@@ -27,3 +27,14 @@
 ;; denote-tree visualizes your notes as a tree.
 
 ;;; Code:
+
+(defun denote-tree--walk (node)
+  "Walks along the tree."
+  (if (listp node)
+      (let ((lst))
+	      (dolist (el node lst)
+	        (setq lst (append lst (denote-tree--walk el))))
+	      (list lst))
+    (list node)))
+
+(provide 'denote-tree)
