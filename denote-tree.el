@@ -16,11 +16,11 @@
 
 ;; denote-tree is distributed in the hope that it will be useful, but WITHOUT
 ;; ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-;; FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+;; FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 ;; details.
 
 ;; You should have received a copy of the GNU General Public License along with
-;; Loco. If not, see <https://www.gnu.org/licenses/>.
+;; denote-tree.  If not, see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 
@@ -44,6 +44,7 @@
       (org-element-map (org-element-parse-buffer) 'link
         (lambda (link)
           (when (string= (org-element-property :type link) "denote")
-            (org-element-property :path link)))))))
+            (concat "denote:" (org-element-property :path link))))))))
+
 
 (provide 'denote-tree)
