@@ -37,4 +37,13 @@
 	      (list lst))
     (list node)))
 
+(defun denote-tree--collect-links (buffer)
+  "Collect all links of type denote in BUFFER."
+  (save-excursion
+    (with-current-buffer buffer
+      (org-element-map (org-element-parse-buffer) 'link
+        (lambda (link)
+          (when (string= (org-element-property :type link) "denote")
+            (org-element-property :path link)))))))
+
 (provide 'denote-tree)
