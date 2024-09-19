@@ -45,6 +45,19 @@
       (lambda (link)
         (when (string= (org-element-property :type link) "denote")
           (org-element-property :path link))))))
+
+(defun denote-tree-walk-links (buffer)
+  "Return a tree of denote links starting with current BUFFER."
+  (let ((links-in-buffer (denote-tree--collect-links buffer)))
+    ; if no links return a buffer
+    (if (null links-in-buffer)
+        (list buffer)
+      (let ((lst (cdar (org-collect-keywords '("identifier")))))
+        ; if links go deeper
+        (dolist (el links-in-buffer lst)
+          (setq lst (append lst (list (denote-tree--walk-links el)))))
+        lst))))
+
 (defun denote-tree--open-link-maybe (element)
   "If ELEMENT is not a buffer, it's an id, open it."
   (if (bufferp element)
