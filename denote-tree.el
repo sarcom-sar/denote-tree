@@ -45,6 +45,12 @@
         (lambda (link)
           (when (string= (org-element-property :type link) "denote")
             (concat "denote:" (org-element-property :path link))))))))
+(defun denote-tree--open-link-maybe (element)
+  "If ELEMENT is not a buffer, it's an id, open it."
+  (if (bufferp element)
+      element
+    (find-file (denote-get-path-by-id element))))
+
 
 
 (provide 'denote-tree)
