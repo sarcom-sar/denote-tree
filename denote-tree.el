@@ -65,5 +65,8 @@
     (find-file (denote-get-path-by-id element))))
 
 
+(defun denote-tree--draw-tree (tree)
+  "A mock as of right now."
+  tree)
 
 (provide 'denote-tree)
