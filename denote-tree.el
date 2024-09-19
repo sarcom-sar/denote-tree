@@ -64,6 +64,12 @@
       element
     (find-file (denote-get-path-by-id element))))
 
+(defun denote-tree (&optional buffer)
+  (interactive)
+  (or buffer (setq buffer (current-buffer)))
+  (save-window-excursion
+    (denote-tree--draw-tree
+     (denote-tree--walk-links buffer))))
 
 (defun denote-tree--draw-tree (tree)
   "A mock as of right now."
