@@ -39,12 +39,12 @@
 
 (defun denote-tree--collect-links (buffer)
   "Collect all links of type denote in BUFFER."
-  (save-excursion
-    (with-current-buffer buffer
-      (org-element-map (org-element-parse-buffer) 'link
-        (lambda (link)
-          (when (string= (org-element-property :type link) "denote")
-            (concat "denote:" (org-element-property :path link))))))))
+  (setq buffer (denote-tree--open-link-maybe buffer))
+  (with-current-buffer buffer
+    (org-element-map (org-element-parse-buffer) 'link
+      (lambda (link)
+        (when (string= (org-element-property :type link) "denote")
+          (org-element-property :path link))))))
 (defun denote-tree--open-link-maybe (element)
   "If ELEMENT is not a buffer, it's an id, open it."
   (if (bufferp element)
