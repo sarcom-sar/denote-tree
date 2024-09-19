@@ -46,7 +46,7 @@
         (when (string= (org-element-property :type link) "denote")
           (org-element-property :path link))))))
 
-(defun denote-tree-walk-links (buffer)
+(defun denote-tree--walk-links (buffer)
   "Return a tree of denote links starting with current BUFFER."
   (let ((links-in-buffer (denote-tree--collect-links buffer)))
     ; if no links return a buffer
