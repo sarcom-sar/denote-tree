@@ -104,6 +104,7 @@
 (defun denote-tree (&optional buffer)
   (interactive)
   (or buffer (setq buffer (current-buffer)))
+  (denote-tree--open-link-maybe buffer)
   (save-window-excursion
     (denote-tree--draw-tree
      (denote-tree--walk-links buffer)))
