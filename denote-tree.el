@@ -86,6 +86,7 @@
 
 (defun denote-tree--draw-tree (tree)
   "A mock as of right now."
-  tree)
+  (with-current-buffer "*scratch*"
+    (insert (format "%s" tree))))
 
 (provide 'denote-tree)
