@@ -41,6 +41,9 @@
 
 ;;; Code:
 
+(defvar denote-tree--visited-buffers '()
+  "List of already created buffers.")
+
 (defun denote-tree--walk (node)
   "Walks along the tree."
   (if (listp node)
@@ -72,10 +75,16 @@
         lst))))
 
 (defun denote-tree--open-link-maybe (element)
-  "If ELEMENT is not a buffer, it's an id, open it."
+  "Return ELEMENT buffer, create if necessary."
   (if (bufferp element)
       element
-    (find-file (denote-get-path-by-id element))))
+    (add-to-list 'denote-tree--visited-buffers element)
+    (get-buffer-create element)
+    (with-current-buffer element
+      (org-mode)
+      (insert-file-contents (denote-get-path-by-id element))
+      element)))
+
 (defun denote-tree--clean-up ()
   "Clean up buffers created during the tree walk."
   (dolist (el denote-tree--visited-buffers)
