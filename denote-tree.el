@@ -25,6 +25,19 @@
 ;;; Commentary:
 
 ;; denote-tree visualizes your notes as a tree.
+;;
+;; A       A1
+;; +-B     B1
+;; | '-C   C1
+;; |   '-D D1
+;; +-B     B2
+;; | '-C   C2
+;; '-B     B3
+;; | +-C   C3
+;; | '-C   C4
+;; |   '-D D2
+;; +-B     B4
+;; +-B     B5
 
 ;;; Code:
 
