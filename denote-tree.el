@@ -44,6 +44,9 @@
 (defvar denote-tree--visited-buffers '()
   "List of already created buffers.")
 
+(defvar denote-tree--cyclic-buffers '()
+  "List of buffers that are cyclic nodes.")
+
 (defun denote-tree--walk (node)
   "Walks along the tree."
   (if (listp node)
@@ -65,14 +68,20 @@
 (defun denote-tree--walk-links (buffer)
   "Return a tree of denote links starting with current BUFFER."
   (let ((links-in-buffer (denote-tree--collect-links buffer)))
-    ; if no links return a buffer
-    (if (null links-in-buffer)
-        (list buffer)
-      (let ((lst (cdar (org-collect-keywords '("identifier")))))
-        ; if links go deeper
-        (dolist (el links-in-buffer lst)
-          (setq lst (append lst (list (denote-tree--walk-links el)))))
-        lst))))
+    (with-current-buffer buffer
+      ; if no links return a buffer
+      (if (null links-in-buffer)
+          (list buffer)
+        ; fine for now, althought `alist-get' will be used later
+        (let ((lst (cdar (org-collect-keywords '("identifier")))))
+                                        ; if links go deeper
+          (dolist (el links-in-buffer lst)
+            ; this essentially checks if next node is a colored in black
+            (if (and (get-buffer el)
+                     (add-to-list 'denote-tree--cyclic-buffers el))
+                (setq lst (append lst (list (list el))))
+              (setq lst (append lst (list (denote-tree--walk-links el))))))
+          lst)))))
 
 (defun denote-tree--open-link-maybe (element)
   "Return ELEMENT buffer, create if necessary."
