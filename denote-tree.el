@@ -76,13 +76,20 @@
   (if (bufferp element)
       element
     (find-file (denote-get-path-by-id element))))
+(defun denote-tree--clean-up ()
+  "Clean up buffers created during the tree walk."
+  (dolist (el denote-tree--visited-buffers)
+    (kill-buffer el))
+  (setq denote-tree--visited-buffers nil)
+  (setq denote-tree--cyclic-buffers nil))
 
 (defun denote-tree (&optional buffer)
   (interactive)
   (or buffer (setq buffer (current-buffer)))
   (save-window-excursion
     (denote-tree--draw-tree
-     (denote-tree--walk-links buffer))))
+     (denote-tree--walk-links buffer)))
+  (denote-tree--clean-up))
 
 (defun denote-tree--draw-tree (tree)
   "A mock as of right now."
