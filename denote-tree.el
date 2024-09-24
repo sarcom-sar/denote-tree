@@ -87,14 +87,14 @@
 
 (defun denote-tree--open-link-maybe (element)
   "Return ELEMENT buffer, create if necessary."
-  (if (bufferp element)
-      element
+  (unless (member element denote-tree--visited-buffers)
     (add-to-list 'denote-tree--visited-buffers element)
     (get-buffer-create element)
     (with-current-buffer element
       (org-mode)
-      (insert-file-contents (denote-get-path-by-id element))
-      element)))
+      (erase-buffer)
+      (insert-file-contents (denote-get-path-by-id element))))
+  element)
 
 (defun denote-tree--clean-up ()
   "Clean up buffers created during the tree walk."
