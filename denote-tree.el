@@ -105,9 +105,10 @@
   (interactive)
   (or buffer (setq buffer (current-buffer)))
   (denote-tree--open-link-maybe buffer)
-  (save-window-excursion
-    (denote-tree--draw-tree
-     (denote-tree--walk-links buffer)))
+  (with-current-buffer-window "*denote-tree*"
+      (erase-buffer)
+      (denote-tree--draw-tree
+       (denote-tree--walk-links buffer)))
   (denote-tree--clean-up))
 
 (defun denote-tree--draw-tree (node)
