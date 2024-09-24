@@ -105,8 +105,8 @@
 
 (defun denote-tree (&optional buffer)
   (interactive)
-  (or buffer (setq buffer (current-buffer)))
   (denote-tree--clean-up)
+  (or buffer (setq buffer (car (cdar (org-collect-keywords '("identifier"))))))
   (denote-tree--open-link-maybe buffer)
   (with-current-buffer-window "*denote-tree*" nil nil
       (erase-buffer)
