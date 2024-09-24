@@ -128,7 +128,10 @@ If dealing with LAST-CHILD of NODE, alter pretty printing."
    (t
     (setq indent (concat indent "| "))
     (insert "+-")))
-  (insert (car node) "\n") ; this will suffice, for now
+  (let ((title))
+    (with-current-buffer (car node)
+      (setq title (car (cdar (org-collect-keywords '("title"))))))
+    (insert "* " title "\n"))
   (dolist (el (cdr node))
     (denote-tree--draw-tree-helper el
                                    indent
