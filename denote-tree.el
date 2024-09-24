@@ -128,7 +128,7 @@ If dealing with LAST-CHILD of NODE, alter pretty printing."
    (t
     (setq indent (concat indent "| "))
     (insert "+-")))
-  (insert (symbol-name (car node)) "\n") ; this will suffice, for now
+  (insert (car node) "\n") ; this will suffice, for now
   (dolist (el (cdr node))
     (denote-tree--draw-tree-helper el
                                    indent
