@@ -115,7 +115,7 @@
 
 (defun denote-tree--draw-tree (node)
   "Draw a tree in current buffer starting with NODE."
-  (denote-tree--draw-tree-helper node indent t))
+  (denote-tree--draw-tree-helper node "" t))
 
 (defun denote-tree--draw-tree-helper (node indent last-child)
   "Insert INDENT and current NODE into the buffer.
