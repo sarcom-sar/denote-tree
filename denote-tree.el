@@ -104,12 +104,12 @@
 (defun denote-tree (&optional buffer)
   (interactive)
   (or buffer (setq buffer (current-buffer)))
+  (denote-tree--clean-up)
   (denote-tree--open-link-maybe buffer)
   (with-current-buffer-window "*denote-tree*"
       (erase-buffer)
       (denote-tree--draw-tree
-       (denote-tree--walk-links buffer)))
-  (denote-tree--clean-up))
+       (denote-tree--walk-links buffer))))
 
 (defun denote-tree--draw-tree (node)
   "Draw a tree in current buffer starting with NODE."
