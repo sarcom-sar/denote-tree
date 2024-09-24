@@ -110,9 +110,27 @@
      (denote-tree--walk-links buffer)))
   (denote-tree--clean-up))
 
-(defun denote-tree--draw-tree (tree)
-  "A mock as of right now."
-  (with-current-buffer "*scratch*"
-    (insert (format "%s" tree))))
+(defun denote-tree--draw-tree (node)
+  "Draw a tree in current buffer starting with NODE."
+  (denote-tree--draw-tree-helper node indent t))
+
+(defun denote-tree--draw-tree-helper (node indent last-child)
+  "Insert INDENT and current NODE into the buffer.
+If dealing with LAST-CHILD of NODE, alter pretty printing."
+  (insert indent)
+  (cond
+   (last-child
+    (setq indent (concat indent "  "))
+    (insert "'-"))
+   (t
+    (setq indent (concat indent "| "))
+    (insert "+-")))
+  (insert (symbol-name (car node)) "\n") ; this will suffice, for now
+  (dolist (el (cdr node))
+    (denote-tree--draw-tree-helper el
+                                   indent
+                                   (equal el
+                                          (car (last node))))))
+
 
 (provide 'denote-tree)
