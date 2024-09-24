@@ -41,6 +41,8 @@
 
 ;;; Code:
 
+(require 'denote)
+
 (defvar denote-tree--visited-buffers '()
   "List of already created buffers.")
 
