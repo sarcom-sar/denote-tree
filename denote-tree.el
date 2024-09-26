@@ -74,11 +74,10 @@
       ; if no links return a buffer
       (if (null links-in-buffer)
           (list buffer)
-        ; fine for now, althought `alist-get' will be used later
-        (let ((lst (cdar (org-collect-keywords '("identifier")))))
-                                        ; if links go deeper
+        (let ((lst (list (denote-tree--collect-keyword buffer "identifier"))))
+          ;; if links go deeper
           (dolist (el links-in-buffer lst)
-            ; this essentially checks if next node is a colored in black
+            ;; this essentially checks if next node is a colored in black
             (if (and (get-buffer el)
                      (add-to-list 'denote-tree--cyclic-buffers el))
                 (setq lst (append lst (list (list el))))
@@ -114,7 +113,8 @@ Return `nil' if none is found."
 (defun denote-tree (&optional buffer)
   (interactive)
   (denote-tree--clean-up)
-  (or buffer (setq buffer (car (cdar (org-collect-keywords '("identifier"))))))
+  (or buffer (setq buffer (denote-tree--collect-keyword (current-buffer)
+                                                        "identifier")))
   (denote-tree--open-link-maybe buffer)
   (with-current-buffer-window "*denote-tree*" nil nil
       (erase-buffer)
