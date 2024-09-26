@@ -1,11 +1,11 @@
-;;; denote-tree --- Visualize your notes as a tree -*- lexical-binding: t; -*-
+;;; denote-tree.el --- Visualize your notes as a tree -*- lexical-binding: t -*-
 
 ;; Copyright 2024, Sararin
 ;; Created: 2024-09-15 Sun
 ;; Version: 0.1.0
 ;; Keywords: convenience
 ;; URL: http://127.0.0.1/
-;; Package-Requires: ((emacs "29.1"))
+;; Package-Requires: ((emacs "27.2"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -42,21 +42,13 @@
 ;;; Code:
 
 (require 'denote)
+(require 'org)
 
 (defvar denote-tree--visited-buffers '()
   "List of already created buffers.")
 
 (defvar denote-tree--cyclic-buffers '()
   "List of buffers that are cyclic nodes.")
-
-(defun denote-tree--walk (node)
-  "Walks along the tree."
-  (if (listp node)
-      (let ((lst))
-        (dolist (el node lst)
-          (setq lst (append lst (denote-tree--walk el))))
-        (list lst))
-    (list node)))
 
 (defun denote-tree--collect-links (buffer)
   "Collect all links of type denote in BUFFER."
@@ -86,7 +78,7 @@
 
 (defun denote-tree--collect-keyword (buffer keyword)
   "Return org KEYWORD from BUFFER.
-Return `nil' if none is found."
+Return nil if none is found."
   (let ((collected-keyword))
     (with-current-buffer buffer
       (setq collected-keyword (org-collect-keywords (list keyword))))
@@ -111,6 +103,9 @@ Return `nil' if none is found."
   (setq denote-tree--cyclic-buffers nil))
 
 (defun denote-tree (&optional buffer)
+  "Draw hierarchy between denote files as a tree.
+The function uses either the current buffer, if called from a function
+a BUFFER provided by the user."
   (interactive)
   (denote-tree--clean-up)
   (or buffer (setq buffer (denote-tree--collect-keyword (current-buffer)
@@ -143,5 +138,5 @@ If dealing with LAST-CHILD of NODE, alter pretty printing."
                                    (equal el
                                           (car (last node))))))
 
-
 (provide 'denote-tree)
+;;; denote-tree.el ends here
