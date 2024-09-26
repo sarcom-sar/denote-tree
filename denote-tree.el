@@ -85,6 +85,14 @@
               (setq lst (append lst (list (denote-tree--walk-links el))))))
           lst)))))
 
+(defun denote-tree--collect-keyword (buffer keyword)
+  "Return org KEYWORD from BUFFER.
+Return `nil' if none is found."
+  (let ((collected-keyword))
+    (with-current-buffer buffer
+      (setq collected-keyword (org-collect-keywords (list keyword))))
+    (car (cdar collected-keyword))))
+
 (defun denote-tree--open-link-maybe (element)
   "Return ELEMENT buffer, create if necessary."
   (unless (member element denote-tree--visited-buffers)
