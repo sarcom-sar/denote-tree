@@ -97,6 +97,42 @@ buffer."
    (denote-get-path-by-id
     (get-text-property (point) 'denote--id))))
 
+(defun denote-tree-child-node (&optional val)
+  (interactive "p")
+  (or val (setq val 1))
+  (let ((total))
+    (dotimes (total val)
+      (when (cadr denote-tree--pointer)
+        (push denote-tree--pointer denote-tree--stack)
+        (setq denote-tree--pointer (cadr denote-tree--pointer))
+        (setq denote-tree--closure (denote-tree--movement-maker
+                                    (length (cdr (car denote-tree--stack)))))
+        (goto-char (car denote-tree--pointer))))))
+
+(defun denote-tree-parent-node (&optional val)
+  (interactive "p")
+  (or val (setq val 1))
+  (let ((total 0))
+    (dotimes (total val)
+      (when denote-tree--stack
+        (setq denote-tree--pointer (pop denote-tree--stack))
+        (setq denote-tree--closure (denote-tree--movement-maker
+                                    (length (cdr (car denote-tree--stack)))))
+        (goto-char (car denote-tree--pointer))))))
+
+(defun denote-tree-next-node (&optional val)
+  (interactive "p")
+  (or val (setq val 1))
+  (when denote-tree--stack
+    (setq denote-tree--pointer (nth (funcall denote-tree--closure val)
+                                    (cdr (car denote-tree--stack))))
+    (goto-char (car denote-tree--pointer))))
+
+(defun denote-tree-prev-node (&optional val)
+  (interactive "p")
+  (or val (setq val 1))
+  (denote-tree-next-node (- val)))
+
 (defun denote-tree--collect-links (buffer)
   "Collect all links of type denote in BUFFER."
   (setq buffer (denote-tree--open-link-maybe buffer))
