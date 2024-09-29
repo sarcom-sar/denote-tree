@@ -125,6 +125,9 @@ a BUFFER provided by the user."
   (setq denote-tree--mark-tree
         (denote-tree--draw-tree-helper node "" t)))
 
+;; it is /imperative/ to merge this function and
+;; denote-tree--walk-links, because they do a lot
+;; of similar things
 (defun denote-tree--draw-tree-helper (node indent last-child)
   "Insert INDENT and current NODE into the buffer.
 If dealing with LAST-CHILD of NODE, alter pretty printing."
