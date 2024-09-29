@@ -5,7 +5,7 @@
 ;; Version: 0.1.0
 ;; Keywords: convenience
 ;; URL: http://127.0.0.1/
-;; Package-Requires: ((emacs "27.2"))
+;; Package-Requires: ((emacs "27.2") (compat "29.1"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -43,9 +43,10 @@
 
 (require 'denote)
 (require 'org)
+(require 'compat)
 
 (defvar denote-tree--mark-tree '()
-  "Tree of points in the `*denote-tree*' where nodes are.
+  "Tree of points in the *denote-tree* where nodes are.
 Used directly to traverse the tree structure.")
 
 (defvar denote-tree--visited-buffers '()
@@ -83,6 +84,7 @@ buffer."
   (setq denote-tree--pointer denote-tree--mark-tree))
 
 (defun denote-tree--movement-maker (len-list)
+  "Return values from 0 to LEN-LIST."
   (let ((pos 0)
         (len len-list)
         (val))
@@ -92,16 +94,19 @@ buffer."
       val)))
 
 (defun denote-tree-enter-node ()
+  "Enter node at point in other window."
   (interactive)
   (find-file-other-window
    (denote-get-path-by-id
     (get-text-property (point) 'denote--id))))
 
-(defun denote-tree-child-node (&optional val)
+(defun denote-tree-child-node (&optional arg)
+  "Move the point to the child node of a current node ARG times.
+If ARG is omitted or nil, move to the child of a current node."
   (interactive "p")
-  (or val (setq val 1))
+  (or arg (setq arg 1))
   (let ((total))
-    (dotimes (total val)
+    (dotimes (total arg)
       (when (cadr denote-tree--pointer)
         (push denote-tree--pointer denote-tree--stack)
         (setq denote-tree--pointer (cadr denote-tree--pointer))
@@ -109,28 +114,34 @@ buffer."
                                     (length (cdr (car denote-tree--stack)))))
         (goto-char (car denote-tree--pointer))))))
 
-(defun denote-tree-parent-node (&optional val)
+(defun denote-tree-parent-node (&optional arg)
+  "Move the point to the parent node of a current node ARG times.
+If ARG is omitted or nil, move to the parent of a current node."
   (interactive "p")
-  (or val (setq val 1))
+  (or arg (setq arg 1))
   (let ((total 0))
-    (dotimes (total val)
+    (dotimes (total arg)
       (when denote-tree--stack
         (setq denote-tree--pointer (pop denote-tree--stack))
         (setq denote-tree--closure (denote-tree--movement-maker
                                     (length (cdr (car denote-tree--stack)))))
         (goto-char (car denote-tree--pointer))))))
 
-(defun denote-tree-next-node (&optional val)
+(defun denote-tree-next-node (&optional arg)
+  "Move the point to the next child node ARG times.
+If ARG is omitted or nil, move to the next child node."
   (interactive "p")
-  (or val (setq val 1))
+  (or arg (setq arg 1))
   (when denote-tree--stack
     (setq denote-tree--pointer (nth (funcall denote-tree--closure val)
                                     (cdr (car denote-tree--stack))))
     (goto-char (car denote-tree--pointer))))
 
-(defun denote-tree-prev-node (&optional val)
+(defun denote-tree-prev-node (&optional arg)
+  "Move the point to the previous child node ARG times.
+If ARG is omitted or nil, move to the previous child node."
   (interactive "p")
-  (or val (setq val 1))
+  (or arg (setq arg 1))
   (denote-tree-next-node (- val)))
 
 (defun denote-tree--collect-links (buffer)
