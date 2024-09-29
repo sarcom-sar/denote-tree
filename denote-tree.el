@@ -44,6 +44,10 @@
 (require 'denote)
 (require 'org)
 
+(defvar denote-tree--mark-tree '()
+  "Tree of points in the `*denote-tree*' where nodes are.
+Used directly to traverse the tree structure.")
+
 (defvar denote-tree--visited-buffers '()
   "List of already created buffers.")
 
@@ -118,7 +122,8 @@ a BUFFER provided by the user."
 
 (defun denote-tree--draw-tree (node)
   "Draw a tree in current buffer starting with NODE."
-  (denote-tree--draw-tree-helper node "" t))
+  (setq denote-tree--mark-tree
+        (denote-tree--draw-tree-helper node "" t)))
 
 (defun denote-tree--draw-tree-helper (node indent last-child)
   "Insert INDENT and current NODE into the buffer.
