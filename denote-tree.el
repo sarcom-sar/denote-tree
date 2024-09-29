@@ -195,9 +195,11 @@ a BUFFER provided by the user."
                                                         "identifier")))
   (denote-tree--open-link-maybe buffer)
   (with-current-buffer-window "*denote-tree*" nil nil
+    (let ((inhibit-read-only t))
       (erase-buffer)
       (denote-tree--draw-tree
-       (denote-tree--walk-links buffer))))
+       (denote-tree--walk-links buffer))
+      (denote-tree-mode))))
 
 (defun denote-tree--draw-tree (node)
   "Draw a tree in current buffer starting with NODE."
