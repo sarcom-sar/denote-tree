@@ -128,20 +128,28 @@ a BUFFER provided by the user."
 (defun denote-tree--draw-tree-helper (node indent last-child)
   "Insert INDENT and current NODE into the buffer.
 If dealing with LAST-CHILD of NODE, alter pretty printing."
-  (insert indent)
-  (cond
-   (last-child
-    (setq indent (concat indent "  "))
-    (insert "'-"))
-   (t
-    (setq indent (concat indent "| "))
-    (insert "+-")))
-  (insert "* " (denote-tree--collect-keyword (car node) "title") "\n")
-  (dolist (el (cdr node))
-    (denote-tree--draw-tree-helper el
-                                   indent
-                                   (equal el
-                                          (car (last node))))))
+  (let ((point-loc))
+    (insert indent)
+    (cond
+     (last-child
+      (setq indent (concat indent "  "))
+      (insert "'-"))
+     (t
+      (setq indent (concat indent "| "))
+      (insert "+-")))
+    (insert "*")
+    (setq point-loc (1- (point)))
+    (add-text-properties point-loc (point) (list 'denote--id (car node)
+                                                 'face 'button))
+    (insert " " (denote-tree--collect-keyword (car node) "title") "\n")
+    (let ((lst (list point-loc))
+          (lastp last-child))
+      (dolist (el (cdr node) lst)
+        (setq lastp (equal el (car (last node))))
+        (setq lst (append lst (list (denote-tree--draw-tree-helper el
+                                                                   indent
+                                                                   lastp)))))
+      lst)))
 
 (provide 'denote-tree)
 ;;; denote-tree.el ends here
