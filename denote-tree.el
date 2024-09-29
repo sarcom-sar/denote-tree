@@ -82,6 +82,15 @@ buffer."
         (denote-tree--movement-maker (1- (length denote-tree--mark-tree))))
   (setq denote-tree--pointer denote-tree--mark-tree))
 
+(defun denote-tree--movement-maker (len-list)
+  (let ((pos 0)
+        (len len-list)
+        (val))
+    (lambda (direction)
+      (setq pos (+ pos direction))
+      (setq val (mod pos len))
+      val)))
+
 (defun denote-tree--collect-links (buffer)
   "Collect all links of type denote in BUFFER."
   (setq buffer (denote-tree--open-link-maybe buffer))
