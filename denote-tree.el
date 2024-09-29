@@ -91,6 +91,12 @@ buffer."
       (setq val (mod pos len))
       val)))
 
+(defun denote-tree-enter-node ()
+  (interactive)
+  (find-file-other-window
+   (denote-get-path-by-id
+    (get-text-property (point) 'denote--id))))
+
 (defun denote-tree--collect-links (buffer)
   "Collect all links of type denote in BUFFER."
   (setq buffer (denote-tree--open-link-maybe buffer))
