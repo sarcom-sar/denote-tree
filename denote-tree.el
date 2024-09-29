@@ -54,6 +54,34 @@ Used directly to traverse the tree structure.")
 (defvar denote-tree--cyclic-buffers '()
   "List of buffers that are cyclic nodes.")
 
+(defvar denote-tree--pointer '()
+  "Node the point is at.")
+
+(defvar denote-tree--stack '()
+  "Stack of parent nodes.")
+
+(defvar denote-tree--closure nil
+  "Closure of current instance of `denote-tree--sideways-maker'.")
+
+(defvar-keymap denote-tree-mode-map
+  :parent special-mode-map
+  :doc "Keymap for denote-tree-mode."
+  "n" #'denote-tree-next-node
+  "p" #'denote-tree-prev-node
+  "f" #'denote-tree-child-node
+  "b" #'denote-tree-parent-node
+  "RET" #'denote-tree-enter-node)
+
+(define-derived-mode denote-tree-mode special-mode "denote-tree"
+  "Visualize your denote notes as a tree.
+
+Denote-tree visualizes every note linked to the root note in a *denote-tree*
+buffer."
+  :interactive nil
+  (setq denote-tree--closure
+        (denote-tree--movement-maker (1- (length denote-tree--mark-tree))))
+  (setq denote-tree--pointer denote-tree--mark-tree))
+
 (defun denote-tree--collect-links (buffer)
   "Collect all links of type denote in BUFFER."
   (setq buffer (denote-tree--open-link-maybe buffer))
