@@ -210,7 +210,9 @@ a BUFFER provided by the user."
       (erase-buffer)
       (denote-tree--draw-tree
        (denote-tree--walk-links buffer))
-      (denote-tree-mode))))
+      (denote-tree-mode)))
+  (set-window-point (get-buffer-window "*denote-tree*")
+                    (goto-char (car denote-tree--mark-tree))))
 
 (defun denote-tree--draw-tree (node)
   "Draw a tree in current buffer starting with NODE."
