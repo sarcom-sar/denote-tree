@@ -133,7 +133,7 @@ If ARG is omitted or nil, move to the next child node."
   (interactive "p")
   (or arg (setq arg 1))
   (when denote-tree--stack
-    (setq denote-tree--pointer (nth (funcall denote-tree--closure val)
+    (setq denote-tree--pointer (nth (funcall denote-tree--closure arg)
                                     (cdr (car denote-tree--stack))))
     (goto-char (car denote-tree--pointer))))
 
@@ -142,7 +142,7 @@ If ARG is omitted or nil, move to the next child node."
 If ARG is omitted or nil, move to the previous child node."
   (interactive "p")
   (or arg (setq arg 1))
-  (denote-tree-next-node (- val)))
+  (denote-tree-next-node (- arg)))
 
 (defun denote-tree--collect-links (buffer)
   "Collect all links of type denote in BUFFER."
