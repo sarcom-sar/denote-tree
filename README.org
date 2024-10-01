@@ -1,0 +1,43 @@
+* denote-tree
+
+denote-tree is a simple utility, that allows you to see and move within tree
+structure of your notes.
+
+** Usage
+
+Just clone this very repository and enable the package:
+
+#+begin_src emacs-lisp
+ (require 'denote-tree)
+#+end_src
+
+The entry point function is ~denote-tree~, which acts on current buffer
+searching for any org-style links within it. As of right now, I doesn't handle
+cycles in links very well, just stops one child deep, when it encounters them.
+
+*** Keybindings for =*denote-tree*= buffer
+
+| Keybinding | Function                |
+|------------+-------------------------|
+| n          | denote-tree-next-node   |
+| p          | denote-tree-prev-node   |
+| f          | denote-tree-child-node  |
+| b          | denote-tree-parent-node |
+| RET        | denote-tree-enter-node  |
+
+** Contributing
+
+As usual, contributions are always welcome. Feel free to open an issue on the
+issue tracker, if you find a bug, have an idea, etc. Same with code
+contributions.
+
+** Nice to have
+
+- [ ] Make it major mode agnostic.
+
+** Bare minimum before going public
+
+- [ ] Keep the position of the point in parent node when ascending, descending;
+- [ ] implement /teleportations/ when encountering the node that cycles up in
+  the tree;
+- [ ] Customization of /look and feel/ of the tree.
