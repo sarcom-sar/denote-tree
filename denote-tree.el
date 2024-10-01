@@ -80,7 +80,7 @@ Denote-tree visualizes every note linked to the root note in a *denote-tree*
 buffer."
   :interactive nil
   (setq denote-tree--closure
-        (denote-tree--movement-maker (1- (length denote-tree--mark-tree))))
+        (denote-tree--movement-maker 1)) ; root never has siblings
   (setq denote-tree--pointer denote-tree--mark-tree))
 
 (defun denote-tree--movement-maker (len-list)
