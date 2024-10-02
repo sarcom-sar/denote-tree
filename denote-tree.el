@@ -86,9 +86,9 @@ buffer."
         (denote-tree--movement-maker 1)) ; root never has siblings
   (setq denote-tree--pointer denote-tree--mark-tree))
 
-(defun denote-tree--movement-maker (len-list)
+(defun denote-tree--movement-maker (len-list init-val)
   "Return values from 0 to LEN-LIST."
-  (let ((pos 0)
+  (let ((pos init-val)
         (len len-list)
         (val))
     (lambda (direction)
