@@ -58,7 +58,7 @@ Used directly to traverse the tree structure.")
 (defvar-local denote-tree--pointer '()
   "Node the point is at.")
 
-(defvar-local denote-tree--stack '()
+(defvar-local denote-tree--node-stack '()
   "Stack of parent nodes.")
 
 (defvar-local denote-tree--pos-stack '()
@@ -111,11 +111,11 @@ If ARG is omitted or nil, move to the child of a current node."
   (let ((total))
     (dotimes (total arg)
       (when (cadr denote-tree--pointer)
-        (push denote-tree--pointer denote-tree--stack)
+        (push denote-tree--pointer denote-tree--node-stack)
         (push (funcall denote-tree--closure 0) denote-tree--pos-stack)
         (setq denote-tree--pointer (cadr denote-tree--pointer))
         (setq denote-tree--closure (denote-tree--movement-maker
-                                    (length (cdar denote-tree--stack))
+                                    (length (cdar denote-tree--node-stack))
                                     0))
         (goto-char (car denote-tree--pointer))))))
 
@@ -126,10 +126,10 @@ If ARG is omitted or nil, move to the parent of a current node."
   (or arg (setq arg 1))
   (let ((total 0))
     (dotimes (total arg)
-      (when denote-tree--stack
-        (setq denote-tree--pointer (pop denote-tree--stack))
+      (when denote-tree--node-stack
+        (setq denote-tree--pointer (pop denote-tree--node-stack))
         (setq denote-tree--closure (denote-tree--movement-maker
-                                    (length (cdar denote-tree--stack))
+                                    (length (cdar denote-tree--node-stack))
                                     (pop denote-tree--pos-stack)))
         (goto-char (car denote-tree--pointer))))))
 
@@ -138,9 +138,9 @@ If ARG is omitted or nil, move to the parent of a current node."
 If ARG is omitted or nil, move to the next child node."
   (interactive "p")
   (or arg (setq arg 1))
-  (when denote-tree--stack
+  (when denote-tree--node-stack
     (setq denote-tree--pointer (nth (funcall denote-tree--closure arg)
-                                    (cdar denote-tree--stack)))
+                                    (cdar denote-tree--node-stack)))
     (goto-char (car denote-tree--pointer))))
 
 (defun denote-tree-prev-node (&optional arg)
