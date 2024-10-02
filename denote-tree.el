@@ -45,7 +45,7 @@
 (require 'org)
 (require 'compat)
 
-(defvar-local denote-tree--mark-tree '()
+(defvar denote-tree--mark-tree '()
   "Tree of points in the *denote-tree* where nodes are.
 Used directly to traverse the tree structure.")
 
