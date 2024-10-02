@@ -48,8 +48,11 @@
 (defface denote-tree-node-face '((t :inherit link))
   "Default face used for nodes.")
 
+(defcustom denote-tree-buffer-name "*denote-tree*"
+  "Name of the buffer denote-tree will be built in.")
+
 (defvar denote-tree--mark-tree '()
-  "Tree of points in the *denote-tree* where nodes are.
+  "Tree of positions used by denote-tree buffer.
 Used directly to traverse the tree structure.")
 
 (defvar denote-tree--visited-buffers '()
@@ -82,8 +85,7 @@ Used directly to traverse the tree structure.")
 (define-derived-mode denote-tree-mode special-mode "denote-tree"
   "Visualize your denote notes as a tree.
 
-Denote-tree visualizes every note linked to the root note in a *denote-tree*
-buffer."
+Denote-tree visualizes every note linked to the root note in a buffer."
   :interactive nil
   (setq denote-tree--closure
         (denote-tree--movement-maker 1 0)) ; root never has siblings
@@ -214,13 +216,13 @@ a BUFFER provided by the user."
   (or buffer (setq buffer (denote-tree--collect-keyword (current-buffer)
                                                         "identifier")))
   (denote-tree--open-link-maybe buffer)
-  (with-current-buffer-window "*denote-tree*" nil nil
+  (with-current-buffer-window denote-tree-buffer-name nil nil
     (let ((inhibit-read-only t))
       (erase-buffer)
       (setq denote-tree--mark-tree
             (denote-tree--draw-tree (denote-tree--walk-links buffer)))
       (denote-tree-mode)))
-  (set-window-point (get-buffer-window "*denote-tree*")
+  (set-window-point (get-buffer-window denote-tree-buffer-name)
                     (goto-char (car denote-tree--mark-tree))))
 
 (defun denote-tree--draw-tree (node)
