@@ -208,16 +208,15 @@ a BUFFER provided by the user."
   (with-current-buffer-window "*denote-tree*" nil nil
     (let ((inhibit-read-only t))
       (erase-buffer)
-      (denote-tree--draw-tree
-       (denote-tree--walk-links buffer))
+      (setq denote-tree--mark-tree
+            (denote-tree--draw-tree (denote-tree--walk-links buffer)))
       (denote-tree-mode)))
   (set-window-point (get-buffer-window "*denote-tree*")
                     (goto-char (car denote-tree--mark-tree))))
 
 (defun denote-tree--draw-tree (node)
   "Draw a tree in current buffer starting with NODE."
-  (setq denote-tree--mark-tree
-        (denote-tree--draw-tree-helper node "" t)))
+  (denote-tree--draw-tree-helper node "" t))
 
 ;; it is /imperative/ to merge this function and
 ;; denote-tree--walk-links, because they do a lot
