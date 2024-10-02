@@ -45,6 +45,9 @@
 (require 'org)
 (require 'compat)
 
+(defface denote-tree-node-face '((t :inherit link))
+  "Default face used for nodes.")
+
 (defvar denote-tree--mark-tree '()
   "Tree of points in the *denote-tree* where nodes are.
 Used directly to traverse the tree structure.")
@@ -242,7 +245,7 @@ If dealing with LAST-CHILD of NODE, alter pretty printing."
     (insert "*")
     (setq point-loc (1- (point)))
     (add-text-properties point-loc (point) (list 'denote--id (car node)
-                                                 'face 'button))
+                                                 'face 'denote-tree-node-face))
     (insert " " (denote-tree--collect-keyword (car node) "title") "\n")
     (let ((lst (list point-loc))
           (lastp last-child))
