@@ -111,7 +111,7 @@ If ARG is omitted or nil, move to the child of a current node."
         (push denote-tree--pointer denote-tree--stack)
         (setq denote-tree--pointer (cadr denote-tree--pointer))
         (setq denote-tree--closure (denote-tree--movement-maker
-                                    (length (cdr (car denote-tree--stack)))))
+                                    (length (cdar denote-tree--stack))))
         (goto-char (car denote-tree--pointer))))))
 
 (defun denote-tree-parent-node (&optional arg)
@@ -124,7 +124,7 @@ If ARG is omitted or nil, move to the parent of a current node."
       (when denote-tree--stack
         (setq denote-tree--pointer (pop denote-tree--stack))
         (setq denote-tree--closure (denote-tree--movement-maker
-                                    (length (cdr (car denote-tree--stack)))))
+                                    (length (cdar denote-tree--stack))))
         (goto-char (car denote-tree--pointer))))))
 
 (defun denote-tree-next-node (&optional arg)
@@ -134,7 +134,7 @@ If ARG is omitted or nil, move to the next child node."
   (or arg (setq arg 1))
   (when denote-tree--stack
     (setq denote-tree--pointer (nth (funcall denote-tree--closure arg)
-                                    (cdr (car denote-tree--stack))))
+                                    (cdar denote-tree--stack)))
     (goto-char (car denote-tree--pointer))))
 
 (defun denote-tree-prev-node (&optional arg)
