@@ -51,6 +51,12 @@
 (defcustom denote-tree-buffer-name "*denote-tree*"
   "Name of the buffer denote-tree will be built in.")
 
+(defconst denote-tree-lower-knee "'-")
+(defconst denote-tree-tee "+-")
+(defconst denote-tree-space "  ")
+(defconst denote-tree-pipe "| ")
+(defconst denote-tree-node "*")
+
 (defvar denote-tree--mark-tree '()
   "Tree of positions used by denote-tree buffer.
 Used directly to traverse the tree structure.")
@@ -239,12 +245,12 @@ If dealing with LAST-CHILD of NODE, alter pretty printing."
     (insert indent)
     (cond
      (last-child
-      (setq indent (concat indent "  "))
-      (insert "'-"))
+      (setq indent (concat indent denote-tree-space))
+      (insert denote-tree-lower-knee))
      (t
-      (setq indent (concat indent "| "))
-      (insert "+-")))
-    (insert "*")
+      (setq indent (concat indent denote-tree-pipe))
+      (insert denote-tree-tee)))
+    (insert denote-tree-node)
     (setq point-loc (1- (point)))
     (add-text-properties point-loc (point) (list 'denote--id (car node)
                                                  'face 'denote-tree-node-face))
