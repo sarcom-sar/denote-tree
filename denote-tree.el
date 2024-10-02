@@ -61,6 +61,9 @@ Used directly to traverse the tree structure.")
 (defvar-local denote-tree--stack '()
   "Stack of parent nodes.")
 
+(defvar-local denote-tree--pos-stack '()
+  "Stack of point position in parent nodes.")
+
 (defvar-local denote-tree--closure nil
   "Closure of current instance of `denote-tree--sideways-maker'.")
 
