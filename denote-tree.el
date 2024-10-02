@@ -112,6 +112,7 @@ If ARG is omitted or nil, move to the child of a current node."
     (dotimes (total arg)
       (when (cadr denote-tree--pointer)
         (push denote-tree--pointer denote-tree--stack)
+        (push (funcall denote-tree--closure 0) denote-tree--pos-stack)
         (setq denote-tree--pointer (cadr denote-tree--pointer))
         (setq denote-tree--closure (denote-tree--movement-maker
                                     (length (cdar denote-tree--stack))
