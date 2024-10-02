@@ -45,7 +45,7 @@
 (require 'org)
 (require 'compat)
 
-(defvar denote-tree--mark-tree '()
+(defvar-local denote-tree--mark-tree '()
   "Tree of points in the *denote-tree* where nodes are.
 Used directly to traverse the tree structure.")
 
@@ -55,13 +55,13 @@ Used directly to traverse the tree structure.")
 (defvar denote-tree--cyclic-buffers '()
   "List of buffers that are cyclic nodes.")
 
-(defvar denote-tree--pointer '()
+(defvar-local denote-tree--pointer '()
   "Node the point is at.")
 
-(defvar denote-tree--stack '()
+(defvar-local denote-tree--stack '()
   "Stack of parent nodes.")
 
-(defvar denote-tree--closure nil
+(defvar-local denote-tree--closure nil
   "Closure of current instance of `denote-tree--sideways-maker'.")
 
 (defvar-keymap denote-tree-mode-map
