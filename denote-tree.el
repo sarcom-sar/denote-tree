@@ -83,7 +83,7 @@ Denote-tree visualizes every note linked to the root note in a *denote-tree*
 buffer."
   :interactive nil
   (setq denote-tree--closure
-        (denote-tree--movement-maker 1)) ; root never has siblings
+        (denote-tree--movement-maker 1 0)) ; root never has siblings
   (setq denote-tree--pointer denote-tree--mark-tree))
 
 (defun denote-tree--movement-maker (len-list init-val)
@@ -114,7 +114,8 @@ If ARG is omitted or nil, move to the child of a current node."
         (push denote-tree--pointer denote-tree--stack)
         (setq denote-tree--pointer (cadr denote-tree--pointer))
         (setq denote-tree--closure (denote-tree--movement-maker
-                                    (length (cdar denote-tree--stack))))
+                                    (length (cdar denote-tree--stack))
+                                    0))
         (goto-char (car denote-tree--pointer))))))
 
 (defun denote-tree-parent-node (&optional arg)
@@ -127,7 +128,8 @@ If ARG is omitted or nil, move to the parent of a current node."
       (when denote-tree--stack
         (setq denote-tree--pointer (pop denote-tree--stack))
         (setq denote-tree--closure (denote-tree--movement-maker
-                                    (length (cdar denote-tree--stack))))
+                                    (length (cdar denote-tree--stack))
+                                    (pop denote-tree--pos-stack)))
         (goto-char (car denote-tree--pointer))))))
 
 (defun denote-tree-next-node (&optional arg)
