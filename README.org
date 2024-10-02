@@ -37,7 +37,7 @@ contributions.
 
 ** Bare minimum before going public
 
-- [ ] Keep the position of the point in parent node when ascending, descending;
+- [X] Keep the position of the point in parent node when ascending, descending;
 - [ ] implement /teleportations/ when encountering the node that cycles up in
   the tree;
 - [ ] Customization of /look and feel/ of the tree.
