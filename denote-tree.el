@@ -48,6 +48,9 @@
 (defface denote-tree-node-face '((t :inherit link))
   "Default face used for nodes.")
 
+(defface denote-tree-circular-node-face '((t :inherit link-visited))
+  "Default face used for circular nodes.")
+
 (defcustom denote-tree-buffer-name "*denote-tree*"
   "Name of the buffer denote-tree will be built in.")
 
