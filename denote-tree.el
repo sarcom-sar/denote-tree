@@ -234,6 +234,54 @@ a BUFFER provided by the user."
   (set-window-point (get-buffer-window denote-tree-buffer-name)
                     (goto-char (car denote-tree--mark-tree))))
 
+(defun denote-tree--check (el lst)
+  "Return the position of EL in LST if it exists.
+Return nil otherwise."
+  (let ((iter lst)
+        (num 0))
+    (while (not (or (equal el (car iter))
+                    (equal iter nil)))
+      (setq num (1+ num))
+      (setq iter (cdr iter)))
+    (unless (equal iter nil)
+      num)))
+
+(defun denote-tree--re-circularize-tree (node)
+  "Return the tree with cyclical structure of the original.
+
+If a current node is in `denote-tree--cyclic-buffers', save the entire
+thing to `denote-tree--cyclic-trees'.  If a current node matches the
+`car' of a node, set it's `cdr' to the `cdr' of
+`denote-tree--cyclic-trees'.  Return modified tree."
+  (if (not (listp node))
+      node
+    (let ((lst (list (car node)))
+          (skip-this-loop nil)
+          (checked-element)
+          (pos-to-id))
+      (setq pos-to-id
+            (get-text-property (car node) 'denote--id))
+      (cond
+       ((setq checked-element
+              (denote-tree--check
+               (get-text-property (car node) 'denote--id)
+               (mapcar #'(lambda (el)
+                           (get-text-property el 'denote--id))
+                       (mapcar #'car denote-tree--cyclic-trees))))
+        (put-text-property (car node)
+                           (1+ (car node))
+                           'face 'denote-tree-circular-node-face)
+        (setcdr node (cdr (nth checked-element denote-tree--cyclic-trees)))
+        (setq skip-this-loop t)
+        (setq lst (append lst (cdr node))))
+       ((denote-tree--check pos-to-id denote-tree--cyclic-buffers)
+        (setq denote-tree--cyclic-trees
+              (append denote-tree--cyclic-trees (list node)))))
+      (dolist (el (cdr node))
+        (unless skip-this-loop
+          (setq lst (append lst (list (denote-tree--re-circularize-tree el))))))
+      lst)))
+
 (defun denote-tree--draw-tree (node)
   "Draw a tree in current buffer starting with NODE."
   (denote-tree--draw-tree-helper node "" t))
