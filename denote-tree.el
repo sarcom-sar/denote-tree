@@ -230,6 +230,8 @@ a BUFFER provided by the user."
       (erase-buffer)
       (setq denote-tree--mark-tree
             (denote-tree--draw-tree (denote-tree--walk-links buffer)))
+      (setq denote-tree--mark-tree
+            (denote-tree--re-circularize-tree denote-tree--mark-tree))
       (denote-tree-mode)))
   (set-window-point (get-buffer-window denote-tree-buffer-name)
                     (goto-char (car denote-tree--mark-tree))))
