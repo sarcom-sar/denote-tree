@@ -57,6 +57,9 @@
 (defconst denote-tree-pipe "| ")
 (defconst denote-tree-node "*")
 
+(defvar denote-tree--cyclic-trees '()
+  "List of all partial trees that contain cycles.")
+
 (defvar denote-tree--mark-tree '()
   "Tree of positions used by denote-tree buffer.
 Used directly to traverse the tree structure.")
