@@ -245,9 +245,8 @@ Return nil otherwise."
   (let ((iter lst)
         (num 0))
     (while (not (or (equal el (car iter))
-                    (equal iter nil)))
-      (setq num (1+ num))
-      (setq iter (cdr iter)))
+                    (setq iter (cdr iter))))
+      (setq num (1+ num)))
     (unless (equal iter nil)
       num)))
 
