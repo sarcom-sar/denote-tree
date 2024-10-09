@@ -260,19 +260,16 @@ thing to `denote-tree--cyclic-trees'.  If a current node matches the
 `denote-tree--cyclic-trees'.  Return modified tree."
   (if (not (listp node))
       node
-    (let ((lst (list (car node)))
-          (skip-this-loop nil)
-          (checked-element)
-          (pos-to-id))
-      (setq pos-to-id
-            (get-text-property (car node) 'denote--id))
+    (let* ((lst (list (car node)))
+           (skip-this-loop nil)
+           (pos-to-id (get-text-property (car node) 'denote--id))
+           (char-pos-of-cyclic-trees (mapcar #'car denote-tree--cyclic-trees))
+           (checked-element (denote-tree--check
+                             pos-to-id
+                             (mapcar #'denote-tree--get-text-property
+                                     char-pos-of-cyclic-trees))))
       (cond
-       ((setq checked-element
-              (denote-tree--check
-               (get-text-property (car node) 'denote--id)
-               (mapcar #'(lambda (el)
-                           (get-text-property el 'denote--id))
-                       (mapcar #'car denote-tree--cyclic-trees))))
+       (checked-element
         (put-text-property (car node)
                            (1+ (car node))
                            'face 'denote-tree-circular-node-face)
@@ -319,6 +316,10 @@ If dealing with LAST-CHILD of NODE, alter pretty printing."
                                                                    indent
                                                                    lastp)))))
       lst)))
+
+(defun denote-tree--get-text-property (element property)
+  "Get text property PROPERTY at char-pos ELEMENT."
+  (get-text-property el 'denote--id))
 
 (provide 'denote-tree)
 ;;; denote-tree.el ends here
