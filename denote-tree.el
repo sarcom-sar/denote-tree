@@ -265,7 +265,8 @@ thing to `denote-tree--cyclic-trees'.  If a current node matches the
            (char-pos-of-cyclic-trees (mapcar #'car denote-tree--cyclic-trees))
            (checked-element (denote-tree--check
                              pos-to-id
-                             (mapcar #'denote-tree--get-text-property
+                             (mapcar (lambda (el)
+                                       (denote-tree--get-text-property el 'denote--id))
                                      char-pos-of-cyclic-trees))))
       (cond
        (checked-element
@@ -318,7 +319,8 @@ If dealing with LAST-CHILD of NODE, alter pretty printing."
 
 (defun denote-tree--get-text-property (element property)
   "Get text property PROPERTY at char-pos ELEMENT."
-  (get-text-property el 'denote--id))
+  (when element
+    (get-text-property element 'denote--id)))
 
 (provide 'denote-tree)
 ;;; denote-tree.el ends here
