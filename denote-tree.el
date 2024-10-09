@@ -63,15 +63,15 @@
 (defvar denote-tree--cyclic-trees '()
   "List of all partial trees that contain cycles.")
 
-(defvar denote-tree--mark-tree '()
-  "Tree of positions used by denote-tree buffer.
-Used directly to traverse the tree structure.")
-
 (defvar denote-tree--visited-buffers '()
   "List of already created buffers.")
 
 (defvar denote-tree--cyclic-buffers '()
   "List of buffers that are cyclic nodes.")
+
+(defvar-local denote-tree--mark-tree '()
+  "Tree of positions used by denote-tree buffer.
+Used directly to traverse the tree structure.")
 
 (defvar-local denote-tree--pointer '()
   "Node the point is at.")
