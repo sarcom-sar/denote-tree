@@ -231,11 +231,11 @@ a BUFFER provided by the user."
   (with-current-buffer-window denote-tree-buffer-name nil nil
     (let ((inhibit-read-only t))
       (erase-buffer)
+      (denote-tree-mode)
       (setq denote-tree--mark-tree
             (denote-tree--draw-tree (denote-tree--walk-links buffer)))
       (setq denote-tree--mark-tree
-            (denote-tree--re-circularize-tree denote-tree--mark-tree))
-      (denote-tree-mode)))
+            (denote-tree--re-circularize-tree denote-tree--mark-tree))))
   (set-window-point (get-buffer-window denote-tree-buffer-name)
                     (goto-char (car denote-tree--mark-tree))))
 
