@@ -125,14 +125,17 @@ Denote-tree visualizes every note linked to the root note in a buffer."
 If ARG is omitted or nil, move to the child of a current node."
   (interactive "p")
   (or arg (setq arg 1))
-  (let ((total))
+  (let (total
+        node-stack)
     (dotimes (total arg)
       (when (cadr denote-tree--pointer)
         (push denote-tree--pointer denote-tree--node-stack)
         (push (funcall denote-tree--closure 0) denote-tree--pos-stack)
         (setq denote-tree--pointer (cadr denote-tree--pointer))
+        (unless (setq node-stack (cdar denote-tree--node-stack))
+          (setq node-stack '(1)))
         (setq denote-tree--closure (denote-tree--movement-maker
-                                    (length (cdar denote-tree--node-stack))
+                                    (length node-stack)
                                     0))
         (goto-char (car denote-tree--pointer))))))
 
