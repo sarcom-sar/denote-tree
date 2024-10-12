@@ -41,9 +41,11 @@
 
 ;;; Code:
 
-(require 'denote)
-(require 'org)
-(require 'compat)
+(eval-when-compile
+  (require 'denote)
+  (require 'org)
+  (require 'compat))
+
 
 ;; Faces and Custom
 
