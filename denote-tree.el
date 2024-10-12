@@ -2,7 +2,7 @@
 
 ;; Copyright 2024, Sararin
 ;; Created: 2024-09-15 Sun
-;; Version: 0.1.0
+;; Version: 0.5.0
 ;; Keywords: convenience
 ;; URL: http://127.0.0.1/
 ;; Package-Requires: ((emacs "27.2") (compat "29.1"))
@@ -24,20 +24,36 @@
 
 ;;; Commentary:
 
-;; denote-tree visualizes your notes as a tree.
+;; denote-tree visualizes your notes as a tree.  It starts from current buffer
+;; or, if prompted, from any buffer and allows you to move within it with
+;; standard GNU Emacs movement keys and enter notes as necessary.
 ;;
-;; A       A1
-;; +-B     B1
-;; | '-C   C1
-;; |   '-D D1
-;; +-B     B2
-;; | '-C   C2
-;; '-B     B3
-;; | +-C   C3
-;; | '-C   C4
-;; |   '-D D2
-;; +-B     B4
-;; +-B     B5
+;; Visualization:
+;;
+;; '-* Lorem ipsum dolor sit amet, consectetuer adipiscing elit.
+;;   +-* Phasellus at dui in ligula mollis ultricies.
+;;   | '-* Nullam libero mauris, consequat quis, varius et, dictum id, arcu.
+;;   |   '-* Nulla posuere.
+;;   +-* Nunc aliquet, augue nec adipiscing interdum,
+;;   | '-* Donec vitae dolor.
+;;   '-* Proin quam nisl, tincidunt et, mattis eget, convallis nec, purus.
+;;   | +-* Nam euismod tellus id erat.
+;;   | '-* Donec pretium posuere tellus.
+;;   |   '-* Nullam libero mauris, consequat quis, varius et, dictum id, arcu.
+;;   +-* Vestibulum convallis, lorem a tempus semper.
+;;   '-* Dui dui euismod elit, vitae placerat urna tortor vitae lacus.
+;;
+;; That is pretty much it.  It is able to handle cyclical nodes and provides a
+;; mechanism to move between those cyclical nodes (called "teleportations") by
+;; default.  As a drawback, it is pretty stupid and has to redraw entire thing
+;; from scratch if anything changes.
+;;
+;; User can customize `denote-tree-node-face' and
+;; `denote-tree-circular-node-face' to make them more visible.  With a bit of
+;; hacking it is also feasible to implement colored node titles.
+;;
+;; The package as of right now hard-depends on denote and org.
+;;
 
 ;;; Code:
 

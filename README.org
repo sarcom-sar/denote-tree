@@ -1,7 +1,8 @@
 * denote-tree
 
 denote-tree is a simple utility, that allows you to see and move within tree
-structure of your notes.
+structure of your notes with standard GNU Emacs movement keys. As of right now
+it is hard-dependent (in addition to denote) on org-mode.
 
 ** Usage
 
@@ -12,8 +13,15 @@ Just clone this very repository and enable the package:
 #+end_src
 
 The entry point function is ~denote-tree~, which acts on current buffer
-searching for any org-style links within it. As of right now, I doesn't handle
-cycles in links very well, just stops one child deep, when it encounters them.
+searching for any org-style links within it.
+
+It is able to handle cyclical nodes and provides a mechanism to move between
+those cyclical nodes (called "teleportations") by default. As a drawback, it is
+pretty stupid and has to redraw entire thing from scratch if anything changes.
+
+User can customize ~denote-tree-node-face~ and ~denote-tree-circular-node-face~
+to make them more visible.  With a bit of hacking it is also feasible to
+implement colored node titles.
 
 *** Keybindings for =*denote-tree*= buffer
 
@@ -25,20 +33,38 @@ cycles in links very well, just stops one child deep, when it encounters them.
 | b          | denote-tree-parent-node |
 | RET        | denote-tree-enter-node  |
 
+*** Visualization
+
+#+begin_example
+  '-* Lorem ipsum dolor sit amet, consectetuer adipiscing elit.
+    +-* Phasellus at dui in ligula mollis ultricies.
+    | '-* Nullam libero mauris, consequat quis, varius et, dictum id, arcu.
+    |   '-* Nulla posuere.
+    +-* Nunc aliquet, augue nec adipiscing interdum,
+    | '-* Donec vitae dolor.
+    '-* Proin quam nisl, tincidunt et, mattis eget, convallis nec, purus.
+    | +-* Nam euismod tellus id erat.
+    | '-* Donec pretium posuere tellus.
+    |   '-* Nullam libero mauris, consequat quis, varius et, dictum id, arcu.
+    +-* Vestibulum convallis, lorem a tempus semper.
+    '-* Dui dui euismod elit, vitae placerat urna tortor vitae lacus.
+#+end_example
+
 ** Contributing
 
 As usual, contributions are always welcome. Feel free to open an issue on the
 issue tracker, if you find a bug, have an idea, etc. Same with code
 contributions.
 
-** Nice to have
+** To-Do list
+*** Nice to have
 
 - [ ] Make it major mode agnostic.
 
-** Bare minimum before going public
+*** Bare minimum before going public
 
 - [X] Keep the position of the point in parent node when ascending, descending;
 - [X] implement /teleportations/ when encountering the node that cycles up in
   the tree;
 - [X] handle the movement with teleportations;
-- [X] Customization of /look and feel/ of the tree.
+- [X] customization of /look and feel/ of the tree.
