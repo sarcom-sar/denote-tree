@@ -40,5 +40,5 @@ contributions.
 - [X] Keep the position of the point in parent node when ascending, descending;
 - [X] implement /teleportations/ when encountering the node that cycles up in
   the tree;
-- [ ] handle the movement with teleportations;
+- [X] handle the movement with teleportations;
 - [X] Customization of /look and feel/ of the tree.
