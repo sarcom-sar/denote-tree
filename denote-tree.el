@@ -58,7 +58,7 @@
 (defconst denote-tree-tee "+-")
 (defconst denote-tree-space "  ")
 (defconst denote-tree-pipe "| ")
-(defconst denote-tree-node "*")
+(defconst denote-tree-node "* ")
 
 (defvar denote-tree--cyclic-trees '()
   "List of all partial trees that contain cycles.")
@@ -313,12 +313,14 @@ If dealing with LAST-CHILD of NODE, alter pretty printing."
      (t
       (setq indent (concat indent denote-tree-pipe))
       (insert denote-tree-tee)))
+    (setq point-star-loc (point))
     (insert denote-tree-node)
-    (setq point-loc (1- (point)))
-    (add-text-properties point-loc (point) (list 'denote--id (car node)
-                                                 'face 'denote-tree-node-face))
-    (insert " " (denote-tree--collect-keyword (car node) "title") "\n")
-    (let ((lst (list point-loc))
+    (add-text-properties point-star-loc
+                         (point)
+                         (list 'denote--id (car node)
+                               'face 'denote-tree-node-face))
+    (insert (denote-tree--collect-keyword (car node) "title") "\n")
+    (let ((lst (list point-star-loc))
           (lastp last-child))
       (dolist (el (cdr node) lst)
         (setq lastp (equal el (car (last node))))
