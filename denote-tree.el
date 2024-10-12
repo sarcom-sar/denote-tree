@@ -44,6 +44,8 @@
 (require 'denote)
 (require 'org)
 (require 'compat)
+
+;; Faces and Custom
 
 (defface denote-tree-node-face '((t :inherit link))
   "Default face used for nodes.")
@@ -53,6 +55,9 @@
 
 (defcustom denote-tree-buffer-name "*denote-tree*"
   "Name of the buffer denote-tree will be built in.")
+
+
+;; Vars and consts
 
 (defconst denote-tree-lower-knee "'-")
 (defconst denote-tree-tee "+-")
@@ -85,6 +90,9 @@ Used directly to traverse the tree structure.")
 (defvar-local denote-tree--closure nil
   "Closure of current instance of `denote-tree--sideways-maker'.")
 
+
+;; Mode and interactive functions
+
 (defvar-keymap denote-tree-mode-map
   :parent special-mode-map
   :doc "Keymap for denote-tree-mode."
@@ -100,15 +108,29 @@ Used directly to traverse the tree structure.")
 Denote-tree visualizes every note linked to the root note in a buffer."
   :interactive nil)
 
-(defun denote-tree--movement-maker (len-list init-val)
-  "Return values from 0 to LEN-LIST."
-  (let ((pos init-val)
-        (len len-list)
-        (val))
-    (lambda (direction)
-      (setq pos (+ pos direction))
-      (setq val (mod pos len))
-      val)))
+(defun denote-tree (&optional buffer)
+  "Draw hierarchy between denote files as a tree.
+The function uses either the current buffer, if called from a function
+a BUFFER provided by the user."
+  (interactive)
+  (when (get-buffer denote-tree-buffer-name)
+    (kill-buffer denote-tree-buffer-name))
+  (denote-tree--clean-up)
+  (or buffer (setq buffer (denote-tree--collect-keyword (current-buffer)
+                                                        "identifier")))
+  (denote-tree--open-link-maybe buffer)
+  (with-current-buffer-window denote-tree-buffer-name nil nil
+    (let ((inhibit-read-only t))
+      (denote-tree-mode)
+      (setq denote-tree--closure
+            (denote-tree--movement-maker 1 0)) ; root never has siblings
+      (setq denote-tree--pointer nil)
+      (setq denote-tree--mark-tree
+            (denote-tree--draw-tree (denote-tree--walk-links buffer)))
+      (setq denote-tree--mark-tree
+            (denote-tree--re-circularize-tree denote-tree--mark-tree))))
+  (set-window-point (get-buffer-window denote-tree-buffer-name)
+                    (goto-char (1+ (length denote-tree-lower-knee)))))
 
 (defun denote-tree-enter-node ()
   "Enter node at point in other window."
@@ -173,14 +195,9 @@ If ARG is omitted or nil, move to the previous child node."
   (or arg (setq arg 1))
   (denote-tree-next-node (- arg)))
 
-(defun denote-tree--collect-links (buffer)
-  "Collect all links of type denote in BUFFER."
-  (setq buffer (denote-tree--open-link-maybe buffer))
-  (with-current-buffer buffer
-    (org-element-map (org-element-parse-buffer) 'link
-      (lambda (link)
-        (when (string= (org-element-property :type link) "denote")
-          (org-element-property :path link))))))
+
+;; Tree traversal
+;; it is a good idea to merge those functions
 
 (defun denote-tree--walk-links (buffer)
   "Return a tree of denote links starting with current BUFFER."
@@ -199,66 +216,37 @@ If ARG is omitted or nil, move to the previous child node."
               (setq lst (append lst (list (denote-tree--walk-links el))))))
           lst)))))
 
-(defun denote-tree--collect-keyword (buffer keyword)
-  "Return org KEYWORD from BUFFER.
-Return nil if none is found."
-  (let ((collected-keyword))
-    (with-current-buffer buffer
-      (setq collected-keyword (org-collect-keywords (list keyword))))
-    (car (cdar collected-keyword))))
+(defun denote-tree--draw-tree (node)
+  "Draw a tree in current buffer starting with NODE."
+  (denote-tree--draw-tree-helper node "" t))
 
-(defun denote-tree--open-link-maybe (element)
-  "Return ELEMENT buffer, create if necessary."
-  (unless (member element denote-tree--visited-buffers)
-    (add-to-list 'denote-tree--visited-buffers element)
-    (get-buffer-create element)
-    (with-current-buffer element
-      (org-mode)
-      (erase-buffer)
-      (insert-file-contents (denote-get-path-by-id element))))
-  element)
-
-(defun denote-tree--clean-up ()
-  "Clean up buffers created during the tree walk."
-  (dolist (el denote-tree--visited-buffers)
-    (kill-buffer el))
-  (setq denote-tree--visited-buffers nil)
-  (setq denote-tree--cyclic-buffers nil))
-
-(defun denote-tree (&optional buffer)
-  "Draw hierarchy between denote files as a tree.
-The function uses either the current buffer, if called from a function
-a BUFFER provided by the user."
-  (interactive)
-  (when (get-buffer denote-tree-buffer-name)
-    (kill-buffer denote-tree-buffer-name))
-  (denote-tree--clean-up)
-  (or buffer (setq buffer (denote-tree--collect-keyword (current-buffer)
-                                                        "identifier")))
-  (denote-tree--open-link-maybe buffer)
-  (with-current-buffer-window denote-tree-buffer-name nil nil
-    (let ((inhibit-read-only t))
-      (denote-tree-mode)
-      (setq denote-tree--closure
-            (denote-tree--movement-maker 1 0)) ; root never has siblings
-      (setq denote-tree--pointer nil)
-      (setq denote-tree--mark-tree
-            (denote-tree--draw-tree (denote-tree--walk-links buffer)))
-      (setq denote-tree--mark-tree
-            (denote-tree--re-circularize-tree denote-tree--mark-tree))))
-  (set-window-point (get-buffer-window denote-tree-buffer-name)
-                    (goto-char (1+ (length denote-tree-lower-knee)))))
-
-(defun denote-tree--check (el lst)
-  "Return the position of EL in LST if it exists.
-Return nil otherwise."
-  (let ((iter lst)
-        (num 0))
-    (while (not (or (equal el (car iter))
-                    (null (setq iter (cdr iter)))))
-      (setq num (1+ num)))
-    (unless (equal iter nil)
-      num)))
+(defun denote-tree--draw-tree-helper (node indent last-child)
+  "Insert INDENT and current NODE into the buffer.
+If dealing with LAST-CHILD of NODE, alter pretty printing."
+  (let (point-star-loc)
+    (insert indent)
+    (cond
+     (last-child
+      (setq indent (concat indent denote-tree-space))
+      (insert denote-tree-lower-knee))
+     (t
+      (setq indent (concat indent denote-tree-pipe))
+      (insert denote-tree-tee)))
+    (setq point-star-loc (point))
+    (insert denote-tree-node)
+    (add-text-properties point-star-loc
+                         (point)
+                         (list 'denote--id (car node)
+                               'face 'denote-tree-node-face))
+    (insert (denote-tree--collect-keyword (car node) "title") "\n")
+    (let ((lst (list point-star-loc))
+          (lastp last-child))
+      (dolist (el (cdr node) lst)
+        (setq lastp (equal el (car (last node))))
+        (setq lst (append lst (list (denote-tree--draw-tree-helper el
+                                                                   indent
+                                                                   lastp)))))
+      lst)))
 
 (defun denote-tree--re-circularize-tree (node)
   "Return the tree with cyclical structure of the original.
@@ -294,45 +282,72 @@ thing to `denote-tree--cyclic-trees'.  If a current node matches the
           (setq lst (append lst (list (denote-tree--re-circularize-tree el))))))
       lst)))
 
-(defun denote-tree--draw-tree (node)
-  "Draw a tree in current buffer starting with NODE."
-  (denote-tree--draw-tree-helper node "" t))
+
+;; Org-related helpers
 
-;; it is /imperative/ to merge this function and
-;; denote-tree--walk-links, because they do a lot
-;; of similar things
-(defun denote-tree--draw-tree-helper (node indent last-child)
-  "Insert INDENT and current NODE into the buffer.
-If dealing with LAST-CHILD of NODE, alter pretty printing."
-  (let (point-star-loc)
-    (insert indent)
-    (cond
-     (last-child
-      (setq indent (concat indent denote-tree-space))
-      (insert denote-tree-lower-knee))
-     (t
-      (setq indent (concat indent denote-tree-pipe))
-      (insert denote-tree-tee)))
-    (setq point-star-loc (point))
-    (insert denote-tree-node)
-    (add-text-properties point-star-loc
-                         (point)
-                         (list 'denote--id (car node)
-                               'face 'denote-tree-node-face))
-    (insert (denote-tree--collect-keyword (car node) "title") "\n")
-    (let ((lst (list point-star-loc))
-          (lastp last-child))
-      (dolist (el (cdr node) lst)
-        (setq lastp (equal el (car (last node))))
-        (setq lst (append lst (list (denote-tree--draw-tree-helper el
-                                                                   indent
-                                                                   lastp)))))
-      lst)))
+(defun denote-tree--collect-links (buffer)
+  "Collect all links of type denote in BUFFER."
+  (setq buffer (denote-tree--open-link-maybe buffer))
+  (with-current-buffer buffer
+    (org-element-map (org-element-parse-buffer) 'link
+      (lambda (link)
+        (when (string= (org-element-property :type link) "denote")
+          (org-element-property :path link))))))
+
+(defun denote-tree--collect-keyword (buffer keyword)
+  "Return org KEYWORD from BUFFER.
+Return nil if none is found."
+  (let ((collected-keyword))
+    (with-current-buffer buffer
+      (setq collected-keyword (org-collect-keywords (list keyword))))
+    (car (cdar collected-keyword))))
+
+(defun denote-tree--open-link-maybe (element)
+  "Return ELEMENT buffer, create if necessary."
+  (unless (member element denote-tree--visited-buffers)
+    (add-to-list 'denote-tree--visited-buffers element)
+    (get-buffer-create element)
+    (with-current-buffer element
+      (org-mode)
+      (erase-buffer)
+      (insert-file-contents (denote-get-path-by-id element))))
+  element)
 
 (defun denote-tree--get-text-property (element property)
   "Get text property PROPERTY at char-pos ELEMENT."
   (when element
     (get-text-property element 'denote--id)))
+
+
+;; Helper functions and one closure
+
+(defun denote-tree--movement-maker (len-list init-val)
+  "Return values from 0 to LEN-LIST."
+  (let ((pos init-val)
+        (len len-list)
+        (val))
+    (lambda (direction)
+      (setq pos (+ pos direction))
+      (setq val (mod pos len))
+      val)))
+
+(defun denote-tree--clean-up ()
+  "Clean up buffers created during the tree walk."
+  (dolist (el denote-tree--visited-buffers)
+    (kill-buffer el))
+  (setq denote-tree--visited-buffers nil)
+  (setq denote-tree--cyclic-buffers nil))
+
+(defun denote-tree--check (el lst)
+  "Return the position of EL in LST if it exists.
+Return nil otherwise."
+  (let ((iter lst)
+        (num 0))
+    (while (not (or (equal el (car iter))
+                    (null (setq iter (cdr iter)))))
+      (setq num (1+ num)))
+    (unless (equal iter nil)
+      num)))
 
 (provide 'denote-tree)
 ;;; denote-tree.el ends here
