@@ -98,10 +98,7 @@ Used directly to traverse the tree structure.")
   "Visualize your denote notes as a tree.
 
 Denote-tree visualizes every note linked to the root note in a buffer."
-  :interactive nil
-  (setq denote-tree--closure
-        (denote-tree--movement-maker 1 0)) ; root never has siblings
-  (setq denote-tree--pointer denote-tree--mark-tree))
+  :interactive nil)
 
 (defun denote-tree--movement-maker (len-list init-val)
   "Return values from 0 to LEN-LIST."
@@ -127,6 +124,9 @@ If ARG is omitted or nil, move to the child of a current node."
   (or arg (setq arg 1))
   (let (total
         node-stack)
+    ;; pointer is at root right now, bootstrap it.
+    (when (null denote-tree--pointer)
+      (setq denote-tree--pointer denote-tree--mark-tree))
     (dotimes (total arg)
       (when (cadr denote-tree--pointer)
         (push denote-tree--pointer denote-tree--node-stack)
@@ -238,6 +238,9 @@ a BUFFER provided by the user."
     (let ((inhibit-read-only t))
       (erase-buffer)
       (denote-tree-mode)
+      (setq denote-tree--closure
+            (denote-tree--movement-maker 1 0)) ; root never has siblings
+      (setq denote-tree--pointer nil)
       (setq denote-tree--mark-tree
             (denote-tree--draw-tree (denote-tree--walk-links buffer)))
       (setq denote-tree--mark-tree
