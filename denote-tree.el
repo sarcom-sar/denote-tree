@@ -246,7 +246,7 @@ a BUFFER provided by the user."
       (setq denote-tree--mark-tree
             (denote-tree--re-circularize-tree denote-tree--mark-tree))))
   (set-window-point (get-buffer-window denote-tree-buffer-name)
-                    (goto-char 3)))
+                    (goto-char (1+ (length denote-tree-lower-knee)))))
 
 (defun denote-tree--check (el lst)
   "Return the position of EL in LST if it exists.
