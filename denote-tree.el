@@ -230,13 +230,14 @@ Return nil if none is found."
 The function uses either the current buffer, if called from a function
 a BUFFER provided by the user."
   (interactive)
+  (when (get-buffer denote-tree-buffer-name)
+    (kill-buffer denote-tree-buffer-name))
   (denote-tree--clean-up)
   (or buffer (setq buffer (denote-tree--collect-keyword (current-buffer)
                                                         "identifier")))
   (denote-tree--open-link-maybe buffer)
   (with-current-buffer-window denote-tree-buffer-name nil nil
     (let ((inhibit-read-only t))
-      (erase-buffer)
       (denote-tree-mode)
       (setq denote-tree--closure
             (denote-tree--movement-maker 1 0)) ; root never has siblings
