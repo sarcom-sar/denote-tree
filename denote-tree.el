@@ -141,12 +141,15 @@ If ARG is omitted or nil, move to the child of a current node."
 If ARG is omitted or nil, move to the parent of a current node."
   (interactive "p")
   (or arg (setq arg 1))
-  (let ((total 0))
+  (let (total
+        node-stack)
     (dotimes (total arg)
       (when denote-tree--node-stack
         (setq denote-tree--pointer (pop denote-tree--node-stack))
+        (unless (setq node-stack (cdar denote-tree--node-stack))
+          (setq node-stack '(1)))
         (setq denote-tree--closure (denote-tree--movement-maker
-                                    (length (cdar denote-tree--node-stack))
+                                    (length node-stack)
                                     (pop denote-tree--pos-stack)))
         (goto-char (car denote-tree--pointer))))))
 
