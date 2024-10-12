@@ -304,7 +304,7 @@ thing to `denote-tree--cyclic-trees'.  If a current node matches the
 (defun denote-tree--draw-tree-helper (node indent last-child)
   "Insert INDENT and current NODE into the buffer.
 If dealing with LAST-CHILD of NODE, alter pretty printing."
-  (let ((point-loc))
+  (let (point-star-loc)
     (insert indent)
     (cond
      (last-child
