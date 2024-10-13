@@ -52,14 +52,13 @@
 ;; `denote-tree-circular-node-face' to make them more visible.  With a bit of
 ;; hacking it is also feasible to implement colored node titles.
 ;;
-;; The package as of right now hard-depends on denote and org.
+;; The package as of right now hard-depends on denote (duh).
 ;;
 
 ;;; Code:
 
 (eval-when-compile
   (require 'denote)
-  (require 'org)
   (require 'compat))
 
 
