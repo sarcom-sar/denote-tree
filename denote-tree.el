@@ -322,10 +322,35 @@ thing to `denote-tree--cyclic-trees'.  If a current node matches the
 (defun denote-tree--collect-keyword (buffer keyword)
   "Return org KEYWORD from BUFFER.
 Return nil if none is found."
-  (let ((collected-keyword))
+  (when-let ((filetype (denote-tree--find-filetype buffer)))
+      (with-current-buffer buffer
+        (goto-char (point-min))
+        ;; if it matches anything, return that substring
+        (when (cond
+               ((string= keyword "title")
+                (re-search-forward (plist-get filetype :title-key-regexp)
+                                   nil t))
+               ((string= keyword "identifier")
+                (re-search-forward denote-id-regexp
+                                   nil t)
+                (backward-word-strictly))
+               ((string= keyword "keywords")
+                (re-search-forward (plist-get filetype :keywords-key-regexp)
+                                   nil t))
+               (t nil))
+          (denote-trim-whitespace
+           (buffer-substring-no-properties (point) (line-end-position)))))))
+
+(defun denote-tree--find-filetype (buffer)
+  "Guess the filetype in BUFFER and return it as a symbol."
+  (let ((types denote-file-types))
     (with-current-buffer buffer
-      (setq collected-keyword (org-collect-keywords (list keyword))))
-    (car (cdar collected-keyword))))
+      (goto-char (point-min))
+      (cdr (seq-find
+            (lambda (type)
+              (re-search-forward
+               (plist-get (cdr type) :title-key-regexp) nil t))
+            types)))))
 
 (defun denote-tree--open-link-maybe (element)
   "Return ELEMENT buffer, create if necessary."
