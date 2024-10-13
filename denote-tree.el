@@ -358,7 +358,6 @@ Return nil if none is found."
     (add-to-list 'denote-tree--visited-buffers element)
     (get-buffer-create element)
     (with-current-buffer element
-      (org-mode)
       (erase-buffer)
       (insert-file-contents (denote-get-path-by-id element))))
   element)
