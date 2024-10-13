@@ -134,22 +134,24 @@ a BUFFER provided by the user."
   (interactive)
   (when (get-buffer denote-tree-buffer-name)
     (kill-buffer denote-tree-buffer-name))
-  (denote-tree--clean-up)
-  (or buffer (setq buffer (denote-tree--collect-keyword (current-buffer)
-                                                        "identifier")))
-  (denote-tree--open-link-maybe buffer)
-  (with-current-buffer-window denote-tree-buffer-name nil nil
-    (let ((inhibit-read-only t))
-      (denote-tree-mode)
-      (setq denote-tree--closure
-            (denote-tree--movement-maker 1 0)) ; root never has siblings
-      (setq denote-tree--pointer nil)
-      (setq denote-tree--mark-tree
-            (denote-tree--draw-tree (denote-tree--walk-links buffer)))
-      (setq denote-tree--mark-tree
-            (denote-tree--re-circularize-tree denote-tree--mark-tree))))
-  (set-window-point (get-buffer-window denote-tree-buffer-name)
-                    (goto-char (1+ (length denote-tree-lower-knee)))))
+  (unwind-protect
+      (progn
+        (or buffer (setq buffer (denote-tree--collect-keyword (current-buffer)
+                                                              "identifier")))
+        (denote-tree--open-link-maybe buffer)
+        (with-current-buffer-window denote-tree-buffer-name nil nil
+          (let ((inhibit-read-only t))
+            (denote-tree-mode)
+            (setq denote-tree--closure
+                  (denote-tree--movement-maker 1 0)) ; root never has siblings
+            (setq denote-tree--pointer nil)
+            (setq denote-tree--mark-tree
+                  (denote-tree--draw-tree (denote-tree--walk-links buffer)))
+            (setq denote-tree--mark-tree
+                  (denote-tree--re-circularize-tree denote-tree--mark-tree))))
+        (set-window-point (get-buffer-window denote-tree-buffer-name)
+                          (goto-char (1+ (length denote-tree-lower-knee)))))
+    (denote-tree--clean-up)))
 
 (defun denote-tree-enter-node ()
   "Enter node at point in other window."
