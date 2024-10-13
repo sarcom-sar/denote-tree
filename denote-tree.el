@@ -304,7 +304,7 @@ thing to `denote-tree--cyclic-trees'.  If a current node matches the
       lst)))
 
 
-;; Org-related helpers
+;; Helpers for Links and Buffers
 
 (defun denote-tree--collect-links (buffer)
   "Collect all links of type denote in BUFFER."
