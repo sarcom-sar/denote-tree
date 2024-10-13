@@ -309,11 +309,15 @@ thing to `denote-tree--cyclic-trees'.  If a current node matches the
 (defun denote-tree--collect-links (buffer)
   "Collect all links of type denote in BUFFER."
   (setq buffer (denote-tree--open-link-maybe buffer))
-  (with-current-buffer buffer
-    (org-element-map (org-element-parse-buffer) 'link
-      (lambda (link)
-        (when (string= (org-element-property :type link) "denote")
-          (org-element-property :path link))))))
+  (let (found-ids)
+    (with-current-buffer buffer
+      (goto-char (point-min))
+      (while (search-forward-regexp denote-id-regexp nil t)
+        (push (concat (match-string-no-properties 1)
+                      (match-string-no-properties 2))
+              found-ids))
+      ;; first element is /always/ the buffer's id
+      (cdr (nreverse found-ids)))))
 
 (defun denote-tree--collect-keyword (buffer keyword)
   "Return org KEYWORD from BUFFER.
