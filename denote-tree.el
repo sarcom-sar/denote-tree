@@ -320,7 +320,7 @@ thing to `denote-tree--cyclic-trees'.  If a current node matches the
       (cdr (nreverse found-ids)))))
 
 (defun denote-tree--collect-keyword (buffer keyword)
-  "Return org KEYWORD from BUFFER.
+  "Return denote KEYWORD from BUFFER.
 Return nil if none is found."
   (when-let ((filetype (denote-tree--find-filetype buffer)))
       (with-current-buffer buffer
