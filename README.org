@@ -59,7 +59,11 @@ contributions.
 ** To-Do list
 *** Nice to have
 
-- [ ] Make it major mode agnostic.
+- [ ] Make it major mode agnostic;
+- [ ] colorize titles based on weighted Euclidean distance formula;
+- [ ] add bookmark-ring;
+- [ ] unite traversal functions;
+- [ ] smarter redrawing of a tree.
 
 *** Bare minimum before going public
 
