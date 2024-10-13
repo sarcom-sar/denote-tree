@@ -1,9 +1,7 @@
 * denote-tree
 
 denote-tree is a simple utility, that allows you to see and move within tree
-structure of your notes with standard GNU Emacs movement keys. As of right now
-it is hard-dependent (in addition to denote) on org-mode.
-
+structure of your notes with standard GNU Emacs movement keys.
 ** Usage
 
 Just clone this very repository and enable the package:
@@ -59,7 +57,7 @@ contributions.
 ** To-Do list
 *** Nice to have
 
-- [ ] Make it major mode agnostic;
+- [X] Make it major mode agnostic;
 - [ ] colorize titles based on weighted Euclidean distance formula;
 - [ ] add bookmark-ring;
 - [ ] unite traversal functions;
