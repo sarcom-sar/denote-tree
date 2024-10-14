@@ -224,7 +224,12 @@ If ARG is omitted or nil, move to the previous child node."
 ;; it is a good idea to merge those functions
 
 (defun denote-tree--walk-links (buffer)
-  "Return a tree of denote links starting with current BUFFER."
+  "Return a tree of denote links starting with current BUFFER.
+
+The function uses basic version of 3 color DFS.  Any node that isn't
+opened as a buffer is white. Buffers opened `with-current-buffer' are
+gray nodes, while nodes that were previously opened as buffers are black.
+The discovery of white nodes happens using `denote-tree--collect-links'."
   (let ((links-in-buffer (denote-tree--collect-links buffer)))
     (with-current-buffer buffer
       ; if no links return a buffer
@@ -413,6 +418,7 @@ Return nil if none is found."
   (dolist (el denote-tree--visited-buffers)
     (kill-buffer el))
   (setq denote-tree--visited-buffers nil)
+  (setq denote-tree--cyclic-trees nil)
   (setq denote-tree--cyclic-buffers nil))
 
 
