@@ -109,7 +109,7 @@ Used directly to traverse the tree structure.")
   "Stack of point position in parent nodes.")
 
 (defvar-local denote-tree--closure nil
-  "Closure of current instance of `denote-tree--sideways-maker'.")
+  "Closure of current instance of `denote-tree--movement-maker'.")
 
 
 ;; Mode and interactive functions
@@ -422,7 +422,6 @@ Return nil if none is found."
   (setq denote-tree--visited-buffers nil)
   (setq denote-tree--cyclic-trees nil)
   (setq denote-tree--cyclic-buffers nil))
-
 
 (defun denote-tree--default-props (str)
   "Default function returning STR with properties."
