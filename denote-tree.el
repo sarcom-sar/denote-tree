@@ -73,6 +73,10 @@
 (defcustom denote-tree-buffer-name "*denote-tree*"
   "Name of the buffer denote-tree will be built in.")
 
+(defcustom denote-tree-title-colorize-function #'denote-tree--default-props
+  "Function accepting one argument STR.
+Returns propertied string STR.")
+
 
 ;; Vars and consts
 
@@ -385,6 +389,11 @@ Return nil if none is found."
     (kill-buffer el))
   (setq denote-tree--visited-buffers nil)
   (setq denote-tree--cyclic-buffers nil))
+
+
+(defun denote-tree--default-props (str)
+  "Default function returning STR with properties."
+  (propertize str))
 
 (defun denote-tree--check (el lst)
   "Return the position of EL in LST if it exists.
