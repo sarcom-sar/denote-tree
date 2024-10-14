@@ -245,7 +245,9 @@ The discovery of white nodes happens using `denote-tree--collect-links'."
               (setq lst (append lst (list (denote-tree--walk-links el)))))))))))
 
 (defun denote-tree--draw-tree (node)
-  "Draw a tree in current buffer starting with NODE."
+  "Draw a tree in current buffer starting with NODE.
+
+The function calls a helper `denote-tree--draw-tree-helper'."
   (denote-tree--draw-tree-helper node "" t))
 
 (defun denote-tree--draw-tree-helper (node indent last-child-p)
