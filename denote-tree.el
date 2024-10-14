@@ -132,8 +132,9 @@ Denote-tree visualizes every note linked to the root note in a buffer."
 ;;;###autoload
 (defun denote-tree (&optional buffer)
   "Draw hierarchy between denote files as a tree.
+
 The function uses either the current buffer, if called from a function
-a BUFFER provided by the user."
+or a BUFFER provided by the user."
   (interactive)
   (when (get-buffer denote-tree-buffer-name)
     (kill-buffer denote-tree-buffer-name))
