@@ -299,28 +299,39 @@ thing to `denote-tree--cyclic-trees'.  If a current node matches the
 `denote-tree--cyclic-trees'.  Return modified tree."
   (if (not (listp node))
       node
-    (let* ((lst (list (car node)))
-           (skip-this-loop nil)
-           (pos-to-id (get-text-property (car node) 'denote--id))
-           (char-pos-of-cyclic-trees (mapcar #'car denote-tree--cyclic-trees))
-           (checked-element (denote-tree--check
-                             pos-to-id
-                             (mapcar (lambda (el)
-                                       (denote-tree--get-text-property el 'denote--id))
-                                     char-pos-of-cyclic-trees))))
-      (cond
-       (checked-element
-        (setcdr node (cdr (nth checked-element denote-tree--cyclic-trees)))
-        (setq skip-this-loop t)
-        (setq lst (append lst (cdr node))))
-       ((denote-tree--check pos-to-id denote-tree--cyclic-buffers)
-        (setq denote-tree--cyclic-trees
-              (append denote-tree--cyclic-trees (list node)))))
-      (dolist (el (cdr node))
+    (let* ((lst-and-skip (denote-tree--check-cyclic node (list (car node))))
+           skip-this-loop lst)
+      (setq skip-this-loop (car lst-and-skip))
+      (setq lst (cdr lst-and-skip))
+      (dolist (el (cdr node) lst)
         (unless skip-this-loop
-          (setq lst (append lst (list (denote-tree--re-circularize-tree el))))))
-      lst)))
+          (setq lst (append lst (list (denote-tree--re-circularize-tree el)))))))))
 
+(defun denote-tree--check-cyclic (node lst)
+  "When NODE is cyclic, modify the LST and skip further traversal.
+
+If NODE is encountered in `denote-tree--cyclic-buffers', then add the current
+structure to `denote-tree--cyclic-trees'.  During further traversal, if the NODE
+matches `car' of one of the nodes in `denote-tree--cyclic-trees' `setcdr' that
+node to the `cdr' of the same element in `denote-tree--cyclic-trees'.  If that
+happens return the flag skip set to t."
+  (let* ((pos-to-id (get-text-property (car node) 'denote--id))
+         (char-pos-of-cyclic-trees (mapcar #'car denote-tree--cyclic-trees))
+         (checked-element (denote-tree--check
+                           pos-to-id
+                           (mapcar (lambda (el)
+                                     (denote-tree--get-text-property el 'denote--id))
+                                   char-pos-of-cyclic-trees)))
+         skip)
+    (cond
+     (checked-element
+      (setcdr node (cdr (nth checked-element denote-tree--cyclic-trees)))
+      (setq skip t)
+      (setq lst (append lst (cdr node))))
+     ((denote-tree--check pos-to-id denote-tree--cyclic-buffers)
+      (setq denote-tree--cyclic-trees
+            (append denote-tree--cyclic-trees (list node)))))
+    (cons skip lst)))
 
 ;; Helpers for Links and Buffers
 
