@@ -58,7 +58,11 @@ contributions.
 *** Nice to have
 
 - [X] Make it major mode agnostic;
+<<<<<<< HEAD
 - [ ] colorize titles based on weighted Euclidean distance formula;
+=======
+- [X] give the user the ability to colorize node titles;
+>>>>>>> ce86bf2 (major mode agnostic, users can colorize node titles)
 - [ ] add bookmark-ring;
 - [ ] unite traversal functions;
 - [ ] smarter redrawing of a tree.
