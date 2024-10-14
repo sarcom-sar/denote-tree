@@ -247,7 +247,8 @@ If ARG is omitted or nil, move to the previous child node."
 (defun denote-tree--draw-tree-helper (node indent last-child)
   "Insert INDENT and current NODE into the buffer.
 If dealing with LAST-CHILD of NODE, alter pretty printing."
-  (let (point-star-loc)
+  (let ((circularp (member (car node) denote-tree--cyclic-buffers))
+        point-star-loc)
     (insert indent)
     (cond
      (last-child
@@ -257,13 +258,12 @@ If dealing with LAST-CHILD of NODE, alter pretty printing."
       (setq indent (concat indent denote-tree-pipe))
       (insert denote-tree-tee)))
     (setq point-star-loc (point))
-    (insert denote-tree-node)
-    (put-text-property (car node)
-                       (1+ (car node))
-                       'face (if (member (car node) denote-tree--cyclic-buffers)
-                                 'denote-tree-circular-node-face
-                               'denote-tree-node-face))
-    (insert (funcall denote-tree-title-colorize-function
+    (insert (propertize denote-tree-node
+                        'denote--id (car node)
+                        'face (if circularp
+                                  'denote-tree-circular-node-face
+                                'denote-tree-node-face))
+            (funcall denote-tree-title-colorize-function
                      (denote-tree--collect-keyword (car node) "title"))
             "\n")
     (let ((lst (list point-star-loc))
