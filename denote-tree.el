@@ -258,11 +258,14 @@ If dealing with LAST-CHILD of NODE, alter pretty printing."
       (insert denote-tree-tee)))
     (setq point-star-loc (point))
     (insert denote-tree-node)
-    (add-text-properties point-star-loc
-                         (point)
-                         (list 'denote--id (car node)
-                               'face 'denote-tree-node-face))
-    (insert (denote-tree--collect-keyword (car node) "title") "\n")
+    (put-text-property (car node)
+                       (1+ (car node))
+                       'face (if (member (car node) denote-tree--cyclic-buffers)
+                                 'denote-tree-circular-node-face
+                               'denote-tree-node-face))
+    (insert (funcall denote-tree-title-colorize-function
+                     (denote-tree--collect-keyword (car node) "title"))
+            "\n")
     (let ((lst (list point-star-loc))
           (lastp last-child))
       (dolist (el (cdr node) lst)
@@ -292,9 +295,6 @@ thing to `denote-tree--cyclic-trees'.  If a current node matches the
                                      char-pos-of-cyclic-trees))))
       (cond
        (checked-element
-        (put-text-property (car node)
-                           (1+ (car node))
-                           'face 'denote-tree-circular-node-face)
         (setcdr node (cdr (nth checked-element denote-tree--cyclic-trees)))
         (setq skip-this-loop t)
         (setq lst (append lst (cdr node))))
