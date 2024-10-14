@@ -244,14 +244,36 @@ If ARG is omitted or nil, move to the previous child node."
   "Draw a tree in current buffer starting with NODE."
   (denote-tree--draw-tree-helper node "" t))
 
-(defun denote-tree--draw-tree-helper (node indent last-child)
+(defun denote-tree--draw-tree-helper (node indent last-child-p)
   "Insert INDENT and current NODE into the buffer.
-If dealing with LAST-CHILD of NODE, alter pretty printing."
-  (let ((circularp (member (car node) denote-tree--cyclic-buffers))
+If dealing with LAST-CHILD-P of NODE, alter pretty printing."
+  (let* ((point-and-indent (denote-tree--draw-node (car node)
+                                                   indent
+                                                   last-child-p))
+         (point-star-loc (car point-and-indent))
+         (indent (cdr point-and-indent))
+         (lst (list point-star-loc))
+         lastp)
+    (dolist (el (cdr node) lst)
+      (setq lastp (equal el (car (last node))))
+      (setq lst (append lst (list (denote-tree--draw-tree-helper el
+                                                                 indent
+                                                                 lastp)))))))
+
+(defun denote-tree--draw-node (node-name indent last-child-p)
+  "Draw NODE-NAME according to INDENT in current buffer.
+
+Insert the current line as follows INDENT `denote-tree-node' title of
+current denote note.  Face of `denote-tree-node' is either
+`denote-tree-circular-node-face' if current NODE-NAME is a member of
+`denote-tree--cyclic-buffers' or `denote-tree-node-face' if it's not.
+
+Return location of a point where the node starts and the current indent."
+  (let ((circularp (member node-name denote-tree--cyclic-buffers))
         point-star-loc)
     (insert indent)
     (cond
-     (last-child
+     (last-child-p
       (setq indent (concat indent denote-tree-space))
       (insert denote-tree-lower-knee))
      (t
@@ -259,21 +281,14 @@ If dealing with LAST-CHILD of NODE, alter pretty printing."
       (insert denote-tree-tee)))
     (setq point-star-loc (point))
     (insert (propertize denote-tree-node
-                        'denote--id (car node)
+                        'denote--id node-name
                         'face (if circularp
                                   'denote-tree-circular-node-face
                                 'denote-tree-node-face))
             (funcall denote-tree-title-colorize-function
-                     (denote-tree--collect-keyword (car node) "title"))
+                     (denote-tree--collect-keyword node-name "title"))
             "\n")
-    (let ((lst (list point-star-loc))
-          (lastp last-child))
-      (dolist (el (cdr node) lst)
-        (setq lastp (equal el (car (last node))))
-        (setq lst (append lst (list (denote-tree--draw-tree-helper el
-                                                                   indent
-                                                                   lastp)))))
-      lst)))
+    (cons point-star-loc indent)))
 
 (defun denote-tree--re-circularize-tree (node)
   "Return the tree with cyclical structure of the original.
