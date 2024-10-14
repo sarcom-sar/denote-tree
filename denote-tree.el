@@ -237,8 +237,7 @@ If ARG is omitted or nil, move to the previous child node."
             (if (and (get-buffer el)
                      (add-to-list 'denote-tree--cyclic-buffers el))
                 (setq lst (append lst (list (list el))))
-              (setq lst (append lst (list (denote-tree--walk-links el))))))
-          lst)))))
+              (setq lst (append lst (list (denote-tree--walk-links el)))))))))))
 
 (defun denote-tree--draw-tree (node)
   "Draw a tree in current buffer starting with NODE."
