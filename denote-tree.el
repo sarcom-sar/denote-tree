@@ -224,7 +224,11 @@ If ARG is omitted or nil, move to the previous child node."
 ;; Tree traversal
 ;; it is a good idea to merge those functions
 
-(defun denote-tree--walk-links (buffer)
+(defun denote-tree--draw-tree (buffer)
+  "Draw a tree in current buffer starting with BUFFER"
+  (denote-tree--walk-links buffer nil "" t))
+
+(defun denote-tree--walk-links (buffer parent indent last-child-p)
   "Return a tree of denote links starting with current BUFFER.
 
 The function uses basic version of 3 color DFS.  Any node that isn't
@@ -244,12 +248,6 @@ The discovery of white nodes happens using `denote-tree--collect-links'."
                      (add-to-list 'denote-tree--cyclic-buffers el))
                 (setq lst (append lst (list (list el))))
               (setq lst (append lst (list (denote-tree--walk-links el)))))))))))
-
-(defun denote-tree--draw-tree (node)
-  "Draw a tree in current buffer starting with NODE.
-
-The function calls a helper `denote-tree--draw-tree-helper'."
-  (denote-tree--draw-tree-helper node "" t))
 
 (defun denote-tree--draw-tree-helper (node indent last-child-p)
   "Insert INDENT and current NODE into the buffer.
