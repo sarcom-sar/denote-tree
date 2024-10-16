@@ -238,13 +238,7 @@ over it."
          (pos (car pos-and-indent))
          (indent (cdr pos-and-indent))
          lastp)
-    (set-text-properties pos
-                         (+ pos (length denote-tree-node))
-                         (append (text-properties-at pos)
-                                 (list 'fontified t
-                                       'denote-tree--childen links-in-buffer
-                                       'denote-tree--parent  parent
-                                       'denote-tree--me      buffer)))
+    (denote-tree--propertize-node pos parent buffer links-in-buffer)
     (unless (or (member buffer denote-tree--cyclic-buffers)
                 (null links-in-buffer))
       (with-current-buffer buffer
@@ -284,7 +278,26 @@ Return location of a point where the node starts and the current indent."
                      (denote-tree--collect-keyword node-name "title"))
             "\n")
     (cons point-star-loc indent)))
+
+(defun denote-tree--propertize-node (position buffer parent links-in-buffer)
+  "Add properties for BUFFER PARENT LINKS-IN-BUFFER at POSITION.
+
+Create a map of local neighbors for the POSITION, so the movement commands
+\"know\" where to move next.  Properties to be set are:
+
+- `denote-tree--children',
+- `denote-tree--parent'
+- `denote-tree--me'."
+  (set-text-properties position
+                       (+ position (length denote-tree-node))
+                       (append (text-properties-at position)
+                               (list 'fontified t
+                                     'denote-tree--childen links-in-buffer
+                                     'denote-tree--parent  parent
+                                     'denote-tree--me      buffer))))
+
 
+
 ;; Helpers for Links and Buffers
 
 (defun denote-tree--collect-links (buffer)
