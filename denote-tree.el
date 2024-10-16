@@ -167,22 +167,15 @@ or a BUFFER provided by the user."
 If ARG is omitted or nil, move to the child of a current node."
   (interactive "p")
   (or arg (setq arg 1))
-  (let (total
-        node-stack)
-    ;; pointer is at root right now, bootstrap it.
-    (when (null denote-tree--pointer)
-      (setq denote-tree--pointer denote-tree--mark-tree))
-    (dotimes (total arg)
-      (when (cadr denote-tree--pointer)
-        (push denote-tree--pointer denote-tree--node-stack)
-        (push (funcall denote-tree--closure 0) denote-tree--pos-stack)
-        (setq denote-tree--pointer (cadr denote-tree--pointer))
-        (unless (setq node-stack (cdar denote-tree--node-stack))
-          (setq node-stack '(1)))
-        (setq denote-tree--closure (denote-tree--movement-maker
-                                    (length node-stack)
-                                    0))
-        (goto-char (car denote-tree--pointer))))))
+  (dotimes (el arg)
+    (when-let ((text-prop (get-text-property (point) 'denote-tree--childen))
+               (cyclicp (get-text-property (point) 'face)))
+      (push (point) denote-tree--pos-stack)
+      (when (eq cyclicp 'denote-tree-circular-node-face)
+        (goto-char (point-min)))
+      (goto-char
+       (prop-match-beginning
+        (text-property-search-forward 'denote-tree--me (car text-prop) t t))))))
 
 (defun denote-tree-parent-node (&optional arg)
   "Move the point to the parent node of a current node ARG times.
