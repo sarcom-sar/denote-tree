@@ -223,7 +223,7 @@ If ARG is omitted or nil, move to the previous child node."
 ;; it is a good idea to merge those functions
 
 (defun denote-tree--draw-tree (buffer)
-  "Draw a tree in current buffer starting with BUFFER"
+  "Draw a tree in current buffer starting with BUFFER."
   (denote-tree--walk-links buffer nil "" t))
 
 (defun denote-tree--walk-links (buffer parent indent last-child-p)
