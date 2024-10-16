@@ -259,9 +259,10 @@ over it."
   "Draw NODE-NAME according to INDENT in current buffer.
 
 Insert the current line as follows INDENT `denote-tree-node' title of
-current denote note.  Face of `denote-tree-node' is either
+the current denote note.  Face of `denote-tree-node' is either
 `denote-tree-circular-node-face' if current NODE-NAME is a member of
 `denote-tree--cyclic-buffers' or `denote-tree-node-face' if it's not.
+Call `denote-tree-title-colorize-function' on title.
 
 Return location of a point where the node starts and the current indent."
   (let ((circularp (member node-name denote-tree--cyclic-buffers))
