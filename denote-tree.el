@@ -160,7 +160,7 @@ or a BUFFER provided by the user."
   (interactive)
   (find-file-other-window
    (denote-get-path-by-id
-    (get-text-property (point) 'denote--id))))
+    (get-text-property (point) 'denote-tree--me))))
 
 (defun denote-tree-child-node (&optional arg)
   "Move the point to the child node of a current node ARG times.
