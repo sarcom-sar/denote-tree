@@ -285,7 +285,6 @@ Return location of a point where the node starts and the current indent."
       (insert denote-tree-tee)))
     (setq point-star-loc (point))
     (insert (propertize denote-tree-node
-                        'denote--id node-name
                         'face (if circularp
                                   'denote-tree-circular-node-face
                                 'denote-tree-node-face))
