@@ -245,22 +245,15 @@ The discovery of white nodes happens using `denote-tree--collect-links'."
                                        'denote-tree--childen links-in-buffer
                                        'denote-tree--parent  parent
                                        'denote-tree--me      buffer)))
-    (unless (member buffer denote-tree--cyclic-buffers)
+    (unless (or (member buffer denote-tree--cyclic-buffers)
+                (null links-in-buffer))
       (with-current-buffer buffer
-        ;; if no links return a buffer
-        (if (null links-in-buffer)
-            (list buffer)
-          (let ((lst (list (denote-tree--collect-keyword buffer "identifier"))))
-            ;; if links go deeper
-            (dolist (el links-in-buffer lst)
-              ;; this essentially checks if next node is a colored in black
-              (when (get-buffer el)
-                (add-to-list 'denote-tree--cyclic-buffers el))
-              (setq lastp (eq el (car (last links-in-buffer))))
-              (setq lst (append lst (list (denote-tree--walk-links el
-                                                                   buffer
-                                                                   indent
-                                                                   lastp)))))))))))
+        ;; if no links do not iterate
+        (dolist (el links-in-buffer)
+          (when (get-buffer el)
+            (add-to-list 'denote-tree--cyclic-buffers el))
+          (setq lastp (eq el (car (last links-in-buffer))))
+          (denote-tree--walk-links el buffer indent lastp))))))
 
 (defun denote-tree--draw-node (node-name indent last-child-p)
   "Draw NODE-NAME according to INDENT in current buffer.
