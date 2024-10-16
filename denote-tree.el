@@ -235,35 +235,34 @@ The function uses basic version of 3 color DFS.  Any node that isn't
 opened as a buffer is white. Buffers opened `with-current-buffer' are
 gray nodes, while nodes that were previously opened as buffers are black.
 The discovery of white nodes happens using `denote-tree--collect-links'."
-  (let ((links-in-buffer (denote-tree--collect-links buffer)))
-    (with-current-buffer buffer
-      ; if no links return a buffer
-      (if (null links-in-buffer)
-          (list buffer)
-        (let ((lst (list (denote-tree--collect-keyword buffer "identifier"))))
-          ;; if links go deeper
-          (dolist (el links-in-buffer lst)
-            ;; this essentially checks if next node is a colored in black
-            (if (and (get-buffer el)
-                     (add-to-list 'denote-tree--cyclic-buffers el))
-                (setq lst (append lst (list (list el))))
-              (setq lst (append lst (list (denote-tree--walk-links el)))))))))))
-
-(defun denote-tree--draw-tree-helper (node indent last-child-p)
-  "Insert INDENT and current NODE into the buffer.
-If dealing with LAST-CHILD-P of NODE, alter pretty printing."
-  (let* ((point-and-indent (denote-tree--draw-node (car node)
-                                                   indent
-                                                   last-child-p))
-         (point-star-loc (car point-and-indent))
-         (indent (cdr point-and-indent))
-         (lst (list point-star-loc))
+  (let* ((links-in-buffer (denote-tree--collect-links buffer))
+         (pos-and-indent (denote-tree--draw-node buffer indent last-child-p))
+         (pos (car pos-and-indent))
+         (indent (cdr pos-and-indent))
          lastp)
-    (dolist (el (cdr node) lst)
-      (setq lastp (equal el (car (last node))))
-      (setq lst (append lst (list (denote-tree--draw-tree-helper el
-                                                                 indent
-                                                                 lastp)))))))
+    (set-text-properties pos
+                         (+ pos (length denote-tree-node))
+                         (append (text-properties-at pos)
+                                 (list 'fontified t
+                                       'denote-tree--childen links-in-buffer
+                                       'denote-tree--parent  parent
+                                       'denote-tree--me      buffer)))
+    (unless (member buffer denote-tree--cyclic-buffers)
+      (with-current-buffer buffer
+        ;; if no links return a buffer
+        (if (null links-in-buffer)
+            (list buffer)
+          (let ((lst (list (denote-tree--collect-keyword buffer "identifier"))))
+            ;; if links go deeper
+            (dolist (el links-in-buffer lst)
+              ;; this essentially checks if next node is a colored in black
+              (when (get-buffer el)
+                (add-to-list 'denote-tree--cyclic-buffers el))
+              (setq lastp (eq el (car (last links-in-buffer))))
+              (setq lst (append lst (list (denote-tree--walk-links el
+                                                                   buffer
+                                                                   indent
+                                                                   lastp)))))))))))
 
 (defun denote-tree--draw-node (node-name indent last-child-p)
   "Draw NODE-NAME according to INDENT in current buffer.
