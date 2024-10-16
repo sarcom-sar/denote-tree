@@ -227,12 +227,12 @@ If ARG is omitted or nil, move to the previous child node."
   (denote-tree--walk-links buffer nil "" t))
 
 (defun denote-tree--walk-links (buffer parent indent last-child-p)
-  "Return a tree of denote links starting with current BUFFER.
+  "Walk along the links starting from BUFFER.
 
-The function uses basic version of 3 color DFS.  Any node that isn't
-opened as a buffer is white. Buffers opened `with-current-buffer' are
-gray nodes, while nodes that were previously opened as buffers are black.
-The discovery of white nodes happens using `denote-tree--collect-links'."
+Draw the current buffer as a node in `denote-tree-buffer-name'.  Set it's
+properties.  Colelct all the links and call `denote-tree--walk-links' on
+them recursively.  If one of the buffers was already visited do not iterate
+over it."
   (let* ((links-in-buffer (denote-tree--collect-links buffer))
          (pos-and-indent (denote-tree--draw-node buffer indent last-child-p))
          (pos (car pos-and-indent))
