@@ -213,7 +213,7 @@ over it."
                 (append node-children
                         (denote-tree--walk-links el buffer indent lastp))))))
     (with-current-buffer denote-tree-buffer-name
-      (denote-tree--propertize-node pos buffer (car links-in-buffer))
+      (denote-tree--propertize-node pos buffer)
       (denote-tree--add-props-to-children node-children pos))
     (list pos)))
 
@@ -247,20 +247,16 @@ Return location of a point where the node starts and the current indent."
             "\n")
     (cons point-star-loc indent)))
 
-(defun denote-tree--propertize-node (position buffer first-born)
-  "Add properties for BUFFER FIRST-BORN at POSITION.
+(defun denote-tree--propertize-node (position buffer)
+  "Add properties for BUFFER at POSITION.
 
 Create a map of local neighbors for the POSITION, so the movement commands
-\"know\" where to move next.  Properties to be set are:
-
-- `denote-tree--child',
-- `denote-tree--me'."
+\"know\" where to move next.  Properties to be set is `denote-tree--me'."
   (set-text-properties position
                        (+ position (length denote-tree-node))
                        (append (text-properties-at position)
                                (list 'fontified t
-                                     'denote-tree--child  first-born
-                                     'denote-tree--me     buffer))))
+                                     'denote-tree--me buffer))))
 
 (defun denote-tree--add-props-to-children (node-children parent)
   "Iterate over NODE-CHILDREN to set node's props. Keep node's PARENT.
@@ -269,6 +265,9 @@ Every node contains props denote-tree--next, denote-tree--prev and
 denote-tree--parent which contain point's position to go to get to
 previous/next sibling node or a parent.  This function sets those
 positions."
+  (when node-children
+    (add-text-properties parent (+ parent (length denote-tree-node))
+                         (list 'denote-tree--child (car node-children))))
   (let ((prev (car (last node-children)))
         (tail node-children))
     (dolist (el node-children)
