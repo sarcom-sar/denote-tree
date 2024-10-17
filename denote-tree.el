@@ -190,10 +190,8 @@ If ARG is omitted or nil, move to the parent of a current node."
 If ARG is omitted or nil, move to the next child node."
   (interactive "p")
   (or arg (setq arg 1))
-  (when denote-tree--node-stack
-    (setq denote-tree--pointer (nth (funcall denote-tree--closure arg)
-                                    (cdar denote-tree--node-stack)))
-    (goto-char (car denote-tree--pointer))))
+  (dotimes (el arg)
+    (goto-char (get-text-property (point) 'denote-tree--next))))
 
 (defun denote-tree-prev-node (&optional arg)
   "Move the point to the previous child node ARG times.
