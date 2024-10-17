@@ -86,30 +86,14 @@ Returns propertied string STR.")
 (defconst denote-tree-pipe "| ")
 (defconst denote-tree-node "* ")
 
-(defvar denote-tree--cyclic-trees '()
-  "List of all partial trees that contain cycles.")
-
 (defvar denote-tree--visited-buffers '()
   "List of already created buffers.")
 
 (defvar denote-tree--cyclic-buffers '()
   "List of buffers that are cyclic nodes.")
 
-(defvar-local denote-tree--mark-tree '()
-  "Tree of positions used by denote-tree buffer.
-Used directly to traverse the tree structure.")
-
-(defvar-local denote-tree--pointer '()
-  "Node the point is at.")
-
-(defvar-local denote-tree--node-stack '()
-  "Stack of parent nodes.")
-
 (defvar-local denote-tree--pos-stack '()
   "Stack of point position in parent nodes.")
-
-(defvar-local denote-tree--closure nil
-  "Closure of current instance of `denote-tree--movement-maker'.")
 
 
 ;; Mode and interactive functions
@@ -146,11 +130,7 @@ or a BUFFER provided by the user."
         (with-current-buffer-window denote-tree-buffer-name nil nil
           (let ((inhibit-read-only t))
             (denote-tree-mode)
-            (setq denote-tree--closure
-                  (denote-tree--movement-maker 1 0)) ; root never has siblings
-            (setq denote-tree--pointer nil)
-            (setq denote-tree--mark-tree
-                  (denote-tree--draw-tree buffer))))
+            (denote-tree--draw-tree buffer)))
         (set-window-point (get-buffer-window denote-tree-buffer-name)
                           (goto-char (1+ (length denote-tree-lower-knee)))))
     (denote-tree--clean-up)))
@@ -363,23 +343,8 @@ Return nil if none is found."
       (insert-file-contents (denote-get-path-by-id element))))
   element)
 
-(defun denote-tree--get-text-property (element property)
-  "Get text property PROPERTY at char-pos ELEMENT."
-  (when element
-    (get-text-property element 'denote--id)))
-
 
 ;; Helper functions and one closure
-
-(defun denote-tree--movement-maker (len-list init-val)
-  "Return values from 0 to LEN-LIST."
-  (let ((pos init-val)
-        (len len-list)
-        (val))
-    (lambda (direction)
-      (setq pos (+ pos direction))
-      (setq val (mod pos len))
-      val)))
 
 (defun denote-tree--clean-up ()
   "Clean up buffers created during the tree walk."
@@ -392,17 +357,6 @@ Return nil if none is found."
 (defun denote-tree--default-props (str)
   "Default function returning STR with properties."
   (propertize str))
-
-(defun denote-tree--check (el lst)
-  "Return the position of EL in LST if it exists.
-Return nil otherwise."
-  (let ((iter lst)
-        (num 0))
-    (while (not (or (equal el (car iter))
-                    (null (setq iter (cdr iter)))))
-      (setq num (1+ num)))
-    (unless (equal iter nil)
-      num)))
 
 (provide 'denote-tree)
 ;;; denote-tree.el ends here
