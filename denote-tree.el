@@ -218,24 +218,6 @@ over it."
       (denote-tree--add-props-to-children node-children))
     (list pos)))
 
-(defun denote-tree--add-props-to-children (node-children)
-  "Iterate over NODE-CHILDREN to set node's props.
-
-Every node contains props denote-tree--next and denote-tree--prev,
-which contain point position to go to to get to previous or next
-sibling node.  This function sets that positions."
-  (let ((prev (car (last node-children)))
-        (tail node-children))
-    (dolist (el node-children)
-      (setq tail (cdr tail))
-      ;; if tail is null, then we are at last element,
-      ;; fetch start of child nodes
-      (let ((next (if (null (car tail)) (car node-children) (car tail))))
-        (add-text-properties el (+ el (length denote-tree-node))
-                             (list 'denote-tree--next next
-                                   'denote-tree--prev prev)))
-      (setq prev el))))
-
 (defun denote-tree--draw-node (node-name indent last-child-p)
   "Draw NODE-NAME according to INDENT in current buffer.
 
@@ -282,6 +264,24 @@ Create a map of local neighbors for the POSITION, so the movement commands
                                      'denote-tree--child  first-born
                                      'denote-tree--parent parent
                                      'denote-tree--me     buffer))))
+
+(defun denote-tree--add-props-to-children (node-children)
+  "Iterate over NODE-CHILDREN to set node's props.
+
+Every node contains props denote-tree--next and denote-tree--prev,
+which contain point position to go to to get to previous or next
+sibling node.  This function sets that positions."
+  (let ((prev (car (last node-children)))
+        (tail node-children))
+    (dolist (el node-children)
+      (setq tail (cdr tail))
+      ;; if tail is null, then we are at last element,
+      ;; fetch start of child nodes
+      (let ((next (if (null (car tail)) (car node-children) (car tail))))
+        (add-text-properties el (+ el (length denote-tree-node))
+                             (list 'denote-tree--next next
+                                   'denote-tree--prev prev)))
+      (setq prev el))))
 
 
 
