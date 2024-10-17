@@ -148,7 +148,7 @@ If ARG is omitted or nil, move to the child of a current node."
   (interactive "p")
   (or arg (setq arg 1))
   (dotimes (el arg)
-    (when-let ((text-prop (get-text-property (point) 'denote-tree--childen))
+    (when-let ((text-prop (get-text-property (point) 'denote-tree--child))
                (cyclicp (get-text-property (point) 'face)))
       (push (point) denote-tree--pos-stack)
       (when (eq cyclicp 'denote-tree-circular-node-face)
@@ -266,22 +266,22 @@ Return location of a point where the node starts and the current indent."
             "\n")
     (cons point-star-loc indent)))
 
-(defun denote-tree--propertize-node (position buffer parent links-in-buffer)
-  "Add properties for BUFFER PARENT LINKS-IN-BUFFER at POSITION.
+(defun denote-tree--propertize-node (position buffer parent first-born)
+  "Add properties for BUFFER PARENT FIRST-BORN at POSITION.
 
 Create a map of local neighbors for the POSITION, so the movement commands
 \"know\" where to move next.  Properties to be set are:
 
-- `denote-tree--children',
+- `denote-tree--child',
 - `denote-tree--parent'
 - `denote-tree--me'."
   (set-text-properties position
                        (+ position (length denote-tree-node))
                        (append (text-properties-at position)
                                (list 'fontified t
-                                     'denote-tree--childen links-in-buffer
-                                     'denote-tree--parent  parent
-                                     'denote-tree--me      buffer))))
+                                     'denote-tree--child  first-born
+                                     'denote-tree--parent parent
+                                     'denote-tree--me     buffer))))
 
 
 
