@@ -150,7 +150,6 @@ If ARG is omitted or nil, move to the child of a current node."
   (dotimes (el arg)
     (when-let ((text-prop (get-text-property (point) 'denote-tree--child))
                (cyclicp (get-text-property (point) 'face)))
-      (push (point) denote-tree--pos-stack)
       (when (eq cyclicp 'denote-tree-circular-node-face)
         (goto-char (point-min)))
       (goto-char
@@ -163,7 +162,7 @@ If ARG is omitted or nil, move to the parent of a current node."
   (interactive "p")
   (or arg (setq arg 1))
   (dotimes (el arg)
-    (goto-char (pop denote-tree--pos-stack))))
+    (goto-char (get-text-property (point) 'denote-tree--parent))))
 
 (defun denote-tree-next-node (&optional arg)
   "Move the point to the next child node ARG times.
