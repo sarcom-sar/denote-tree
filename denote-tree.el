@@ -92,9 +92,6 @@ Returns propertied string STR.")
 (defvar denote-tree--cyclic-buffers '()
   "List of buffers that are cyclic nodes.")
 
-(defvar-local denote-tree--pos-stack '()
-  "Stack of point position in parent nodes.")
-
 
 ;; Mode and interactive functions
 
