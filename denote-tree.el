@@ -155,7 +155,7 @@ If ARG is omitted or nil, move to the child of a current node."
         (goto-char (point-min)))
       (goto-char
        (prop-match-beginning
-        (text-property-search-forward 'denote-tree--me (car text-prop) t t))))))
+        (text-property-search-forward 'denote-tree--me text-prop t t))))))
 
 (defun denote-tree-parent-node (&optional arg)
   "Move the point to the parent node of a current node ARG times.
@@ -201,8 +201,7 @@ over it."
     (with-current-buffer denote-tree-buffer-name
       (setq pos-and-indent (denote-tree--draw-node buffer indent last-child-p))
       (setq pos (car pos-and-indent))
-      (setq indent (cdr pos-and-indent))
-      (denote-tree--propertize-node pos buffer parent links-in-buffer))
+      (setq indent (cdr pos-and-indent)))
     (unless (or (member buffer denote-tree--cyclic-buffers)
                 (null links-in-buffer))
       (with-current-buffer buffer
@@ -215,6 +214,7 @@ over it."
                 (append node-children
                         (denote-tree--walk-links el buffer indent lastp))))))
     (with-current-buffer denote-tree-buffer-name
+      (denote-tree--propertize-node pos buffer parent (car links-in-buffer))
       (denote-tree--add-node-props node-children))
     (list pos)))
 
