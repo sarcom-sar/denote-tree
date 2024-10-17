@@ -218,7 +218,7 @@ properties.  Colelct all the links and call `denote-tree--walk-links' on
 them recursively.  If one of the buffers was already visited do not iterate
 over it."
   (let ((links-in-buffer (denote-tree--collect-links buffer))
-        pos-and-indent pos lastp)
+        pos-and-indent pos lastp node-children)
     (with-current-buffer denote-tree-buffer-name
       (setq pos-and-indent (denote-tree--draw-node buffer indent last-child-p))
       (setq pos (car pos-and-indent))
@@ -232,7 +232,30 @@ over it."
           (when (get-buffer el)
             (add-to-list 'denote-tree--cyclic-buffers el))
           (setq lastp (eq el (car (last links-in-buffer))))
-          (denote-tree--walk-links el buffer indent lastp))))))
+          (setq node-children
+                (append node-children
+                        (denote-tree--walk-links el buffer indent lastp))))))
+    (with-current-buffer denote-tree-buffer-name
+      (denote-tree--add-node-props node-children))
+    (list pos)))
+
+(defun denote-tree--add-node-props (node-children)
+  "Iterate over NODE-CHILDREN to set node's props.
+
+Every node contains props denote-tree--next and denote-tree--prev,
+which contain point position to go to to get to previous or next
+sibling node.  This function sets that positions."
+  (let ((prev (car (last node-children)))
+        (tail node-children))
+    (dolist (el node-children)
+      (setq tail (cdr tail))
+      ;; if tail is null, then we are at last element,
+      ;; fetch start of child nodes
+      (let ((next (if (null (car tail)) (car node-children) (car tail))))
+        (add-text-properties el (+ el (length denote-tree-node))
+                             (list 'denote-tree--next next
+                                   'denote-tree--prev prev)))
+      (setq prev el))))
 
 (defun denote-tree--draw-node (node-name indent last-child-p)
   "Draw NODE-NAME according to INDENT in current buffer.
