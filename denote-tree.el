@@ -214,7 +214,7 @@ If ARG is omitted or nil, move to the previous child node."
   "Walk along the links starting from BUFFER.
 
 Draw the current buffer as a node in `denote-tree-buffer-name'.  Set it's
-properties.  Colelct all the links and call `denote-tree--walk-links' on
+properties. Collect all the links and call `denote-tree--walk-links' on
 them recursively.  If one of the buffers was already visited do not iterate
 over it."
   (let ((links-in-buffer (denote-tree--collect-links buffer))
