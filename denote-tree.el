@@ -214,8 +214,8 @@ over it."
                 (append node-children
                         (denote-tree--walk-links el buffer indent lastp))))))
     (with-current-buffer denote-tree-buffer-name
-      (denote-tree--propertize-node pos buffer parent (car links-in-buffer))
-      (denote-tree--add-props-to-children node-children))
+      (denote-tree--propertize-node pos buffer (car links-in-buffer))
+      (denote-tree--add-props-to-children node-children pos))
     (list pos)))
 
 (defun denote-tree--draw-node (node-name indent last-child-p)
@@ -248,29 +248,28 @@ Return location of a point where the node starts and the current indent."
             "\n")
     (cons point-star-loc indent)))
 
-(defun denote-tree--propertize-node (position buffer parent first-born)
-  "Add properties for BUFFER PARENT FIRST-BORN at POSITION.
+(defun denote-tree--propertize-node (position buffer first-born)
+  "Add properties for BUFFER FIRST-BORN at POSITION.
 
 Create a map of local neighbors for the POSITION, so the movement commands
 \"know\" where to move next.  Properties to be set are:
 
 - `denote-tree--child',
-- `denote-tree--parent'
 - `denote-tree--me'."
   (set-text-properties position
                        (+ position (length denote-tree-node))
                        (append (text-properties-at position)
                                (list 'fontified t
                                      'denote-tree--child  first-born
-                                     'denote-tree--parent parent
                                      'denote-tree--me     buffer))))
 
-(defun denote-tree--add-props-to-children (node-children)
-  "Iterate over NODE-CHILDREN to set node's props.
+(defun denote-tree--add-props-to-children (node-children parent)
+  "Iterate over NODE-CHILDREN to set node's props. Keep node's PARENT.
 
-Every node contains props denote-tree--next and denote-tree--prev,
-which contain point position to go to to get to previous or next
-sibling node.  This function sets that positions."
+Every node contains props denote-tree--next, denote-tree--prev and
+denote-tree--parent which contain point's position to go to get to
+previous/next sibling node or a parent.  This function sets those
+positions."
   (let ((prev (car (last node-children)))
         (tail node-children))
     (dolist (el node-children)
@@ -280,7 +279,8 @@ sibling node.  This function sets that positions."
       (let ((next (if (null (car tail)) (car node-children) (car tail))))
         (add-text-properties el (+ el (length denote-tree-node))
                              (list 'denote-tree--next next
-                                   'denote-tree--prev prev)))
+                                   'denote-tree--prev prev
+                                   'denote-tree--parent parent)))
       (setq prev el))))
 
 
