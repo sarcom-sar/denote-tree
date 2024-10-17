@@ -215,10 +215,10 @@ over it."
                         (denote-tree--walk-links el buffer indent lastp))))))
     (with-current-buffer denote-tree-buffer-name
       (denote-tree--propertize-node pos buffer parent (car links-in-buffer))
-      (denote-tree--add-node-props node-children))
+      (denote-tree--add-props-to-children node-children))
     (list pos)))
 
-(defun denote-tree--add-node-props (node-children)
+(defun denote-tree--add-props-to-children (node-children)
   "Iterate over NODE-CHILDREN to set node's props.
 
 Every node contains props denote-tree--next and denote-tree--prev,
