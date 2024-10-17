@@ -198,7 +198,8 @@ If ARG is omitted or nil, move to the next child node."
 If ARG is omitted or nil, move to the previous child node."
   (interactive "p")
   (or arg (setq arg 1))
-  (denote-tree-next-node (- arg)))
+  (dotimes (el arg)
+    (goto-char (get-text-property (point) 'denote-tree--prev))))
 
 
 ;; Tree traversal
