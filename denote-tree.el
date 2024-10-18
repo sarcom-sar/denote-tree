@@ -333,7 +333,7 @@ Return nil if none is found."
   element)
 
 
-;; Helper functions and one closure
+;; Helper functions and macro closure
 
 (defun denote-tree--clean-up ()
   "Clean up buffers created during the tree walk."
@@ -346,6 +346,17 @@ Return nil if none is found."
 (defun denote-tree--default-props (str)
   "Default function returning STR with properties."
   (propertize str))
+
+(defmacro denote-tree--movement-generator (prop)
+  "Generate defuns that move the point to PROP."
+  (declare (indent 1))
+  `(defun ,(intern (format "denote-tree-%s-node" prop)) (&optional arg)
+     ,(concat "Move the point to the " (symbol-name prop) " node of a current node ARG times.
+If ARG is omitted or nil, move to the " (symbol-name prop) " of a current node.")
+     (interactive "p")
+     (or arg (setq arg 1))
+     (dotimes (el arg)
+       (goto-char (get-text-property (point) ',(intern (format "denote-tree--%s" prop)))))))
 
 (provide 'denote-tree)
 ;;; denote-tree.el ends here
