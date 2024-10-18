@@ -139,37 +139,10 @@ or a BUFFER provided by the user."
    (denote-get-path-by-id
     (get-text-property (point) 'denote-tree--me))))
 
-(defun denote-tree-child-node (&optional arg)
-  "Move the point to the child node of a current node ARG times.
-If ARG is omitted or nil, move to the child of a current node."
-  (interactive "p")
-  (or arg (setq arg 1))
-  (dotimes (el arg)
-    (goto-char (get-text-property (point) 'denote-tree--child))))
-
-(defun denote-tree-parent-node (&optional arg)
-  "Move the point to the parent node of a current node ARG times.
-If ARG is omitted or nil, move to the parent of a current node."
-  (interactive "p")
-  (or arg (setq arg 1))
-  (dotimes (el arg)
-    (goto-char (get-text-property (point) 'denote-tree--parent))))
-
-(defun denote-tree-next-node (&optional arg)
-  "Move the point to the next child node ARG times.
-If ARG is omitted or nil, move to the next child node."
-  (interactive "p")
-  (or arg (setq arg 1))
-  (dotimes (el arg)
-    (goto-char (get-text-property (point) 'denote-tree--next))))
-
-(defun denote-tree-prev-node (&optional arg)
-  "Move the point to the previous child node ARG times.
-If ARG is omitted or nil, move to the previous child node."
-  (interactive "p")
-  (or arg (setq arg 1))
-  (dotimes (el arg)
-    (goto-char (get-text-property (point) 'denote-tree--prev))))
+(denote-tree--movement-generator child)
+(denote-tree--movement-generator parent)
+(denote-tree--movement-generator next)
+(denote-tree--movement-generator prev)
 
 
 ;; Tree traversal
