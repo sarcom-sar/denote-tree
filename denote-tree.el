@@ -247,8 +247,11 @@ denote-tree--parent which contain point's position to go to get to
 previous/next sibling node or a parent.  This function sets those
 positions."
   (when node-children
-    (add-text-properties parent (+ parent (length denote-tree-node))
-                         (list 'denote-tree--child (car node-children))))
+    (save-excursion
+      (goto-char parent)
+      (add-text-properties (pos-bol)
+                           (pos-eol)
+                           (list 'denote-tree--child (car node-children)))))
   (let ((prev (car (last node-children)))
         (tail node-children))
     (dolist (el node-children)
@@ -256,10 +259,13 @@ positions."
       ;; if tail is null, then we are at last element,
       ;; fetch start of child nodes
       (let ((next (if (null (car tail)) (car node-children) (car tail))))
-        (add-text-properties el (+ el (length denote-tree-node))
-                             (list 'denote-tree--next next
-                                   'denote-tree--prev prev
-                                   'denote-tree--parent parent)))
+        (save-excursion
+          (goto-char el)
+          (add-text-properties (pos-bol)
+                               (pos-eol)
+                               (list 'denote-tree--next next
+                                     'denote-tree--prev prev
+                                     'denote-tree--parent parent))))
       (setq prev el))))
 
 
