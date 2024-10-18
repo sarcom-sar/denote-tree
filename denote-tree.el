@@ -92,9 +92,6 @@ Returns propertied string STR.")
 (defvar denote-tree--cyclic-buffers '()
   "List of buffers that are cyclic nodes.")
 
-(defvar-local denote-tree--current-point-pos nil
-  "Current position the point is at.")
-
 (defvar-local denote-tree-mark nil
   "Mark in the buffer.")
 
@@ -135,9 +132,7 @@ or a BUFFER provided by the user."
         (with-current-buffer-window denote-tree-buffer-name nil nil
           (let ((inhibit-read-only t))
             (denote-tree-mode)
-            (denote-tree--draw-tree buffer))
-          (setq denote-tree--current-point-pos
-                (1+ (length denote-tree-lower-knee))))
+            (denote-tree--draw-tree buffer)))
         (set-window-point (get-buffer-window denote-tree-buffer-name)
                           (goto-char (1+ (length denote-tree-lower-knee)))))
     (denote-tree--clean-up)))
@@ -352,11 +347,10 @@ If ARG is omitted or nil, move to the " (symbol-name prop) " of a current node."
      (or arg (setq arg 1))
      (dotimes (el arg)
        (when-let ((next-point
-                   (get-text-property denote-tree--current-point-pos
+                   (get-text-property (point)
                                       ',(intern (format "denote-tree--%s"
                                                         prop)))))
-         (goto-char next-point)
-         (setq denote-tree--current-point-pos next-point)))))
+         (goto-char next-point)))))
 
 (provide 'denote-tree)
 ;;; denote-tree.el ends here
