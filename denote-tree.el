@@ -92,9 +92,6 @@ Returns propertied string STR.")
 (defvar denote-tree--cyclic-buffers '()
   "List of buffers that are cyclic nodes.")
 
-(defvar-local denote-tree-mark nil
-  "Mark in the buffer.")
-
 
 ;; Mode and interactive functions
 
@@ -105,8 +102,6 @@ Returns propertied string STR.")
   "p" #'denote-tree-prev-node
   "f" #'denote-tree-child-node
   "b" #'denote-tree-parent-node
-  "m" #'denote-tree-mark-node
-  "j" #'denote-tree-jump-to-node
   "RET" #'denote-tree-enter-node)
 
 (define-derived-mode denote-tree-mode special-mode "denote-tree"
@@ -143,18 +138,6 @@ or a BUFFER provided by the user."
   (find-file-other-window
    (denote-get-path-by-id
     (get-text-property (point) 'denote-tree--me))))
-
-(defun denote-tree-mark-node ()
-  "Set the mark, that respects denote-tree internals."
-  (interactive)
-  (setq denote-tree-mark denote-tree--current-point-pos))
-
-(defun denote-tree-jump-to-node ()
-  "Jump to the mark you've set.
-Updates last position to position of the mark."
-  (interactive)
-  (goto-char denote-tree-mark)
-  (setq denote-tree--current-point-pos denote-tree-mark))
 
 (denote-tree--movement-generator child)
 (denote-tree--movement-generator parent)
