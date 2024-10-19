@@ -139,6 +139,21 @@ or a BUFFER provided by the user."
    (denote-get-path-by-id
     (get-text-property (point) 'denote-tree--me))))
 
+(defmacro denote-tree--movement-generator (prop)
+  "Generate defuns that move the point to PROP."
+  (declare (indent 1))
+  `(defun ,(intern (format "denote-tree-%s-node" prop)) (&optional arg)
+     ,(concat "Move the point to the " (symbol-name prop) " node of a current node ARG times.
+If ARG is omitted or nil, move to the " (symbol-name prop) " of a current node.")
+     (interactive "p")
+     (or arg (setq arg 1))
+     (dotimes (el arg)
+       (when-let ((next-point
+                   (get-text-property (point)
+                                      ',(intern (format "denote-tree--%s"
+                                                        prop)))))
+         (goto-char next-point)))))
+
 (denote-tree--movement-generator child)
 (denote-tree--movement-generator parent)
 (denote-tree--movement-generator next)
@@ -345,21 +360,6 @@ Return nil if none is found."
 (defun denote-tree--default-props (str)
   "Default function returning STR with properties."
   (propertize str))
-
-(defmacro denote-tree--movement-generator (prop)
-  "Generate defuns that move the point to PROP."
-  (declare (indent 1))
-  `(defun ,(intern (format "denote-tree-%s-node" prop)) (&optional arg)
-     ,(concat "Move the point to the " (symbol-name prop) " node of a current node ARG times.
-If ARG is omitted or nil, move to the " (symbol-name prop) " of a current node.")
-     (interactive "p")
-     (or arg (setq arg 1))
-     (dotimes (el arg)
-       (when-let ((next-point
-                   (get-text-property (point)
-                                      ',(intern (format "denote-tree--%s"
-                                                        prop)))))
-         (goto-char next-point)))))
 
 (provide 'denote-tree)
 ;;; denote-tree.el ends here
