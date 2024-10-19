@@ -166,9 +166,9 @@ over it."
   (let* ((links-in-buffer (denote-tree--collect-links buffer))
          (pos-and-indent (denote-tree--draw-node buffer indent lastp))
          (pos (car pos-and-indent))
-         (indent (cdr pos-and-indent))
          (cyclical-node (assoc buffer denote-tree--cyclic-buffers #'string=))
          node-children)
+    (setq indent (cdr pos-and-indent))
     ;; traverse the buffer structure
     ;; if current buffer is in denote-tree--cyclic-buffers
     ;; do not go deeper, because you enter a cycle
