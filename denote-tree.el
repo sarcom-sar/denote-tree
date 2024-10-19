@@ -188,9 +188,8 @@ over it."
               (append node-children
                       (denote-tree--walk-links el buffer indent lastp))))))
     ;; add props to children of a buffer
-    (with-current-buffer denote-tree-buffer-name
-      (denote-tree--propertize-node pos buffer)
-      (denote-tree--add-props-to-children node-children pos))
+    (denote-tree--propertize-node pos buffer)
+    (denote-tree--add-props-to-children node-children pos)
     (list pos)))
 
 (defun denote-tree--add-props-to-cycles ()
