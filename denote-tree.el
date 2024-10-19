@@ -201,8 +201,7 @@ over it."
           (goto-char le)
           (add-text-properties (pos-bol)
                                (pos-eol)
-                               (list 'denote-tree--child child-prop
-                                     'denote-tree--me    (car el))))))))
+                               (list 'denote-tree--child child-prop)))))))
 
 (defun denote-tree--draw-node (node-name indent last-child-p)
   "Draw NODE-NAME according to INDENT in current buffer.
