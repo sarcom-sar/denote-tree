@@ -153,7 +153,7 @@ or a BUFFER provided by the user."
   (denote-tree--walk-links buffer nil "" t)
   (denote-tree--add-props-to-cycles))
 
-(defun denote-tree--walk-links (buffer parent indent last-child-p)
+(defun denote-tree--walk-links (buffer parent indent lastp)
   "Walk along the links starting from BUFFER.
 
 Draw the current buffer as a node in `denote-tree-buffer-name'.  Set it's
@@ -164,7 +164,7 @@ over it."
   ;; extract position of point at node
   ;; carry over the indent
   (let* ((links-in-buffer (denote-tree--collect-links buffer))
-         (pos-and-indent (denote-tree--draw-node buffer indent last-child-p))
+         (pos-and-indent (denote-tree--draw-node buffer indent lastp))
          (pos (car pos-and-indent))
          (indent (cdr pos-and-indent))
          (cyclical-node (assoc buffer denote-tree--cyclic-buffers #'string=))
