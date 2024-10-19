@@ -178,17 +178,16 @@ over it."
               (append (cdr (assoc buffer denote-tree--cyclic-buffers))
                       (list pos))))
      (t
-      (with-current-buffer buffer
-        (dolist (el links-in-buffer)
-          (when (get-buffer el)
-            (add-to-list 'denote-tree--cyclic-buffers
-                         (list el)
-                         nil
-                         (lambda (a b) (string= (car a) (car b)))))
-          (setq lastp (eq el (car (last links-in-buffer))))
-          (setq node-children
-                (append node-children
-                        (denote-tree--walk-links el buffer indent lastp)))))))
+      (dolist (el links-in-buffer)
+        (when (get-buffer el)
+          (add-to-list 'denote-tree--cyclic-buffers
+                       (list el)
+                       nil
+                       (lambda (a b) (string= (car a) (car b)))))
+        (setq lastp (eq el (car (last links-in-buffer))))
+        (setq node-children
+              (append node-children
+                      (denote-tree--walk-links el buffer indent lastp))))))
     ;; add props to children of a buffer
     (with-current-buffer denote-tree-buffer-name
       (denote-tree--propertize-node pos buffer)
