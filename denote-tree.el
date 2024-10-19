@@ -191,17 +191,16 @@ over it."
     pos))
 
 (defun denote-tree--add-props-to-cycles ()
-  (with-current-buffer denote-tree-buffer-name
-    (let (child-prop)
-      (dolist (el denote-tree--cyclic-buffers)
-        (goto-char (point-min))
-        (text-property-search-forward 'denote-tree--me (car el))
-        (setq child-prop (get-text-property (point) 'denote-tree--child))
-        (dolist (le (cdr el))
-          (goto-char le)
-          (add-text-properties (pos-bol)
-                               (pos-eol)
-                               (list 'denote-tree--child child-prop)))))))
+  (let (child-prop)
+    (dolist (el denote-tree--cyclic-buffers)
+      (goto-char (point-min))
+      (text-property-search-forward 'denote-tree--me (car el))
+      (setq child-prop (get-text-property (point) 'denote-tree--child))
+      (dolist (le (cdr el))
+        (goto-char le)
+        (add-text-properties (pos-bol)
+                             (pos-eol)
+                             (list 'denote-tree--child child-prop))))))
 
 (defun denote-tree--draw-node (node-name indent last-child-p)
   "Draw NODE-NAME according to INDENT in current buffer.
