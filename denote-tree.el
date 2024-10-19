@@ -347,7 +347,6 @@ Return nil if none is found."
   (dolist (el denote-tree--visited-buffers)
     (kill-buffer el))
   (setq denote-tree--visited-buffers nil)
-  (setq denote-tree--cyclic-trees nil)
   (setq denote-tree--cyclic-buffers nil))
 
 (defun denote-tree--default-props (str)
