@@ -150,7 +150,8 @@ or a BUFFER provided by the user."
 
 (defun denote-tree--draw-tree (buffer)
   "Draw a tree in current buffer starting with BUFFER."
-  (denote-tree--walk-links buffer nil "" t))
+  (denote-tree--walk-links buffer nil "" t)
+  (denote-tree--add-props-to-cycles))
 
 (defun denote-tree--walk-links (buffer parent indent last-child-p)
   "Walk along the links starting from BUFFER.
@@ -193,6 +194,20 @@ over it."
       (denote-tree--propertize-node pos buffer)
       (denote-tree--add-props-to-children node-children pos))
     (list pos)))
+
+(defun denote-tree--add-props-to-cycles ()
+  (with-current-buffer denote-tree-buffer-name
+    (let (child-prop)
+      (dolist (el denote-tree--cyclic-buffers)
+        (goto-char (point-min))
+        (text-property-search-forward 'denote-tree--me (car el))
+        (setq child-prop (get-text-property (point) 'denote-tree--child))
+        (dolist (le (cdr el))
+          (goto-char le)
+          (add-text-properties (pos-bol)
+                               (pos-eol)
+                               (list 'denote-tree--child child-prop
+                                     'denote-tree--me    (car el))))))))
 
 (defun denote-tree--draw-node (node-name indent last-child-p)
   "Draw NODE-NAME according to INDENT in current buffer.
