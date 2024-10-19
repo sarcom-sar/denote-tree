@@ -183,13 +183,12 @@ over it."
                        nil
                        (lambda (a b) (string= (car a) (car b)))))
         (setq lastp (eq el (car (last links-in-buffer))))
-        (setq node-children
-              (append node-children
-                      (denote-tree--walk-links el buffer indent lastp))))))
+        (push (denote-tree--walk-links el buffer indent lastp)
+              node-children))))
     ;; add props to children of a buffer
     (denote-tree--propertize-node pos buffer)
     (denote-tree--add-props-to-children node-children pos)
-    (list pos)))
+    pos))
 
 (defun denote-tree--add-props-to-cycles ()
   (with-current-buffer denote-tree-buffer-name
