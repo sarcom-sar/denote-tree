@@ -160,15 +160,14 @@ Draw the current buffer as a node in `denote-tree-buffer-name'.  Set it's
 properties. Collect all the links and call `denote-tree--walk-links' on
 them recursively.  If one of the buffers was already visited do not iterate
 over it."
-  (let ((links-in-buffer (denote-tree--collect-links buffer))
-        pos-and-indent pos lastp node-children)
-    ;; draw node in buffer,
-    ;; extract position of point at node
-    ;; carry over the indent
-    (with-current-buffer denote-tree-buffer-name
-      (setq pos-and-indent (denote-tree--draw-node buffer indent last-child-p))
-      (setq pos (car pos-and-indent))
-      (setq indent (cdr pos-and-indent)))
+  ;; draw node in buffer,
+  ;; extract position of point at node
+  ;; carry over the indent
+  (let* ((links-in-buffer (denote-tree--collect-links buffer))
+         (pos-and-indent (denote-tree--draw-node buffer indent last-child-p))
+         (pos (car pos-and-indent))
+         (indent (cdr pos-and-indent))
+         node-children)
     ;; traverse the buffer structure
     ;; if current buffer is in denote-tree--cyclic-buffers
     ;; do not go deeper, because you enter a cycle
