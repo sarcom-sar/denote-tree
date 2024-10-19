@@ -161,21 +161,34 @@ them recursively.  If one of the buffers was already visited do not iterate
 over it."
   (let ((links-in-buffer (denote-tree--collect-links buffer))
         pos-and-indent pos lastp node-children)
+    ;; draw node in buffer,
+    ;; extract position of point at node
+    ;; carry over the indent
     (with-current-buffer denote-tree-buffer-name
       (setq pos-and-indent (denote-tree--draw-node buffer indent last-child-p))
       (setq pos (car pos-and-indent))
       (setq indent (cdr pos-and-indent)))
-    (unless (or (member buffer denote-tree--cyclic-buffers)
-                (null links-in-buffer))
+    ;; traverse the buffer structure
+    ;; if current buffer is in denote-tree--cyclic-buffers
+    ;; do not go deeper, because you enter a cycle
+    (cond
+     ((assoc buffer denote-tree--cyclic-buffers #'string=)
+      (setcdr (assoc buffer denote-tree--cyclic-buffers)
+              (append (cdr (assoc buffer denote-tree--cyclic-buffers))
+                      (list pos))))
+     (t
       (with-current-buffer buffer
-        ;; if no links do not iterate
         (dolist (el links-in-buffer)
           (when (get-buffer el)
-            (add-to-list 'denote-tree--cyclic-buffers el))
+            (add-to-list 'denote-tree--cyclic-buffers
+                         (list el)
+                         nil
+                         (lambda (a b) (string= (car a) (car b)))))
           (setq lastp (eq el (car (last links-in-buffer))))
           (setq node-children
                 (append node-children
-                        (denote-tree--walk-links el buffer indent lastp))))))
+                        (denote-tree--walk-links el buffer indent lastp)))))))
+    ;; add props to children of a buffer
     (with-current-buffer denote-tree-buffer-name
       (denote-tree--propertize-node pos buffer)
       (denote-tree--add-props-to-children node-children pos))
@@ -191,7 +204,7 @@ the current denote note.  Face of `denote-tree-node' is either
 Call `denote-tree-title-colorize-function' on title.
 
 Return location of a point where the node starts and the current indent."
-  (let ((circularp (member node-name denote-tree--cyclic-buffers))
+  (let ((circularp (assoc node-name denote-tree--cyclic-buffers))
         point-star-loc)
     (insert indent)
     (cond
