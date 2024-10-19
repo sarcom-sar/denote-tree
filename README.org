@@ -1,7 +1,9 @@
 * denote-tree
 
 denote-tree is a simple utility, that allows you to see and move within tree
-structure of your notes with standard GNU Emacs movement keys.
+structure of your notes with standard GNU Emacs movement keys.  Because of how
+it operates, stuff like setting a mark /just work/ without reimplementing them.
+
 ** Usage
 
 Just clone this very repository and enable the package:
@@ -11,15 +13,16 @@ Just clone this very repository and enable the package:
 #+end_src
 
 The entry point function is ~denote-tree~, which acts on current buffer
-searching for any org-style links within it.
+searching for any links within it.
 
 It is able to handle cyclical nodes and provides a mechanism to move between
 those cyclical nodes (called "teleportations") by default. As a drawback, it is
 pretty stupid and has to redraw entire thing from scratch if anything changes.
 
 User can customize ~denote-tree-node-face~ and ~denote-tree-circular-node-face~
-to make them more visible.  With a bit of hacking it is also feasible to
-implement colored node titles.
+to make them more visible.  User can implement their own node title coloring
+defun with ~denote-tree-title-colorize-function~.
+
 
 *** Keybindings for =*denote-tree*= buffer
 
