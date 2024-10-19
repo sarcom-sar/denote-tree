@@ -167,15 +167,14 @@ over it."
          (pos-and-indent (denote-tree--draw-node buffer indent last-child-p))
          (pos (car pos-and-indent))
          (indent (cdr pos-and-indent))
+         (cyclical-node (assoc buffer denote-tree--cyclic-buffers #'string=))
          node-children)
     ;; traverse the buffer structure
     ;; if current buffer is in denote-tree--cyclic-buffers
     ;; do not go deeper, because you enter a cycle
     (cond
-     ((assoc buffer denote-tree--cyclic-buffers #'string=)
-      (setcdr (assoc buffer denote-tree--cyclic-buffers)
-              (append (cdr (assoc buffer denote-tree--cyclic-buffers))
-                      (list pos))))
+     (cyclical-node
+      (setcdr cyclical-node (append (cdr cyclical-node) (list pos))))
      (t
       (dolist (el links-in-buffer)
         (when (get-buffer el)
