@@ -90,7 +90,11 @@ Returns propertied string STR.")
   "List of already created buffers.  Used for clean up.")
 
 (defvar denote-tree--cyclic-buffers '()
-  "List of buffers that are cyclic nodes.")
+  "List of buffers that are cyclic nodes.
+
+`car' of the element of `denote-tree--cyclic-buffers' is denote ID
+that appears cyclically over the buffer.  `cdr' of that variable is
+set to the list of positions at which that denote ID is present.")
 
 
 ;; Mode and interactive functions
