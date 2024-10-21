@@ -202,7 +202,7 @@ over it."
               node-children))))
     ;; add props to children of a buffer
     (denote-tree--propertize-node pos buffer)
-    (denote-tree--add-props-to-children node-children pos)
+    (denote-tree--add-props-to-children (nreverse node-children) pos)
     pos))
 
 (defun denote-tree--add-props-to-cycles ()
