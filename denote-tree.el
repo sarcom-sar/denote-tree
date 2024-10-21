@@ -216,7 +216,7 @@ over it."
     pos))
 
 (defun denote-tree--add-props-to-cycles ()
-  ""
+  "Add props to elements of `denote-tree--cyclic-buffers'."
   (let (child-prop)
     (dolist (el denote-tree--cyclic-buffers)
       (goto-char (point-min))
@@ -259,7 +259,7 @@ Return location of a point where the node starts and the current indent."
     (cons point-star-loc indent)))
 
 (defun denote-tree--set-button (position buffer)
-  "Add button to enter BUFFER at POSITION."
+  "Add button to visit BUFFER at POSITION."
   (make-text-button position
                     (+ position (length denote-tree-node))
                     'action #'denote-tree-enter-node
@@ -270,8 +270,7 @@ Return location of a point where the node starts and the current indent."
 
 Every node contains props denote-tree--next, denote-tree--prev and
 denote-tree--parent which contain point's position to go to get to
-previous/next sibling node or a parent.  This function sets those
-positions."
+previous/next sibling node or a parent."
   (when node-children
     (save-excursion
       (goto-char parent)
