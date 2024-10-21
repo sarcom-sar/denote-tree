@@ -221,7 +221,7 @@ over it."
                              (pos-eol)
                              (list 'denote-tree--child child-prop))))))
 
-(defun denote-tree--draw-node (node-name indent last-child-p)
+(defun denote-tree--draw-node (node-name indent lastp)
   "Draw NODE-NAME according to INDENT in current buffer.
 
 Insert the current line as follows INDENT `denote-tree-node' title of
@@ -235,7 +235,7 @@ Return location of a point where the node starts and the current indent."
         point-star-loc)
     (insert indent)
     (cond
-     (last-child-p
+     (lastp
       (setq indent (concat indent denote-tree-space))
       (insert denote-tree-lower-knee))
      (t
