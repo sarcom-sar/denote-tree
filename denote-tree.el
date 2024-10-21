@@ -5,7 +5,7 @@
 ;; Version: 0.5.0
 ;; Keywords: convenience
 ;; URL: http://github.com/sarcom-sar/denote-tree.el
-;; Package-Requires: ((emacs "27.2") (compat "29.1"))
+;; Package-Requires: ((emacs "25.1"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -99,13 +99,14 @@ set to the list of positions at which that denote ID is present.")
 
 ;; Mode and interactive functions
 
-(defvar-keymap denote-tree-mode-map
-  :parent special-mode-map
-  :doc "Keymap for denote-tree-mode."
-  "n" #'denote-tree-next-node
-  "p" #'denote-tree-prev-node
-  "f" #'denote-tree-child-node
-  "b" #'denote-tree-parent-node)
+(defvar denote-tree-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map "n" #'denote-tree-next-node)
+    (define-key map "p" #'denote-tree-prev-node)
+    (define-key map "f" #'denote-tree-child-node)
+    (define-key map "b" #'denote-tree-parent-node )
+    map)
+  "Keymap for denote-tree-mode.")
 
 (define-derived-mode denote-tree-mode special-mode "denote-tree"
   "Visualize your denote notes as a tree.
@@ -217,8 +218,8 @@ over it."
       (setq child-prop (get-text-property (point) 'denote-tree--child))
       (dolist (le (cdr el))
         (goto-char le)
-        (add-text-properties (pos-bol)
-                             (pos-eol)
+        (add-text-properties (line-beginning-position)
+                             (line-end-position)
                              (list 'denote-tree--child child-prop))))))
 
 (defun denote-tree--draw-node (node-name indent lastp)
@@ -268,8 +269,8 @@ positions."
   (when node-children
     (save-excursion
       (goto-char parent)
-      (add-text-properties (pos-bol)
-                           (pos-eol)
+      (add-text-properties (line-beginning-position)
+                           (line-end-position)
                            (list 'denote-tree--child (car node-children)))))
   (let ((prev (car (last node-children)))
         (tail node-children))
@@ -280,8 +281,8 @@ positions."
       (let ((next (if (null (car tail)) (car node-children) (car tail))))
         (save-excursion
           (goto-char el)
-          (add-text-properties (pos-bol)
-                               (pos-eol)
+          (add-text-properties (line-beginning-position)
+                               (line-end-position)
                                (list 'denote-tree--next next
                                      'denote-tree--prev prev
                                      'denote-tree--parent parent))))
