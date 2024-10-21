@@ -87,7 +87,7 @@ Returns propertied string STR.")
 (defconst denote-tree-node "* ")
 
 (defvar denote-tree--visited-buffers '()
-  "List of already created buffers.")
+  "List of already created buffers.  Used for clean up.")
 
 (defvar denote-tree--cyclic-buffers '()
   "List of buffers that are cyclic nodes.")
@@ -335,12 +335,11 @@ Return nil if none is found."
 
 (defun denote-tree--open-link-maybe (element)
   "Return ELEMENT buffer, create if necessary."
-  (unless (member element denote-tree--visited-buffers)
-    (add-to-list 'denote-tree--visited-buffers element)
-    (get-buffer-create element)
-    (with-current-buffer element
-      (erase-buffer)
-      (insert-file-contents (denote-get-path-by-id element))))
+    (unless (get-buffer element)
+      (add-to-list 'denote-tree--visited-buffers element)
+      (with-current-buffer (get-buffer-create element)
+        (erase-buffer)
+        (insert-file-contents (denote-get-path-by-id element))))
   element)
 
 
