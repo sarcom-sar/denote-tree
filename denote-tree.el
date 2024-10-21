@@ -101,8 +101,7 @@ Returns propertied string STR.")
   "n" #'denote-tree-next-node
   "p" #'denote-tree-prev-node
   "f" #'denote-tree-child-node
-  "b" #'denote-tree-parent-node
-  "RET" #'denote-tree-enter-node)
+  "b" #'denote-tree-parent-node)
 
 (define-derived-mode denote-tree-mode special-mode "denote-tree"
   "Visualize your denote notes as a tree.
@@ -132,12 +131,12 @@ or a BUFFER provided by the user."
                           (goto-char (1+ (length denote-tree-lower-knee)))))
     (denote-tree--clean-up)))
 
-(defun denote-tree-enter-node ()
+(defun denote-tree-enter-node (&optional button)
   "Enter node at point in other window."
   (interactive)
-  (find-file-other-window
-   (denote-get-path-by-id
-    (get-text-property (point) 'denote-tree--me))))
+  (when button
+    (find-file-other-window
+     (denote-get-path-by-id button))))
 
 (defmacro denote-tree--movement-generator (prop)
   "Generate defuns that move the point to PROP."
