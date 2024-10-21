@@ -200,16 +200,17 @@ over it."
         (setq lastp (eq el (car (last links-in-buffer))))
         (push (denote-tree--walk-links el buffer indent lastp)
               node-children))))
-    ;; add props to children of a buffer
-    (denote-tree--propertize-node pos buffer)
+    ;; add props to current node and it's children
+    (denote-tree--set-button pos buffer)
     (denote-tree--add-props-to-children (nreverse node-children) pos)
     pos))
 
 (defun denote-tree--add-props-to-cycles ()
+  ""
   (let (child-prop)
     (dolist (el denote-tree--cyclic-buffers)
       (goto-char (point-min))
-      (text-property-search-forward 'denote-tree--me (car el))
+      (text-property-search-forward 'button-data (car el))
       (setq child-prop (get-text-property (point) 'denote-tree--child))
       (dolist (le (cdr el))
         (goto-char le)
@@ -247,16 +248,12 @@ Return location of a point where the node starts and the current indent."
             "\n")
     (cons point-star-loc indent)))
 
-(defun denote-tree--propertize-node (position buffer)
-  "Add properties for BUFFER at POSITION.
-
-Create a map of local neighbors for the POSITION, so the movement commands
-\"know\" where to move next.  Properties to be set is `denote-tree--me'."
-  (set-text-properties position
-                       (+ position (length denote-tree-node))
-                       (append (text-properties-at position)
-                               (list 'fontified t
-                                     'denote-tree--me buffer))))
+(defun denote-tree--set-button (position buffer)
+  "Add button to enter BUFFER at POSITION."
+  (make-text-button position
+                    (+ position (length denote-tree-node))
+                    'action #'denote-tree-enter-node
+                    'button-data buffer))
 
 (defun denote-tree--add-props-to-children (node-children parent)
   "Iterate over NODE-CHILDREN to set node's props. Keep node's PARENT.
