@@ -77,6 +77,10 @@
   "Function accepting one argument STR.
 Returns propertied string STR.")
 
+(defcustom denote-tree-max-traversal-depth t
+  "Maximum traversal depth of denote-tree.
+If t traverse all the way, if num, traverse n nodes deep.")
+
 
 ;; Vars and consts
 
@@ -169,10 +173,10 @@ If ARG is omitted or nil, move to the " (symbol-name prop) " of a current node."
 
 (defun denote-tree--draw-tree (buffer)
   "Draw a tree in current buffer starting with BUFFER."
-  (denote-tree--walk-links buffer nil "" t)
+  (denote-tree--walk-links buffer nil "" t denote-tree-max-traversal-depth)
   (denote-tree--add-props-to-cycles))
 
-(defun denote-tree--walk-links (buffer parent indent lastp)
+(defun denote-tree--walk-links (buffer parent indent lastp depth)
   "Walk along the links starting from BUFFER.
 
 Draw the current buffer as a node in `denote-tree-buffer-name'.  Set it's
@@ -186,6 +190,7 @@ over it."
          (pos-and-indent (denote-tree--draw-node buffer indent lastp))
          (pos (car pos-and-indent))
          (cyclical-node (assoc buffer denote-tree--cyclic-buffers #'string=))
+         (depth (if (symbolp depth) depth (if (= (1- depth) 0) nil (1- depth))))
          node-children)
     (setq indent (cdr pos-and-indent))
     ;; traverse the buffer structure
@@ -201,9 +206,10 @@ over it."
                        (list el)
                        nil
                        (lambda (a b) (string= (car a) (car b)))))
-        (setq lastp (eq el (car (last links-in-buffer))))
-        (push (denote-tree--walk-links el buffer indent lastp)
-              node-children))))
+        (when depth
+          (setq lastp (eq el (car (last links-in-buffer))))
+          (push (denote-tree--walk-links el buffer indent lastp depth)
+                node-children)))))
     ;; add props to current node and it's children
     (denote-tree--set-button pos buffer)
     (denote-tree--add-props-to-children (nreverse node-children) pos)
