@@ -132,8 +132,8 @@ or a BUFFER provided by the user."
     (kill-buffer denote-tree-buffer-name))
   (unwind-protect
       (progn
-        (or buffer (setq buffer (denote-tree--collect-keyword (current-buffer)
-                                                              "identifier")))
+        (or buffer (setq buffer (denote-tree--collect-keywords (current-buffer)
+                                                              '(identifier))))
         (denote-tree--open-link-maybe buffer)
         (with-current-buffer-window denote-tree-buffer-name nil nil
           (let ((inhibit-read-only t))
@@ -242,6 +242,7 @@ Call `denote-tree-title-colorize-function' on title.
 
 Return location of a point where the node starts and the current indent."
   (let ((circularp (assoc node-name denote-tree--cyclic-buffers))
+        (keywords denote-tree-include-from-front-matter)
         point-star-loc)
     (insert indent)
     (cond
@@ -257,7 +258,7 @@ Return location of a point where the node starts and the current indent."
                                   'denote-tree-circular-node-face
                                 'denote-tree-node-face))
             (funcall denote-tree-title-colorize-function
-                     (denote-tree--collect-keyword node-name "title"))
+                     (denote-tree--collect-keywords node-name keywords))
             "\n")
     (cons point-star-loc indent)))
 
@@ -313,27 +314,32 @@ previous/next sibling node or a parent."
       ;; first element is /always/ the buffer's id
       (cdr (nreverse found-ids)))))
 
-(defun denote-tree--collect-keyword (buffer keyword)
-  "Return denote KEYWORD from BUFFER.
+(defun denote-tree--collect-keywords (buffer keywords)
+  "Return denote KEYWORDS from BUFFER.
 Return nil if none is found."
-  (when-let ((filetype (denote-tree--find-filetype buffer)))
+  (let ((filetype (denote-tree--find-filetype buffer))
+        lst)
+  (when filetype
     (with-current-buffer buffer
-      (goto-char (point-min))
-      ;; if it matches anything, return that substring
-      (when (cond
-             ((string= keyword "title")
-              (re-search-forward (plist-get filetype :title-key-regexp)
-                                 nil t))
-             ((string= keyword "identifier")
-              (re-search-forward denote-id-regexp
-                                 nil t)
-              (backward-word-strictly))
-             ((string= keyword "keywords")
-              (re-search-forward (plist-get filetype :keywords-key-regexp)
-                                 nil t))
-             (t nil))
-        (denote-trim-whitespace
-         (buffer-substring-no-properties (point) (line-end-position)))))))
+      (dolist (el keywords)
+        (goto-char (point-min))
+        (when (cond
+               ((eq el 'title)
+                (re-search-forward (plist-get filetype :title-key-regexp)
+                                   nil t))
+               ((eq el 'identifier)
+                (re-search-forward denote-id-regexp
+                                   nil t)
+                (backward-word-strictly))
+               ((eq el 'keywords)
+                (re-search-forward (plist-get filetype :keywords-key-regexp)
+                                   nil t))
+               (t nil))
+          (push (denote-trim-whitespace
+                 (buffer-substring-no-properties (point) (line-end-position)))
+                lst)
+          (push " " lst)))))
+  (apply #'concat (nreverse (cdr lst)))))
 
 (defun denote-tree--find-filetype (buffer)
   "Guess the filetype in BUFFER and return it as a symbol."
