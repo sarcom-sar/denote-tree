@@ -111,7 +111,8 @@ set to the list of positions at which that denote ID is present.")
     (define-key map "n" #'denote-tree-next-node)
     (define-key map "p" #'denote-tree-prev-node)
     (define-key map "f" #'denote-tree-child-node)
-    (define-key map "b" #'denote-tree-parent-node )
+    (define-key map "b" #'denote-tree-parent-node)
+    (define-key map "g" #'denote-tree-redraw)
     map)
   "Keymap for denote-tree-mode.")
 
@@ -149,6 +150,15 @@ or a BUFFER provided by the user."
   (when button
     (find-file-other-window
      (denote-get-path-by-id button))))
+
+(defun denote-tree-redraw (&optional arg)
+  "Redraw the entire tree.
+With universal argument, redraw from node at point."
+  (interactive "P")
+  (unless (equal arg '(4))
+    (goto-char (1+ (length denote-tree-node))))
+  (when-let ((current-node (get-text-property (point) 'button-data)))
+    (denote-tree current-node)))
 
 (defmacro denote-tree--movement-generator (prop)
   "Generate defuns that move the point to PROP."
