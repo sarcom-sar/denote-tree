@@ -81,6 +81,9 @@ Returns propertied string STR.")
   "Maximum traversal depth of denote-tree.
 If t traverse all the way, if num, traverse n nodes deep.")
 
+(defcustom denote-tree-include-from-front-matter '(title)
+  "Elements of front matter to include, when drawing a node.")
+
 
 ;; Vars and consts
 
