@@ -129,19 +129,18 @@ Denote-tree visualizes every note linked to the root note in a buffer."
 The function uses either the current buffer, if called from a function
 or a BUFFER provided by the user."
   (interactive)
-  (when (get-buffer denote-tree-buffer-name)
-    (kill-buffer denote-tree-buffer-name))
   (unwind-protect
       (progn
         (or buffer (setq buffer (denote-tree--collect-keywords (current-buffer)
-                                                              '(identifier))))
+                                                               '(identifier))))
         (denote-tree--open-link-maybe buffer)
-        (with-current-buffer-window denote-tree-buffer-name nil nil
-          (let ((inhibit-read-only t))
+        (let ((inhibit-read-only t))
+          (with-current-buffer (get-buffer-create denote-tree-buffer-name)
+            (erase-buffer)
             (denote-tree-mode)
             (denote-tree--draw-tree buffer)))
-        (set-window-point (get-buffer-window denote-tree-buffer-name)
-                          (goto-char (1+ (length denote-tree-lower-knee)))))
+        (pop-to-buffer denote-tree-buffer-name)
+        (goto-char (1+ (length denote-tree-lower-knee))))
     (denote-tree--clean-up)))
 
 (defun denote-tree-enter-node (&optional button)
