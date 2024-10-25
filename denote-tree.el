@@ -64,11 +64,17 @@
 
 ;; Faces and Custom
 
-(defface denote-tree-node-face '((t :inherit link))
-  "Default face used for nodes.")
+(defgroup denote-tree-faces ()
+  "Faces for `denote-tree'."
+  :group 'faces)
 
-(defface denote-tree-circular-node-face '((t :inherit link-visited))
-  "Default face used for circular nodes.")
+(defface denote-tree-node '((t :inherit link))
+  "Default face used for nodes."
+  :group 'denote-tree-faces)
+
+(defface denote-tree-circular-node '((t :inherit link-visited))
+  "Default face used for circular nodes."
+  :group 'denote-tree-faces)
 
 (defcustom denote-tree-buffer-name "*denote-tree*"
   "Name of the buffer denote-tree will be built in.")
@@ -264,8 +270,8 @@ Return location of a point where the node starts and the current indent."
     (setq point-star-loc (point))
     (insert (propertize denote-tree-node
                         'face (if circularp
-                                  'denote-tree-circular-node-face
-                                'denote-tree-node-face))
+                                  'denote-tree-circular-node
+                                'denote-tree-node))
             (funcall denote-tree-title-colorize-function
                      (denote-tree--collect-keywords node-name keywords))
             "\n")
