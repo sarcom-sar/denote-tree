@@ -165,7 +165,8 @@ or a BUFFER provided by the user."
     (denote-tree--clean-up)))
 
 (defun denote-tree-enter-node (&optional button)
-  "Enter node at point in other window."
+  "Enter node at point in other window.
+BUTTON is pased as node's ID."
   (interactive)
   (when button
     (find-file-other-window
@@ -173,7 +174,7 @@ or a BUFFER provided by the user."
 
 (defun denote-tree-redraw (&optional arg)
   "Redraw the entire tree.
-With universal argument, redraw from node at point."
+With universal argument ARG, redraw from node at point."
   (interactive "P")
   (unless (equal arg '(4))
     (goto-char (1+ (length denote-tree-node))))
