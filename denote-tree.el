@@ -206,7 +206,7 @@ If ARG is omitted or nil, move to the " (symbol-name prop) " of a current node."
 ;; it is a good idea to merge those functions
 
 (defun denote-tree--draw-tree (buffer)
-  "Draw a tree in current buffer starting with BUFFER."
+  "Draw and propertize a tree in current buffer starting with BUFFER."
   (denote-tree--walk-links buffer nil "" t denote-tree-max-traversal-depth)
   (denote-tree--add-props-to-cycles))
 
@@ -216,7 +216,12 @@ If ARG is omitted or nil, move to the " (symbol-name prop) " of a current node."
 Draw the current buffer as a node in `denote-tree-buffer-name'.  Set it's
 properties. Collect all the links and call `denote-tree--walk-links' on
 them recursively.  If one of the buffers was already visited do not iterate
-over it."
+over it.
+
+Argument PARENT - parent of current node.
+Argument INDENT - state of INDENT between traversals.
+Argument LASTP  - is the node the last child of parent node?
+Argument DEPTH  - maximum depth of the traversal."
   ;; draw node in buffer,
   ;; extract position of point at node
   ;; carry over the indent
@@ -271,7 +276,8 @@ the current denote note.  Face of `denote-tree-node' is either
 `denote-tree--cyclic-buffers' or `denote-tree-node-face' if it's not.
 Call `denote-tree-title-colorize-function' on title.
 
-Return location of a point where the node starts and the current indent."
+Return location of a point where the node starts and the current indent.
+Argument LASTP is the current node last child of parent."
   (let ((circularp (assoc node-name denote-tree--cyclic-buffers))
         (keywords denote-tree-include-from-front-matter)
         point-star-loc)
@@ -333,7 +339,8 @@ previous/next sibling node or a parent."
 ;; Helpers for Links and Buffers
 
 (defun denote-tree--collect-links (buffer)
-  "Collect all links of type denote in BUFFER."
+  "Collect all denote style identifiers in BUFFER.
+Return as a list sans BUFFER own identifiers."
   (setq buffer (denote-tree--open-link-maybe buffer))
   (let (found-ids)
     (with-current-buffer buffer
@@ -384,7 +391,9 @@ Return nil if none is found."
             types)))))
 
 (defun denote-tree--open-link-maybe (element)
-  "Return ELEMENT buffer, create if necessary."
+  "Return ELEMENT buffer, create if necessary.
+Add ELEMENT to `denote-tree--visited-buffers' to delete it after
+`denote-tree' initialization."
     (unless (get-buffer element)
       (add-to-list 'denote-tree--visited-buffers element)
       (with-current-buffer (get-buffer-create element)
