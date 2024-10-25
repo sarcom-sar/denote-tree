@@ -255,7 +255,12 @@ Argument DEPTH  - maximum depth of the traversal."
     pos))
 
 (defun denote-tree--add-props-to-cycles ()
-  "Add props to elements of `denote-tree--cyclic-buffers'."
+  "Add denote-tree--child prop to elements of `denote-tree--cyclic-buffers'.
+
+Find first element with button-data set to the car of
+`denote-tree--cyclic-buffers' (since DFS is in effect, the first found match
+is guaranteed to be the most expanded one), then save it's position and set
+that position as denote-tree--child of all the cyclic nodes."
   (let (child-prop)
     (dolist (el denote-tree--cyclic-buffers)
       (goto-char (point-min))
