@@ -134,12 +134,13 @@ set to the list of positions at which that denote ID is present.")
     (define-key map "b" #'denote-tree-parent-node)
     (define-key map "g" #'denote-tree-redraw)
     map)
-  "Keymap for denote-tree-mode.")
+  "Keymap for `denote-tree-mode'.")
 
 (define-derived-mode denote-tree-mode special-mode "denote-tree"
-  "Visualize your denote notes as a tree.
-
-Denote-tree visualizes every note linked to the root note in a buffer."
+  "Major mode for output from \\[denote-tree].
+Move point to one of the nodes in the buffer, then press a button to
+open it.
+\\{denote-tree-mode-map\}"
   :interactive nil)
 
 ;;;###autoload
