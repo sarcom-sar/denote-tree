@@ -261,13 +261,12 @@ Find first element with button-data set to the car of
 `denote-tree--cyclic-buffers' (since DFS is in effect, the first found match
 is guaranteed to be the most expanded one), then save it's position and set
 that position as denote-tree--child of all the cyclic nodes."
-  (let (child-prop)
-    (dolist (el denote-tree--cyclic-buffers)
-      (goto-char (point-min))
-      (text-property-search-forward 'button-data (car el))
-      (setq child-prop (get-text-property (point) 'denote-tree--child))
-      (dolist (le (cdr el))
-        (goto-char le)
+  (dolist (node-id-and-pos denote-tree--cyclic-buffers)
+    (goto-char (point-min))
+    (text-property-search-forward 'button-data (car node-id-and-pos))
+    (let ((child-prop (get-text-property (point) 'denote-tree--child)))
+      (dolist (node-pos (cdr node-id-and-pos))
+        (goto-char node-pos)
         (add-text-properties (line-beginning-position)
                              (line-end-position)
                              (list 'denote-tree--child child-prop))))))
