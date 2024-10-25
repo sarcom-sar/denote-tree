@@ -76,19 +76,33 @@
   "Default face used for circular nodes."
   :group 'denote-tree-faces)
 
+(defgroup denote-tree ()
+  "Visualise your notes as a tree."
+  :group 'convenience)
+
 (defcustom denote-tree-buffer-name "*denote-tree*"
-  "Name of the buffer denote-tree will be built in.")
+  "Name of the buffer `denote-tree' will be built in."
+  :group 'denote-tree
+  :type 'string)
 
 (defcustom denote-tree-title-colorize-function #'denote-tree--default-props
   "Function accepting one argument STR.
-Returns propertied string STR.")
+Returns propertied string STR."
+  :group 'denote-tree
+  :type 'function)
 
 (defcustom denote-tree-max-traversal-depth t
-  "Maximum traversal depth of denote-tree.
-If t traverse all the way, if num, traverse n nodes deep.")
+  "Maximum traversal depth of `denote-tree'.
+If t traverse all the way, if num, traverse n nodes deep."
+  :group 'denote-tree
+  :type '(choice symbol natnum))
 
 (defcustom denote-tree-include-from-front-matter '(title)
-  "Elements of front matter to include, when drawing a node.")
+  "Elements of front matter to include, when drawing a node."
+  :group 'denote-tree
+  :type '(set (choice (const title)
+                      (const identifier)
+                      (const keywords))))
 
 
 ;; Vars and consts
