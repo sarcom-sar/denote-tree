@@ -98,11 +98,18 @@ If t traverse all the way, if num, traverse n nodes deep."
   :type '(choice symbol natnum))
 
 (defcustom denote-tree-include-from-front-matter '(title)
-  "Elements of front matter to include, when drawing a node."
+  "Elements of front matter to include, when drawing a node.
+
+Currently supported elements:
+- title
+- identifier
+- keywords
+- arbitrary string"
   :group 'denote-tree
   :type '(set (choice (const title)
                       (const identifier)
-                      (const keywords))))
+                      (const keywords)
+                      string)))
 
 
 ;; Vars and consts
@@ -358,30 +365,32 @@ Return as a list sans BUFFER own identifiers."
 
 (defun denote-tree--collect-keywords (buffer keywords)
   "Return denote KEYWORDS from BUFFER.
-Return nil if none is found."
+Return \"\" if none are found."
   (let ((filetype (denote-tree--find-filetype buffer))
         lst)
-  (when filetype
-    (with-current-buffer buffer
-      (dolist (el keywords)
-        (goto-char (point-min))
-        (when (cond
-               ((eq el 'title)
-                (re-search-forward (plist-get filetype :title-key-regexp)
-                                   nil t))
-               ((eq el 'identifier)
-                (re-search-forward denote-id-regexp
-                                   nil t)
-                (backward-word-strictly))
-               ((eq el 'keywords)
-                (re-search-forward (plist-get filetype :keywords-key-regexp)
-                                   nil t))
-               (t nil))
-          (push (denote-trim-whitespace
-                 (buffer-substring-no-properties (point) (line-end-position)))
-                lst)
-          (push " " lst)))))
-  (apply #'concat (nreverse (cdr lst)))))
+    (when filetype
+      (with-current-buffer buffer
+        (dolist (el keywords)
+          (goto-char (point-min))
+          (when (cond
+                 ((eq el 'title)
+                  (re-search-forward (plist-get filetype :title-key-regexp)
+                                     nil t))
+                 ((eq el 'identifier)
+                  (re-search-forward denote-id-regexp
+                                     nil t)
+                  (backward-word-strictly))
+                 ((eq el 'keywords)
+                  (re-search-forward (plist-get filetype :keywords-key-regexp)
+                                     nil t))
+                 (t nil))
+            (setq el (denote-trim-whitespace
+                      (buffer-substring-no-properties (point)
+                                                      (line-end-position)))))
+          (when (stringp el)
+            (push el lst)
+            (push " " lst)))))
+    (apply #'concat (nreverse (cdr lst)))))
 
 (defun denote-tree--find-filetype (buffer)
   "Guess the filetype in BUFFER and return it as a symbol."
