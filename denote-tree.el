@@ -406,7 +406,7 @@ Add ELEMENT to `denote-tree--visited-buffers' to delete it after
   element)
 
 
-;; Helper functions and macro closure
+;; Helper functions
 
 (defun denote-tree--clean-up ()
   "Clean up buffers created during the tree walk."
