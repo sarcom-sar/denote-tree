@@ -244,14 +244,13 @@ If ARG is omitted, nil or zero, move once."
         (goto-char next-point)))))
 
 (defun denote-tree-prev-node (&optional arg)
-  "Move the point to the prev sibling a node ARG times.
-If ARG is omitted or nil, move once."
+  "Move the point to the prev sibling node ARG times.
+If ARG is negative move to the nextv sibling node ARG times.
+If ARG is omitted, nil or zero, move once."
   (interactive "p")
   (or arg (setq arg 1))
-  (dotimes (el arg)
-    (when-let ((next-point
-                (get-text-property (point) 'denote-tree--prev)))
-      (goto-char next-point))))
+  (denote-tree-next-node (- arg)))
+
 
 ;; Tree traversal
 ;; it is a good idea to merge those functions
