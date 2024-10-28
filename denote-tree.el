@@ -212,6 +212,17 @@ With universal argument ARG, redraw from node at point."
             denote-tree--teleport-stack))
     (goto-char next-point)))
 
+(defun denote-tree-move-to-parent-node (&optional arg)
+  (interactive "p")
+  (or arg (setq arg 1))
+  (when-let ((next-point (get-text-property (point)
+                                            'denote-tree--parent)))
+    (let ((current-teleport (pop denote-tree--teleport-stack)))
+      ;; what if user moves the point?
+      (if (member (point) (cadr current-teleport))
+          (goto-char (car current-teleport))
+        (goto-char next-point)))))
+
 (defun denote-tree--discover-siblings (pos)
   "Discover all siblings of node at POS."
   (let (lst)
