@@ -223,9 +223,11 @@ With universal argument ARG, redraw from node at point."
                                               'denote-tree--parent))
                (canonical-point (get-text-property next-point
                                                    'denote-tree--child)))
-      (let ((current-teleport (pop denote-tree--teleport-stack)))
+      (let ((current-teleport (car denote-tree--teleport-stack)))
         (if (equal canonical-point (cadr current-teleport))
-            (goto-char (car current-teleport))
+            (progn
+              (goto-char (car current-teleport))
+              (pop denote-tree--teleport-stack))
           (goto-char next-point))))))
 
 (defun denote-tree-next-node (&optional arg)
