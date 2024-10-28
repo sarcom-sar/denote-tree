@@ -199,6 +199,30 @@ With universal argument ARG, redraw from node at point."
   (when-let ((current-node (get-text-property (point) 'button-data)))
     (denote-tree current-node)))
 
+
+(defun denote-tree-move-to-child-node (&optional arg)
+  (interactive "p")
+  (or arg (setq arg 1))
+  (when-let ((next-point (get-text-property (point)
+                                            'denote-tree--child)))
+    (when (and denote-tree-preserve-teleports-p
+               (> (point) next-point))
+      ;; what if point not at node?
+      (push (list (point) (denote-tree--discover-siblings next-point))
+            denote-tree--teleport-stack))
+    (goto-char next-point)))
+
+(defun denote-tree--discover-siblings (pos)
+  "Discover all siblings of node at POS."
+  (let (lst)
+    (save-excursion
+      (goto-char pos)
+      (while (not (equal (car (last lst)) (point)))
+        (push (point)
+              lst)
+        (goto-char (get-text-property (point) 'denote-tree--next))))
+    lst))
+
 (defmacro denote-tree--movement-generator (prop)
   "Generate defuns that move the point to PROP."
   (declare (indent 1))
