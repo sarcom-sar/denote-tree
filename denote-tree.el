@@ -206,7 +206,10 @@ With universal argument ARG, redraw from node at point."
                                             'denote-tree--child)))
     (when (and denote-tree-preserve-teleports-p
                (> (point) next-point))
-      ;; what if point not at node?
+      (goto-char (line-beginning-position))
+      (goto-char
+       (prop-match-beginning
+        (text-property-search-forward 'button-data)))
       (push (list (point) next-point)
             denote-tree--teleport-stack))
     (goto-char next-point)))
