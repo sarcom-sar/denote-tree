@@ -111,6 +111,12 @@ Currently supported elements:
                       (const keywords)
                       string)))
 
+(defcustom denote-tree-preserve-teleports-p t
+  "Teleport back when accessing cyclical node from it's child.
+When nil, always move to \"real\" parent of a node."
+  :group 'denote-tree
+  :type 'boolean)
+
 
 ;; Vars and consts
 
@@ -129,6 +135,11 @@ Currently supported elements:
 `car' of the element of `denote-tree--cyclic-buffers' is denote ID
 that appears cyclically over the buffer.  `cdr' of that variable is
 set to the list of positions at which that denote ID is present.")
+
+(defvar-local denote-tree--teleport-stack '()
+  "Stack of point positions denoting WHERE-TO jump FROM-WHERE.
+FROM-WHERE is a list of point positions of a child nodes.  WHERE-TO
+is a point position of cyclical parent node.")
 
 
 ;; Mode and interactive functions
