@@ -231,14 +231,17 @@ With universal argument ARG, redraw from node at point."
           (goto-char next-point))))))
 
 (defun denote-tree-next-node (&optional arg)
-  "Move the point to the next sibling a node ARG times.
-If ARG is omitted or nil, move once."
+  "Move the point to the next sibling node ARG times.
+If ARG is negative move to the prev sibling node ARG times.
+If ARG is omitted, nil or zero, move once."
   (interactive "p")
   (or arg (setq arg 1))
-  (dotimes (el arg)
-    (when-let ((next-point
-                (get-text-property (point) 'denote-tree--next)))
-      (goto-char next-point))))
+  (let ((direction (if (<= arg 0) 'denote-tree--prev 'denote-tree--next))
+        (arg (abs arg)))
+    (dotimes (el arg)
+      (when-let ((next-point
+                  (get-text-property (point) direction)))
+        (goto-char next-point)))))
 
 (defun denote-tree-prev-node (&optional arg)
   "Move the point to the prev sibling a node ARG times.
