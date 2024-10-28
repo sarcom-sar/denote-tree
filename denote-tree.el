@@ -200,6 +200,12 @@ With universal argument ARG, redraw from node at point."
     (denote-tree current-node)))
 
 (defun denote-tree-child-node (&optional arg)
+  "Move the point to the child of a node ARG times.
+If ARG is negative move to the parent of a node ARG times.
+If ARG is ommited, nil or zero, move once.
+
+If `denote-tree-preserve-teleports-p' is set to t, preserve
+the parent node position for future backtracking."
   (interactive "p")
   (or arg (setq arg 1))
   (if (< arg 0)
@@ -218,6 +224,12 @@ With universal argument ARG, redraw from node at point."
         (goto-char next-point)))))
 
 (defun denote-tree-parent-node (&optional arg)
+  "Move the point to the parent of a node ARG times.
+If ARG is negative move to the child of a node ARG times.
+If ARG is ommited, nil or zero, move once.
+
+If `denote-tree-preserve-teleports-p' is set to t, teleport to
+the parent the point came from."
   (interactive "p")
   (or arg (setq arg 1))
   (if (< arg 0)
