@@ -199,7 +199,7 @@ With universal argument ARG, redraw from node at point."
   (when-let ((current-node (get-text-property (point) 'button-data)))
     (denote-tree current-node)))
 
-(defun denote-tree-move-to-child-node (&optional arg)
+(defun denote-tree-child-node (&optional arg)
   (interactive "p")
   (or arg (setq arg 1))
   (when-let ((next-point (get-text-property (point)
@@ -217,14 +217,15 @@ With universal argument ARG, redraw from node at point."
 (defun denote-tree-move-to-parent-node (&optional arg)
   (interactive "p")
   (or arg (setq arg 1))
-  (when-let ((next-point (get-text-property (point)
-                                            'denote-tree--parent))
-             (canonical-point (get-text-property next-point
-                                                 'denote-tree--child)))
-    (let ((current-teleport (pop denote-tree--teleport-stack)))
-      (if (equal canonical-point (cadr current-teleport))
-          (goto-char (car current-teleport))
-        (goto-char next-point)))))
+  (dotimes (el arg)
+    (when-let ((next-point (get-text-property (point)
+                                              'denote-tree--parent))
+               (canonical-point (get-text-property next-point
+                                                   'denote-tree--child)))
+      (let ((current-teleport (pop denote-tree--teleport-stack)))
+        (if (equal canonical-point (cadr current-teleport))
+            (goto-char (car current-teleport))
+          (goto-char next-point))))))
 
 (defmacro denote-tree--movement-generator (prop)
   "Generate defuns that move the point to PROP."
@@ -241,7 +242,6 @@ If ARG is omitted or nil, move to the " (symbol-name prop) " of a current node."
                                                         prop)))))
          (goto-char next-point)))))
 
-(denote-tree--movement-generator child)
 (denote-tree--movement-generator parent)
 (denote-tree--movement-generator next)
 (denote-tree--movement-generator prev)
