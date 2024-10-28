@@ -202,18 +202,20 @@ With universal argument ARG, redraw from node at point."
 (defun denote-tree-child-node (&optional arg)
   (interactive "p")
   (or arg (setq arg 1))
-  (dotimes (el arg)
-    (when-let ((next-point (get-text-property (point)
-                                              'denote-tree--child)))
-      (when (and denote-tree-preserve-teleports-p
-                 (> (point) next-point))
-        (goto-char (line-beginning-position))
-        (goto-char
-         (prop-match-beginning
-          (text-property-search-forward 'button-data)))
-        (push (list (point) next-point)
-              denote-tree--teleport-stack))
-      (goto-char next-point))))
+  (if (< arg 0)
+      (denote-tree-parent-node (- arg))
+    (dotimes (el arg)
+      (when-let ((next-point (get-text-property (point)
+                                                'denote-tree--child)))
+        (when (and denote-tree-preserve-teleports-p
+                   (> (point) next-point))
+          (goto-char (line-beginning-position))
+          (goto-char
+           (prop-match-beginning
+            (text-property-search-forward 'button-data)))
+          (push (list (point) next-point)
+                denote-tree--teleport-stack))
+        (goto-char next-point)))))
 
 (defun denote-tree-parent-node (&optional arg)
   (interactive "p")
