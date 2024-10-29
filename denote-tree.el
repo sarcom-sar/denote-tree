@@ -43,16 +43,19 @@
 ;;   +-* Vestibulum convallis, lorem a tempus semper.
 ;;   '-* Dui dui euismod elit, vitae placerat urna tortor vitae lacus.
 ;;
-;; That is pretty much it.  It is able to handle cyclical nodes and provides a
-;; mechanism to move between those cyclical nodes (called "teleportations") by
-;; default.  As a drawback, it is pretty stupid and has to redraw entire thing
-;; from scratch if anything changes.
+;; Parts of front matter to include are customizable via
+;; `denote-tree-include-from-front-matter'.  It is able to handle cyclical
+;; nodes and provides a mechanism to move between those cyclical nodes
+;; (called "teleportations") by default (customizable via
+;; `denote-tree-preserve-teleports-p').  As a drawback, it is pretty stupid
+;; and has to redraw entire thing from scratch, if anything changes.
 ;;
 ;; User can customize `denote-tree-node-face' and
 ;; `denote-tree-circular-node-face' to make them more visible.  With a bit of
-;; hacking it is also feasible to implement colored node titles.
+;; hacking it is also feasible to implement colored node titles via
+;; `denote-tree-title-colorize-function'.
 ;;
-;; The package as of right now hard-depends on denote (duh).
+;; For performance reasons `denote-tree-max-traversal-depth' can be reduced.
 ;;
 
 ;;; Code:
