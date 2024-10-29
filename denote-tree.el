@@ -202,26 +202,31 @@ With universal argument ARG, redraw from node at point."
 (defun denote-tree-child-node (&optional arg)
   "Move the point to the child of a node ARG times.
 If ARG is negative move to the parent of a node ARG times.
-If ARG is ommited, nil or zero, move once.
+If ARG is ommited, nil or zero, move once.  With \\[universal-argument]
+reverse `denote-tree-preserve-teleports-p' one time.
 
 If `denote-tree-preserve-teleports-p' is set to t, preserve
 the parent node position for future backtracking."
-  (interactive "p")
+  (interactive "P")
   (or arg (setq arg 1))
-  (if (< arg 0)
-      (denote-tree-parent-node (- arg))
-    (dotimes (el arg)
-      (when-let ((next-point (get-text-property (point)
-                                                'denote-tree--child)))
-        (when (and denote-tree-preserve-teleports-p
-                   (> (point) next-point))
-          (goto-char (line-beginning-position))
-          (goto-char
-           (prop-match-beginning
-            (text-property-search-forward 'button-data)))
-          (push (list (point) next-point)
-                denote-tree--teleport-stack))
-        (goto-char next-point)))))
+  (let ((preserve-teleport-p denote-tree-preserve-teleports-p))
+    (when (equal arg '(4))
+      (setq preserve-teleport-p (not denote-tree-preserve-teleports-p))
+      (setq arg 1))
+    (if (< arg 0)
+        (denote-tree-parent-node (- arg))
+      (dotimes (el arg)
+        (when-let ((next-point (get-text-property (point)
+                                                  'denote-tree--child)))
+          (when (and preserve-teleport-p
+                     (> (point) next-point))
+            (goto-char (line-beginning-position))
+            (goto-char
+             (prop-match-beginning
+              (text-property-search-forward 'button-data)))
+            (push (list (point) next-point)
+                  denote-tree--teleport-stack))
+          (goto-char next-point))))))
 
 (defun denote-tree-parent-node (&optional arg)
   "Move the point to the parent of a node ARG times.
