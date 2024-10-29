@@ -26,7 +26,9 @@ Customizable elements are:
 - ~denote-tree-include-from-front-matter~, what to include within node
   description;
 - ~denote-tree-title-colorize-function~, which enables colorization of node
-  description.
+  description;
+- ~denote-tree-preserve-teleports-p~, which preserves the movement in and out
+  cyclical nodes.
 
 *** Keybindings for =*denote-tree*= buffer
 
