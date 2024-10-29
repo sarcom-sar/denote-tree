@@ -195,7 +195,7 @@ BUTTON is pased as node's ID."
 
 (defun denote-tree-redraw (&optional arg)
   "Redraw the entire tree.
-With universal argument ARG, redraw from node at point."
+With \\[universal-argument], redraw from node at point."
   (interactive "P")
   (unless (equal arg '(4))
     (goto-char (1+ (length denote-tree-node))))
