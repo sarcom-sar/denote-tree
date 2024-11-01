@@ -219,15 +219,14 @@ the parent node position for future backtracking."
     (if (< arg 0)
         (denote-tree-parent-node (- arg))
       (dotimes (el arg)
-        (when-let ((next-point (get-text-property (point)
-                                                  'denote-tree--child)))
+        (when-let ((next-point
+                    (get-text-property (point) 'denote-tree--child))
+                   (curr-point
+                    (next-single-property-change (line-beginning-position)
+                                                 'button-data)))
           (when (and preserve-teleport-p
                      (> (point) next-point))
-            (goto-char (line-beginning-position))
-            (goto-char
-             (prop-match-beginning
-              (text-property-search-forward 'button-data)))
-            (push (list (point) next-point)
+            (push (list curr-point next-point)
                   denote-tree--teleport-stack))
           (goto-char next-point))))))
 
