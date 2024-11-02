@@ -275,6 +275,23 @@ If ARG is omitted, nil or zero, move once."
   (denote-tree-next-node (- arg)))
 
 
+;; denote-tree-edit
+
+(defvar denote-tree-edit-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map "C-c C-c" #'denote-tree-edit-commit-changes)
+    (define-key map "C-c C-k" #'denote-tree-edit-abort-changes)
+    map)
+  "Keymap for `denote-tree-edit-mode'.")
+
+(define-derived-mode denote-tree-edit-mode text-mode "denote-tree-edit"
+  "Edit the front matter of the note at point from within a tree.
+
+Everything else is still read-only.  All newlines will be dropped.
+\\{denote-tree-edit-mode}"
+  (setq buffer-read-only t))
+
+
 ;; Tree traversal
 ;; it is a good idea to merge those functions
 
