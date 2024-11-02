@@ -289,7 +289,14 @@ If ARG is omitted, nil or zero, move once."
 
 Everything else is still read-only.  All newlines will be dropped.
 \\{denote-tree-edit-mode}"
-  (setq buffer-read-only t))
+  (setq buffer-read-only t)
+  (add-hook 'after-change-functions #'denote-tree-edit--remove-newline nil t)))
+
+(defun denote-tree-edit--remove-newline (beg end length)
+  "Silently drop a newline if user tries to enter one."
+  (save-excursion
+    (and (search-forward "\n" end t)
+         (delete-region (1- (point)) end))))
 
 
 ;; Tree traversal
