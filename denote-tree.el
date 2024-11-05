@@ -277,6 +277,9 @@ If ARG is omitted, nil or zero, move once."
 
 ;; denote-tree-edit
 
+(defvar-local denote-tree-edit--current-line nil
+  "Beginning of currently edited line.")
+
 (defvar denote-tree-edit-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map "C-c C-c" #'denote-tree-edit-commit-changes)
@@ -290,7 +293,8 @@ If ARG is omitted, nil or zero, move once."
 Everything else is still read-only.  All newlines will be dropped.
 \\{denote-tree-edit-mode}"
   (setq buffer-read-only t)
-  (add-hook 'after-change-functions #'denote-tree-edit--remove-newline nil t)))
+  (add-hook 'after-change-functions #'denote-tree-edit--remove-newline nil t)
+  (setq denote-tree-edit--current-line (line-beginning-position)))
 
 (defun denote-tree-edit--remove-newline (beg end length)
   "Silently drop a newline if user tries to enter one."
