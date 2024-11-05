@@ -277,6 +277,13 @@ If ARG is omitted, nil or zero, move once."
 
 ;; denote-tree-edit
 
+(defvar-local denote-tree-edit--current-note '((file)
+                                    (title . keep-current)
+                                    (keywords . keep-current)
+                                    (signature . keep-current)
+                                    (date . keep-current))
+  "Alist of a current note elements.")
+
 (defvar-local denote-tree-edit--current-line nil
   "Beginning of currently edited line.")
 
@@ -294,7 +301,14 @@ Everything else is still read-only.  All newlines will be dropped.
 \\{denote-tree-edit-mode}"
   (setq buffer-read-only t)
   (add-hook 'after-change-functions #'denote-tree-edit--remove-newline nil t)
-  (setq denote-tree-edit--current-line (line-beginning-position)))
+  (setq denote-tree-edit--current-line (line-beginning-position))
+  (save-excursion
+  (setcdr (assq file denote-tree-edit--current-note)
+          (denote-get-path-by-id
+           (get-text-property
+            (next-single-property-change (line-beginning-position)
+                                         'button-data)
+            'button-data)))))
 
 (defun denote-tree-edit--remove-newline (beg end length)
   "Silently drop a newline if user tries to enter one."
