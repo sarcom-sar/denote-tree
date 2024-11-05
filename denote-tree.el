@@ -310,19 +310,25 @@ Everything else is still read-only.  All newlines will be dropped.
                                            'button-data)
               'button-data)))
     (let ((inhibit-read-only t))
-      ;; first element /has to/ get front-sticky prop
-      ;; otherwise we run into a thing where user
-      ;; has this thing going:
-      ;; |i am a title -> oops uneditable |i am a title
-      (dolist (el denote-tree-include-from-front-matter)
-        (when (symbolp el)
-          (goto-char (line-beginning-position))
-          (when-let* ((match
-                       (text-property-search-forward 'denote-tree--type el t))
-                      (start (prop-match-beginning match))
-                      (end (prop-match-end match)))
-            (add-text-properties start end '(inhibit-read-only t))
-            (denote-tree-edit--save-match start end el)))))))
+      ;; process first element separately
+      ;; it has to have front-sticky property
+      (denote-tree-edit--set-props (car denote-tree-include-from-front-matter)
+                        '(inhibit-read-only t front-sticky t))
+      (dolist (el (cdr denote-tree-include-from-front-matter))
+        (denote-tree-edit--set-props el '(inhibit-read-only t))))))
+
+(defun denote-tree-edit--set-props (element prop-list)
+  "Set PROP-LIST for ELEMENT in current line
+Save that match to alist via `denote-tree-edit--save-match'."
+  (when (symbolp element)
+    (goto-char (line-beginning-position))
+    (when-let* ((match
+                 (text-property-search-forward 'denote-tree--type element t))
+                (start (prop-match-beginning match))
+                (end (prop-match-end match)))
+      (add-text-properties start end prop-list)
+      (denote-tree-edit--save-match start end element))))
+
 
 (defun denote-tree-edit--remove-newline (beg end length)
   "Silently drop a newline if user tries to enter one."
