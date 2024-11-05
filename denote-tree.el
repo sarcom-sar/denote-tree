@@ -303,18 +303,37 @@ Everything else is still read-only.  All newlines will be dropped.
   (add-hook 'after-change-functions #'denote-tree-edit--remove-newline nil t)
   (setq denote-tree-edit--current-line (line-beginning-position))
   (save-excursion
-  (setcdr (assq file denote-tree-edit--current-note)
-          (denote-get-path-by-id
-           (get-text-property
-            (next-single-property-change (line-beginning-position)
-                                         'button-data)
-            'button-data)))))
+    (setcdr (assq 'file denote-tree-edit--current-note)
+            (denote-get-path-by-id
+             (get-text-property
+              (next-single-property-change (line-beginning-position)
+                                           'button-data)
+              'button-data)))
+    (let ((inhibit-read-only t))
+      ;; first element /has to/ get front-sticky prop
+      ;; otherwise we run into a thing where user
+      ;; has this thing going:
+      ;; |i am a title -> oops uneditable |i am a title
+      (dolist (el denote-tree-include-from-front-matter)
+        (when (symbolp el)
+          (goto-char (line-beginning-position))
+          (when-let* ((match
+                       (text-property-search-forward 'denote-tree--type el t))
+                      (start (prop-match-beginning match))
+                      (end (prop-match-end match)))
+            (add-text-properties start end '(inhibit-read-only t))
+            (denote-tree-edit--save-match start end el)))))))
 
 (defun denote-tree-edit--remove-newline (beg end length)
   "Silently drop a newline if user tries to enter one."
   (save-excursion
     (and (search-forward "\n" end t)
          (delete-region (1- (point)) end))))
+
+(defun denote-tree-edit--save-match (start end type)
+  "Save match to `denote-tree-edit--current-note'."
+  (setcdr (assq type denote-tree-edit--current-note)
+          (buffer-substring start end)))
 
 
 ;; Tree traversal
