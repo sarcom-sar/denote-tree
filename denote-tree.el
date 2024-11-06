@@ -310,21 +310,34 @@ Everything else is still read-only.  All newlines will be dropped.
                                            'button-data)
               'button-data)))
     (let ((inhibit-read-only t))
-      (dolist (el (cdr denote-tree-include-from-front-matter))
-        (denote-tree-edit--set-props el '(inhibit-read-only t
-                               front-sticky t))))))
+      ;; set props
+      (denote-tree-edit--set-from-front-matter
+       denote-tree-include-from-front-matter
+       #'add-text-properties
+       '(inhibit-read-only t front-sticky t))
+      ;; save to denote-tree-edit--current-note
+      (denote-tree-edit--set-from-front-matter
+       denote-tree-include-from-front-matter
+       #'denote-tree-edit--save-match))))
 
-(defun denote-tree-edit--set-props (element prop-list)
-  "Set PROP-LIST for ELEMENT in current line
-Save that match to alist via `denote-tree-edit--save-match'."
-  (when (symbolp element)
-    (goto-char (line-beginning-position))
-    (when-let* ((match
-                 (text-property-search-forward 'denote-tree--type element t))
+(defun denote-tree-edit--set-from-front-matter
+    (front-matter-els func &optional any)
+  "Iterate over FRONT-MATTER-ELS applying FUNC to it.
+Restrict search of props to the current line.
+
+FUNC takes two positional arguments START END and one general one."
+  (dolist (el front-matter-els)
+    (when-let* ((match (denote-tree-edit--prop-match el))
                 (start (prop-match-beginning match))
-                (end (prop-match-end match)))
-      (add-text-properties start end prop-list)
-      (denote-tree-edit--save-match start end element))))
+                (end (prop-match-end match))
+                (thing (if any any el)))
+      (funcall func start end thing))))
+
+(defun denote-tree-edit--prop-match (el)
+  "Match prop of denote-tree--type EL in current line."
+  (when (symbolp el)
+    (goto-char (line-beginning-position))
+    (text-property-search-forward 'denote-tree--type el t)))
 
 
 (defun denote-tree-edit--remove-newline (beg end length)
