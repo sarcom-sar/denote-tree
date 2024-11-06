@@ -368,6 +368,13 @@ Denote wont ask you to confirm it, this is final."
      #'denote-tree-edit--restore-line))
   (denote-tree-mode))
 
+(defun denote-tree-edit--restore-line (start end element)
+  "Stub"
+  (let ((props (text-properties-at start)))
+    (delete-region start end)
+    (goto-char start)
+    (insert (alist-get element denote-tree-edit--current-note))))
+
 (defun denote-tree-edit--clean-up ()
   "Return the line to read-only state."
   (let ((inhibit-read-only t))
