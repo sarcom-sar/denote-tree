@@ -310,12 +310,9 @@ Everything else is still read-only.  All newlines will be dropped.
                                            'button-data)
               'button-data)))
     (let ((inhibit-read-only t))
-      ;; process first element separately
-      ;; it has to have front-sticky property
-      (denote-tree-edit--set-props (car denote-tree-include-from-front-matter)
-                        '(inhibit-read-only t front-sticky t))
       (dolist (el (cdr denote-tree-include-from-front-matter))
-        (denote-tree-edit--set-props el '(inhibit-read-only t))))))
+        (denote-tree-edit--set-props el '(inhibit-read-only t
+                               front-sticky t))))))
 
 (defun denote-tree-edit--set-props (element prop-list)
   "Set PROP-LIST for ELEMENT in current line
