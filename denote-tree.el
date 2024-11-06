@@ -356,6 +356,18 @@ Denote wont ask you to confirm it, this is final."
     (denote-rename-file (mapcar #'cdr denote-tree-edit--current-note)))
   (denote-tree-mode))
 
+(defun denote-tree-edit-abort-changes ()
+  "Restore the note from `denote-tree-edit--current-note'."
+  (interactive)
+  (save-excursion
+    (goto-char denote-tree-edit--current-line)
+    (setq denote-tree-edit--current-line nil)
+    (denote-tree-edit--clean-up)
+    (denote-tree-edit--set-from-front-matter
+     denote-tree-include-from-front-matter
+     #'denote-tree-edit--restore-line))
+  (denote-tree-mode))
+
 (defun denote-tree-edit--clean-up ()
   "Return the line to read-only state."
   (let ((inhibit-read-only t))
