@@ -341,6 +341,13 @@ If EL is not a symbol or EL is not in line return nil."
     (with-restriction (line-beginning-position) (line-end-position)
       (text-property-search-forward 'denote-tree--type el t))))
 
+(defun denote-tree-edit--clean-up ()
+  "Return the line to read-only state."
+  (let ((inhibit-read-only t))
+    (denote-tree-edit--set-from-front-matter
+     denote-tree-include-from-front-matter
+     #'add-text-properties
+     '(inhibit-read-only nil))))
 
 (defun denote-tree-edit--remove-newline (beg end length)
   "Silently drop a newline if user tries to enter one."
