@@ -500,7 +500,7 @@ Return as a list sans BUFFER own identifiers."
   "Return denote KEYWORDS from BUFFER.
 Return \"\" if none are found."
   (let ((filetype (denote-tree--find-filetype buffer))
-        lst)
+        lst type)
     (when filetype
       (with-current-buffer buffer
         (dolist (el keywords)
@@ -517,11 +517,12 @@ Return \"\" if none are found."
                   (re-search-forward (plist-get filetype :keywords-key-regexp)
                                      nil t))
                  (t nil))
+            (setq type el)
             (setq el (denote-trim-whitespace
                       (buffer-substring-no-properties (point)
                                                       (line-end-position)))))
           (when (stringp el)
-            (push el lst)
+            (push (propertize el 'denote-tree--type type) lst)
             (push " " lst)))))
     (apply #'concat (nreverse (cdr lst)))))
 
