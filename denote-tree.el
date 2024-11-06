@@ -334,10 +334,12 @@ FUNC takes two positional arguments START END and one general one."
       (funcall func start end thing))))
 
 (defun denote-tree-edit--prop-match (el)
-  "Match prop of denote-tree--type EL in current line."
+  "Match prop of denote-tree--type EL in current line.
+If EL is not a symbol or EL is not in line return nil."
   (when (symbolp el)
     (goto-char (line-beginning-position))
-    (text-property-search-forward 'denote-tree--type el t)))
+    (with-restriction (line-beginning-position) (line-end-position)
+      (text-property-search-forward 'denote-tree--type el t))))
 
 
 (defun denote-tree-edit--remove-newline (beg end length)
