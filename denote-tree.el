@@ -341,6 +341,18 @@ If EL is not a symbol or EL is not in line return nil."
     (with-restriction (line-beginning-position) (line-end-position)
       (text-property-search-forward 'denote-tree--type el t))))
 
+(defun denote-tree-edit-commit-changes ()
+  "Replace front matter of note with user inputed data.
+Denote wont ask you to confirm it, this is final."
+  (interactive)
+  (denote-tree-edit--clean-up)
+  (denote-tree-edit--set-from-front-matter
+   denote-tree-include-from-front-matter
+   #'denote-tree-edit--save-match)
+  (let ((denote-rename-confirmations nil))
+    (denote-rename-file (mapcar #'cdr denote-tree-edit--current-note)))
+  (denote-tree-mode))
+
 (defun denote-tree-edit--clean-up ()
   "Return the line to read-only state."
   (let ((inhibit-read-only t))
