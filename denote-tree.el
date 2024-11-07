@@ -355,7 +355,7 @@ Denote wont ask you to confirm it, this is final."
        denote-tree-include-from-front-matter
        #'denote-tree-edit--save-match)))
   (let ((denote-rename-confirmations nil))
-    (denote-rename-file (mapcar #'cdr denote-tree-edit--current-note)))
+    (apply #'denote-rename-file (mapcar #'cdr denote-tree-edit--current-note)))
   (denote-tree-mode))
 
 (defun denote-tree-edit-abort-changes ()
