@@ -357,14 +357,31 @@ If EL is not a symbol or EL is not in line return nil."
 Denote wont ask you to confirm it, this is final."
   (interactive)
   (save-excursion
-    (let ((inhibit-read-only t))
+    (let ((inhibit-read-only t)
+          filetype path)
       (goto-char denote-tree-edit--current-line)
-      (setq denote-tree-edit--current-line nil)
+      (setq path (denote-get-path-by-id
+                  (get-text-property
+                   (next-single-property-change (point) 'button-data)
+                   'button-data)))
+      (with-temp-buffer
+        (insert-file path)
+        (setq filetype (denote-tree--find-filetype (current-buffer))))
       (denote-tree-edit--clean-up)
+      (setq denote-tree-edit--current-line nil)
       (denote-tree-edit--set-from-front-matter
        denote-tree-include-from-front-matter
-       #'denote-tree-edit--save-match)))
-  (let ((denote-rename-confirmations nil))
+       #'denote-tree-edit--save-match)
+      (let ((keywords (assq 'keywords denote-tree-edit--current-note)))
+        (set-text-properties 0 (length (cdr keywords)) nil (cdr keywords))
+        (when (stringp (cdr keywords))
+          (setcdr keywords
+                  (funcall (plist-get filetype
+                                      :keywords-value-reverse-function)
+                           (cdr keywords)))))))
+  (let ((denote-rename-confirmations nil)
+        (denote-save-buffers t)
+        (denote-kill-buffers t))
     (apply #'denote-rename-file (mapcar #'cdr denote-tree-edit--current-note)))
   (denote-tree-mode))
 
