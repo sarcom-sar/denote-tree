@@ -154,7 +154,7 @@ is a point position of cyclical parent node.")
     (define-key map "f" #'denote-tree-child-node)
     (define-key map "b" #'denote-tree-parent-node)
     (define-key map "g" #'denote-tree-redraw)
-    (define-key map "e" #'denote-tree-enter-edit-mode)
+    (define-key map "e" #'denote-tree-enter-edit)
     map)
   "Keymap for `denote-tree-mode'.")
 
@@ -275,12 +275,12 @@ If ARG is omitted, nil or zero, move once."
   (or arg (setq arg 1))
   (denote-tree-next-node (- arg)))
 
-(defun denote-tree-edit-enter-edit-mode ()
+(defun denote-tree-enter-edit ()
   "Edit current note.
 \\<denote-tree-edit-mode-map>
 
-\\[denote-tree-edit-commit-changes] to accept.
-\\[denote-tree-edit-abort-changes] to abort."
+\\[denote-tree-edit-commit-changes] to keep the changes.
+\\[denote-tree-edit-abort-changes] to abort the changes."
   (interactive)
   (denote-tree-edit-mode))
 
