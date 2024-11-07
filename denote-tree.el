@@ -325,7 +325,8 @@ Everything else is still read-only.  All newlines will be dropped.
   "Iterate over FRONT-MATTER-ELS applying FUNC to it.
 Restrict search of props to the current line.
 
-FUNC takes two positional arguments START END and one general one."
+FUNC takes two positional arguments START END and ANY, which if not
+set defaults to currently iterated over element of FRONT-MATTER-ELS."
   (dolist (el front-matter-els)
     (when-let* ((match (denote-tree-edit--prop-match el))
                 (start (prop-match-beginning match))
