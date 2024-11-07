@@ -302,13 +302,13 @@ Everything else is still read-only.  All newlines will be dropped.
   (setq buffer-read-only t)
   (add-hook 'after-change-functions #'denote-tree-edit--remove-newline nil t)
   (setq denote-tree-edit--current-line (line-beginning-position))
+  (setcdr (assq 'file denote-tree-edit--current-note)
+          (denote-get-path-by-id
+           (get-text-property
+            (next-single-property-change (line-beginning-position)
+                                         'button-data)
+            'button-data)))
   (save-excursion
-    (setcdr (assq 'file denote-tree-edit--current-note)
-            (denote-get-path-by-id
-             (get-text-property
-              (next-single-property-change (line-beginning-position)
-                                           'button-data)
-              'button-data)))
     (let ((inhibit-read-only t))
       ;; set props
       (denote-tree-edit--set-from-front-matter
