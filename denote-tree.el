@@ -380,7 +380,7 @@ Denote wont ask you to confirm it, this is final."
 
 (defun denote-tree-edit--clean-up ()
   "Return the line to read-only state."
-  (let ((inhibit-read-only t))
+  (save-excursion
     (denote-tree-edit--set-from-front-matter
      denote-tree-include-from-front-matter
      #'add-text-properties
