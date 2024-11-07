@@ -299,8 +299,8 @@ If ARG is omitted, nil or zero, move once."
 
 (defvar denote-tree-edit-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map "C-c C-c" #'denote-tree-edit-commit-changes)
-    (define-key map "C-c C-k" #'denote-tree-edit-abort-changes)
+    (define-key map (kbd "C-c C-c") #'denote-tree-edit-commit-changes)
+    (define-key map (kbd "C-c C-k") #'denote-tree-edit-abort-changes)
     map)
   "Keymap for `denote-tree-edit-mode'.")
 
