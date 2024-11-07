@@ -347,12 +347,13 @@ If EL is not a symbol or EL is not in line return nil."
 Denote wont ask you to confirm it, this is final."
   (interactive)
   (save-excursion
-    (goto-char denote-tree-edit--current-line)
-    (setq denote-tree-edit--current-line nil)
-    (denote-tree-edit--clean-up)
-    (denote-tree-edit--set-from-front-matter
-     denote-tree-include-from-front-matter
-     #'denote-tree-edit--save-match))
+    (let ((inhibit-read-only t))
+      (goto-char denote-tree-edit--current-line)
+      (setq denote-tree-edit--current-line nil)
+      (denote-tree-edit--clean-up)
+      (denote-tree-edit--set-from-front-matter
+       denote-tree-include-from-front-matter
+       #'denote-tree-edit--save-match)))
   (let ((denote-rename-confirmations nil))
     (denote-rename-file (mapcar #'cdr denote-tree-edit--current-note)))
   (denote-tree-mode))
