@@ -375,10 +375,13 @@ Denote wont ask you to confirm it, this is final."
     (let ((inhibit-read-only t))
       (goto-char denote-tree-edit--current-line)
       (setq denote-tree-edit--current-line nil)
-      (denote-tree-edit--clean-up)
-      (denote-tree-edit--set-from-front-matter
-       denote-tree-include-from-front-matter
-       #'denote-tree-edit--restore-line)))
+      (goto-char (+ (next-single-property-change (point) 'button-data)
+                      (length denote-tree-node)))
+      (delete-region (point) (line-end-position))
+      (dolist (el denote-tree-include-from-front-matter)
+        (insert (alist-get el denote-tree-edit--current-note) " "))
+      (delete-char -1)
+      (denote-tree-edit--clean-up)))
   (denote-tree-mode))
 
 (defun denote-tree-edit--restore-line (start end element)
