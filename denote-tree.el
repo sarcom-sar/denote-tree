@@ -283,11 +283,12 @@ If ARG is omitted, nil or zero, move once."
                        (get-text-property node-loc 'button-data))))
     (denote-tree--edit-node fake-buffer)))
 (defun denote-tree--edit-node (buffer)
-  ""
-  (let ((denote-save-buffers t)
-        (denote-kill-buffers t))
+  "Call `denote-rename-file' interactively to edit BUFFER."
+  (let ((denote-save-buffers t))
     (with-current-buffer (find-file-noselect buffer)
-      (call-interactively #'denote-rename-file))))
+      (call-interactively #'denote-rename-file)
+      (current-buffer))))
+
 
 
 ;; Tree traversal
