@@ -311,7 +311,6 @@ Preserve properties."
 
 
 ;; Tree traversal
-;; it is a good idea to merge those functions
 
 (defun denote-tree--draw-tree (buffer)
   "Draw and propertize a tree in current buffer starting with BUFFER."
