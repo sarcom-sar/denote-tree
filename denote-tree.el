@@ -366,7 +366,7 @@ Argument LASTP is the current node last child of parent."
      (t
       (setq indent (concat indent denote-tree-pipe))
       (insert denote-tree-tee)))
-    (setq point-star-loc (point))
+    (setq point-star-loc (point-marker))
     (insert (propertize denote-tree-node
                         'face (if circularp
                                   'denote-tree-circular-node
