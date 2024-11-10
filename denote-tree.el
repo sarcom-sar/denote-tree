@@ -279,12 +279,17 @@ If ARG is omitted, nil or zero, move once."
   "Edit node's front matter.
 What is editable is dependent on `denote-prompts'."
   (interactive)
-  (let* ((node-loc (next-single-property-change (line-beginning-position)
-                                                'button-data))
-         (buffer (denote-tree--edit-node
-                  (denote-get-path-by-id
-                   (get-text-property node-loc 'button-data)))))
-    (denote-tree--redraw-node buffer node-loc)))
+  (let* ((identifier (get-text-property
+                      (next-single-property-change (line-beginning-position)
+                                                   'button-data)
+                      'button-data))
+         (buffer (denote-tree--edit-node (denote-get-path-by-id identifier))))
+    (save-excursion
+      (goto-char (point-min))
+      (while (text-property-search-forward 'button-data
+                                           identifier
+                                           t)
+        (denote-tree--redraw-node buffer (point))))))
 
 
 ;; Utilities for node editing
