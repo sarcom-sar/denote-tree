@@ -370,29 +370,7 @@ If EL is not a symbol or EL is not in line return nil."
   "Replace front matter of note with user inputed data.
 Denote wont ask you to confirm it, this is final."
   (interactive)
-  (save-excursion
-    (let ((inhibit-read-only t)
-          filetype path)
-      (goto-char denote-tree-edit--current-line)
-      (setq path (denote-get-path-by-id
-                  (get-text-property
-                   (next-single-property-change (point) 'button-data)
-                   'button-data)))
-      (with-temp-buffer
-        (insert-file path)
-        (setq filetype (denote-tree--find-filetype (current-buffer))))
-      (denote-tree-edit--clean-up)
-      (setq denote-tree-edit--current-line nil)
-      (denote-tree-edit--set-from-front-matter
-       denote-tree-include-from-front-matter
-       #'denote-tree-edit--save-match)
-      (let ((keywords (assq 'keywords denote-tree-edit--current-note)))
-        (set-text-properties 0 (length (cdr keywords)) nil (cdr keywords))
-        (when (stringp (cdr keywords))
-          (setcdr keywords
-                  (funcall (plist-get filetype
-                                      :keywords-value-reverse-function)
-                           (cdr keywords)))))))
+  ;; placeholder + clean up
   (let ((denote-rename-confirmations nil)
         (denote-save-buffers t)
         (denote-kill-buffers t))
@@ -402,17 +380,7 @@ Denote wont ask you to confirm it, this is final."
 (defun denote-tree-edit-abort-changes ()
   "Restore the note from `denote-tree-edit--current-note'."
   (interactive)
-  (save-excursion
-    (let ((inhibit-read-only t))
-      (goto-char denote-tree-edit--current-line)
-      (setq denote-tree-edit--current-line nil)
-      (goto-char (+ (next-single-property-change (point) 'button-data)
-                      (length denote-tree-node)))
-      (delete-region (point) (line-end-position))
-      (dolist (el denote-tree-include-from-front-matter)
-        (insert (alist-get el denote-tree-edit--current-note) " "))
-      (delete-char -1)
-      (denote-tree-edit--clean-up)))
+  ;; placeholder + cleanup
   (denote-tree-mode))
 
 (defun denote-tree-edit--restore-line (start end element)
