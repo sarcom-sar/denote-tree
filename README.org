@@ -26,7 +26,7 @@ Customizable elements are:
 - ~denote-tree-max-traversal-depth~, it accepts either a symbol or max depth;
 - ~denote-tree-include-from-front-matter~, what to include within node
   description;
-- ~denote-tree-title-colorize-function~, which enables colorization of node
+- ~denote-tree-node-colorize-function~, which enables colorization of node
   description;
 - ~denote-tree-preserve-teleports-p~, which preserves the movement in and out
   cyclical nodes.

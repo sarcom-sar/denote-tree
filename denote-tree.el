@@ -53,7 +53,7 @@
 ;; User can customize `denote-tree-node-face' and
 ;; `denote-tree-circular-node-face' to make them more visible.  With a bit of
 ;; hacking it is also feasible to implement colored node titles via
-;; `denote-tree-title-colorize-function'.
+;; `denote-tree-node-colorize-function'.
 ;;
 ;; For performance reasons `denote-tree-max-traversal-depth' can be reduced.
 ;;
@@ -88,9 +88,11 @@
   :group 'denote-tree
   :type 'string)
 
-(defcustom denote-tree-title-colorize-function #'denote-tree--default-props
-  "Function accepting one argument STR.
-Returns propertied string STR."
+(defcustom denote-tree-node-colorize-function #'denote-tree--default-props
+  "Add properties to information from the node according to type.
+
+Function accepts two arguments STR and TYPE.  Choosen string from front-matter
+is propertized according to type from denote-tree-include-from-front-matter."
   :group 'denote-tree
   :type 'function)
 
@@ -312,7 +314,7 @@ Preserve properties."
     (save-excursion
       (goto-char pos)
       (delete-region pos (line-end-position))
-      (insert (funcall denote-tree-title-colorize-function
+      (insert (funcall denote-tree-node-colorize-function
                        (denote-tree--collect-keywords
                         buffer
                         denote-tree-include-from-front-matter)))
@@ -394,7 +396,7 @@ Insert the current line as follows INDENT `denote-tree-node' title of
 the current denote note.  Face of `denote-tree-node' is either
 `denote-tree-circular-node-face' if current NODE-NAME is a member of
 `denote-tree--cyclic-buffers' or `denote-tree-node-face' if it's not.
-Call `denote-tree-title-colorize-function' on title.
+Call `denote-tree-node-colorize-function' on title.
 
 Return location of a point where the node starts and the current indent.
 Argument LASTP is the current node last child of parent."
@@ -414,7 +416,7 @@ Argument LASTP is the current node last child of parent."
                         'face (if circularp
                                   'denote-tree-circular-node
                                 'denote-tree-node))
-            (funcall denote-tree-title-colorize-function
+            (funcall denote-tree-node-colorize-function
                      (denote-tree--collect-keywords node-name keywords))
             "\n")
     (cons point-star-loc indent)))
