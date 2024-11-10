@@ -286,6 +286,9 @@ What is editable is dependent on `denote-prompts'."
                    (get-text-property node-loc 'button-data)))))
     (denote-tree--draw-line buffer node-loc)))
 
+
+;; Utilities for node editing
+
 (defun denote-tree--edit-node (buffer)
   "Call `denote-rename-file' interactively to edit BUFFER.
 Return current buffer object."
