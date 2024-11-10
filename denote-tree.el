@@ -314,10 +314,9 @@ Preserve properties."
     (save-excursion
       (goto-char pos)
       (delete-region pos (line-end-position))
-      (insert (funcall denote-tree-node-colorize-function
-                       (denote-tree--collect-keywords
-                        buffer
-                        denote-tree-include-from-front-matter)))
+      (insert (denote-tree--collect-keywords
+               buffer
+               denote-tree-include-from-front-matter))
       (add-text-properties pos (line-end-position) props))))
 
 
@@ -416,8 +415,7 @@ Argument LASTP is the current node last child of parent."
                         'face (if circularp
                                   'denote-tree-circular-node
                                 'denote-tree-node))
-            (funcall denote-tree-node-colorize-function
-                     (denote-tree--collect-keywords node-name keywords))
+            (denote-tree--collect-keywords node-name keywords)
             "\n")
     (cons point-star-loc indent)))
 
@@ -475,10 +473,10 @@ Return as a list sans BUFFER own identifiers."
       (cdr (nreverse found-ids)))))
 
 (defun denote-tree--collect-keywords (buffer keywords)
-  "Return denote KEYWORDS from BUFFER.
+  "Return denote propertized KEYWORDS from BUFFER.
 Return \"\" if none are found."
   (let ((filetype (denote-tree--find-filetype buffer))
-        lst)
+        lst type)
     (when filetype
       (with-current-buffer buffer
         (dolist (el keywords)
@@ -495,11 +493,12 @@ Return \"\" if none are found."
                   (re-search-forward (plist-get filetype :keywords-key-regexp)
                                      nil t))
                  (t nil))
+            (setq type el)
             (setq el (denote-trim-whitespace
                       (buffer-substring-no-properties (point)
                                                       (line-end-position)))))
           (when (stringp el)
-            (push el lst)
+            (push (funcall denote-tree-node-colorize-function el type) lst)
             (push " " lst)))))
     (apply #'concat (nreverse (cdr lst)))))
 
@@ -535,8 +534,8 @@ Add ELEMENT to `denote-tree--visited-buffers' to delete it after
   (setq denote-tree--visited-buffers nil)
   (setq denote-tree--cyclic-buffers nil))
 
-(defun denote-tree--default-props (str)
-  "Default function returning STR with properties."
+(defun denote-tree--default-props (str type)
+  "Default function returning STR of TYPE with properties."
   (propertize str))
 
 (provide 'denote-tree)
