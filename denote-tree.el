@@ -62,7 +62,8 @@
 
 (eval-when-compile
   (require 'denote)
-  (require 'compat))
+  (require 'compat)
+  (require 'wid-edit))
 
 
 ;; Faces and Custom
@@ -320,15 +321,28 @@ Everything else is still read-only.  All newlines will be dropped.
             'button-data)))
   (save-excursion
     (let ((inhibit-read-only t))
-      ;; set props
-      (denote-tree-edit--set-from-front-matter
-       denote-tree-include-from-front-matter
-       #'add-text-properties
-       '(inhibit-read-only t front-sticky t))
       ;; save to denote-tree-edit--current-note
       (denote-tree-edit--set-from-front-matter
        denote-tree-include-from-front-matter
-       #'denote-tree-edit--save-match))))
+       #'denote-tree-edit--save-match)
+      (denote-tree-edit--widgetize-line))))
+
+(defun denote-tree-edit--widgetize-line ()
+  "Make line widgetized."
+  (kill-region (+ (next-single-property-change
+                   denote-tree-edit--current-line
+                   'button-data)
+                  (length denote-tree-node))
+               (line-end-position))
+  (goto-char (line-end-position))
+  (dolist (el denote-tree-include-from-front-matter)
+    (widget-create 'editable-field
+                   :size 13
+                   (substring-no-properties
+                    (alist-get el denote-tree-edit--current-note)))
+    (widget-insert " "))
+  (use-local-map widget-keymap)
+  (widget-setup))
 
 (defun denote-tree-edit--set-from-front-matter
     (front-matter-els func &optional any)
