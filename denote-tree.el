@@ -473,11 +473,11 @@ Return \"\" if none are found."
   "Return ELEMENT buffer, create if necessary.
 Add ELEMENT to `denote-tree--visited-buffers' to delete it after
 `denote-tree' initialization."
-    (unless (get-buffer element)
-      (add-to-list 'denote-tree--visited-buffers element)
-      (with-current-buffer (get-buffer-create element)
-        (erase-buffer)
-        (insert-file-contents (denote-get-path-by-id element))))
+  (unless (get-buffer element)
+    (add-to-list 'denote-tree--visited-buffers element)
+    (with-current-buffer (get-buffer-create element)
+      (erase-buffer)
+      (insert-file-contents (denote-get-path-by-id element))))
   element)
 
 
