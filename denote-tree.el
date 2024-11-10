@@ -154,6 +154,7 @@ is a point position of cyclical parent node.")
     (define-key map "f" #'denote-tree-child-node)
     (define-key map "b" #'denote-tree-parent-node)
     (define-key map "g" #'denote-tree-redraw)
+    (define-key map "e" #'denote-tree-edit-node)
     map)
   "Keymap for `denote-tree-mode'.")
 
@@ -273,6 +274,18 @@ If ARG is omitted, nil or zero, move once."
   (interactive "p")
   (or arg (setq arg 1))
   (denote-tree-next-node (- arg)))
+
+(defun denote-tree-edit-node ()
+  (interactive)
+  (let ((fake-buffer (denote-get-path-by-id
+                      (get-text-property
+                       (next-single-property-change (line-beginning-position)
+                                                    'button-data)
+                       'button-data)))
+        (denote-save-buffers t)
+        (denote-kill-buffers t))
+    (with-current-buffer (find-file-noselect fake-buffer)
+      (call-interactively #'denote-rename-file))))
 
 
 ;; Tree traversal
