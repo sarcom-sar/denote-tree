@@ -276,12 +276,16 @@ If ARG is omitted, nil or zero, move once."
   (denote-tree-next-node (- arg)))
 
 (defun denote-tree-edit-node ()
+  "Edit node's front matter.
+What is editable is dependent on `denote-prompts'."
   (interactive)
   (let* ((node-loc (next-single-property-change (line-beginning-position)
                                                 'button-data))
-         (fake-buffer (denote-get-path-by-id
-                       (get-text-property node-loc 'button-data))))
-    (denote-tree--edit-node fake-buffer)))
+         (buffer (denote-tree--edit-node
+                  (denote-get-path-by-id
+                   (get-text-property node-loc 'button-data)))))
+    (denote-tree--draw-line buffer node-loc)))
+
 (defun denote-tree--edit-node (buffer)
   "Call `denote-rename-file' interactively to edit BUFFER."
   (let ((denote-save-buffers t))
