@@ -297,14 +297,13 @@ Return current buffer object."
       (call-interactively #'denote-rename-file)
       (current-buffer))))
 
-(defun denote-tree--redraw-node (buffer loc)
-  "Redraw node based on BUFFER's front matter at LOC.
+(defun denote-tree--redraw-node (buffer pos)
+  "Redraw node based on BUFFER's front matter at POS.
 Include only elements from `denote-tree-include-from-front-matter'.
 
 Preserve properties."
   (let ((inhibit-read-only t)
-        (props (text-properties-at (line-beginning-position)))
-        (pos (+ loc (length denote-tree-node))))
+        (props (text-properties-at (line-beginning-position))))
     (save-excursion
       (goto-char pos)
       (delete-region pos (line-end-position))
