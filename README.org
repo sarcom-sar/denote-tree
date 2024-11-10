@@ -22,6 +22,7 @@ redraw entire tree from scratch if anything changes.
 Customizable elements are:
 
 - faces ~denote-tree-node~ and ~denote-tree-circular-node~;
+- ~denote-tree-buffer-name~, a string for default name of denote-tree buffer;
 - ~denote-tree-max-traversal-depth~, it accepts either a symbol or max depth;
 - ~denote-tree-include-from-front-matter~, what to include within node
   description;
@@ -39,6 +40,7 @@ Customizable elements are:
 | f          | denote-tree-child-node  |
 | b          | denote-tree-parent-node |
 | g          | denote-tree-redraw      |
+| e          | denote-tree-edit-node   |
 | RET        | denote-tree-enter-node  |
 
 *** Visualization
@@ -71,7 +73,8 @@ contributions.
 - [X] give the user the ability to colorize node titles;
 - [X] unite traversal functions;
 - [ ] smarter redrawing of a tree;
-- [ ] ability to edit the front matter at point.
+- [X] ability to edit the front matter at point;
+- [ ] edit front matter with widgets.
 
 *** Bare minimum before going public
 
