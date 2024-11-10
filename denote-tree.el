@@ -277,14 +277,16 @@ If ARG is omitted, nil or zero, move once."
 
 (defun denote-tree-edit-node ()
   (interactive)
-  (let ((fake-buffer (denote-get-path-by-id
-                      (get-text-property
-                       (next-single-property-change (line-beginning-position)
-                                                    'button-data)
-                       'button-data)))
-        (denote-save-buffers t)
+  (let* ((node-loc (next-single-property-change (line-beginning-position)
+                                                'button-data))
+         (fake-buffer (denote-get-path-by-id
+                       (get-text-property node-loc 'button-data))))
+    (denote-tree--edit-node fake-buffer)))
+(defun denote-tree--edit-node (buffer)
+  ""
+  (let ((denote-save-buffers t)
         (denote-kill-buffers t))
-    (with-current-buffer (find-file-noselect fake-buffer)
+    (with-current-buffer (find-file-noselect buffer)
       (call-interactively #'denote-rename-file))))
 
 
