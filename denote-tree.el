@@ -309,7 +309,7 @@ If ARG is omitted, nil or zero, move once."
 
 Everything else is still read-only.  All newlines will be dropped.
 \\{denote-tree-edit-mode}"
-  (setq buffer-read-only t)
+  (setq buffer-read-only nil)
   (add-hook 'after-change-functions #'denote-tree-edit--remove-newline nil t)
   (setq denote-tree-edit--current-line (line-beginning-position))
   (setcdr (assq 'file denote-tree-edit--current-note)
