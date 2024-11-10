@@ -287,14 +287,16 @@ What is editable is dependent on `denote-prompts'."
     (denote-tree--draw-line buffer node-loc)))
 
 (defun denote-tree--edit-node (buffer)
-  "Call `denote-rename-file' interactively to edit BUFFER."
+  "Call `denote-rename-file' interactively to edit BUFFER.
+Return current buffer object."
   (let ((denote-save-buffers t))
     (with-current-buffer (find-file-noselect buffer)
       (call-interactively #'denote-rename-file)
       (current-buffer))))
 
 (defun denote-tree--draw-line (buffer loc)
-  "Draw BUFFER's elements from `denote-tree-include-from-front-matter' at LOC."
+  "Draw BUFFER's elements from `denote-tree-include-from-front-matter' at LOC.
+Preserve properties."
   (let ((inhibit-read-only t)
         (props (text-properties-at (line-beginning-position)))
         (pos (+ loc (length denote-tree-node))))
