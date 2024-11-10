@@ -289,6 +289,19 @@ If ARG is omitted, nil or zero, move once."
       (call-interactively #'denote-rename-file)
       (current-buffer))))
 
+(defun denote-tree--draw-line (buffer loc)
+  "Draw BUFFER's elements from `denote-tree-include-from-front-matter' at LOC."
+  (let ((inhibit-read-only t)
+        (props (text-properties-at (line-beginning-position)))
+        (pos (+ loc (length denote-tree-node))))
+    (save-excursion
+      (goto-char pos)
+      (delete-region pos (line-end-position))
+      (insert (funcall denote-tree-title-colorize-function
+                       (denote-tree--collect-keywords
+                        buffer
+                        denote-tree-include-from-front-matter)))
+      (add-text-properties pos (line-end-position) props))))
 
 
 ;; Tree traversal
