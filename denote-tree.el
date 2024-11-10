@@ -284,7 +284,7 @@ What is editable is dependent on `denote-prompts'."
          (buffer (denote-tree--edit-node
                   (denote-get-path-by-id
                    (get-text-property node-loc 'button-data)))))
-    (denote-tree--draw-line buffer node-loc)))
+    (denote-tree--redraw-node buffer node-loc)))
 
 
 ;; Utilities for node editing
@@ -297,8 +297,10 @@ Return current buffer object."
       (call-interactively #'denote-rename-file)
       (current-buffer))))
 
-(defun denote-tree--draw-line (buffer loc)
-  "Draw BUFFER's elements from `denote-tree-include-from-front-matter' at LOC.
+(defun denote-tree--redraw-node (buffer loc)
+  "Redraw node based on BUFFER's front matter at LOC.
+Include only elements from `denote-tree-include-from-front-matter'.
+
 Preserve properties."
   (let ((inhibit-read-only t)
         (props (text-properties-at (line-beginning-position)))
