@@ -19,18 +19,6 @@ It is able to handle cyclical notes and provides a mechanism to move between
 those cyclical nodes by default.  As a drawback, it is pretty dumb and has to
 redraw entire tree from scratch if anything changes.
 
-Customizable elements are:
-
-- faces ~denote-tree-node~ and ~denote-tree-circular-node~;
-- ~denote-tree-buffer-name~, a string for default name of denote-tree buffer;
-- ~denote-tree-max-traversal-depth~, it accepts either a symbol or max depth;
-- ~denote-tree-include-from-front-matter~, what to include within node
-  description;
-- ~denote-tree-node-colorize-function~, which enables colorization of node
-  description;
-- ~denote-tree-preserve-teleports-p~, which preserves the movement in and out
-  cyclical nodes.
-
 *** Keybindings for =*denote-tree*= buffer
 
 | Keybinding | Function                |
@@ -59,6 +47,60 @@ Customizable elements are:
     +-* Vestibulum convallis, lorem a tempus semper.
     '-* Dui dui euismod elit, vitae placerat urna tortor vitae lacus.
 #+end_example
+
+*** In depth doc
+
+**** Customizable elements
+
+- =denote-tree-preserve-teleports-p=, teleport back when accessing cyclical node
+   from it's child.  When nil, always move to "real" parent of a node.
+- =denote-tree-include-from-front-matter=, elements of front matter to include,
+  when drawing a node.  Currently supported elements: TITLE, IDENTIFIER,
+  KEYWORDS, arbitrary string.
+- =denote-tree-max-traversal-depth=, maximum traversal depth of =denote-tree=.
+  If t traverse all the way, if num, traverse n nodes deep.
+- =denote-tree-title-colorize-function=, Add properties to information from the
+  node according to type.  Function accepts two arguments STR and TYPE.  Choosen
+  string from front-matter is propertized according to type
+  =from denote-tree-include-from-front-matter=.
+- =denote-tree-buffer-name=, name of the buffer denote-tree will be built in.
+
+**** Faces
+
+- =denote-tree-circular-node=, default face used for circular nodes.
+- =denote-tree-node=, default face used for nodes.
+
+**** User facing functions
+
+- =denote-tree= (&optional buffer)
+  Draw hierarchy between denote files as a tree.  The function uses either the
+  current buffer, if called from a function or a BUFFER provided by the user.
+- =denote-tree-next-node= (&optional arg)
+  Move the point to the next sibling node ARG times.  If ARG is negative move
+  to the prev sibling node ARG times.  If ARG is omitted, nil or zero, move
+  once.
+- =denote-tree-prev-node= (&optional arg)
+  Move the point to the prev sibling node ARG times.  If ARG is negative move
+  to the nextv sibling node ARG times.  If ARG is omitted, nil or zero, move
+  once.
+- =denote-tree-parent-node= (&optional arg)
+  Move the point to the parent of a node ARG times.  If ARG is negative move to
+  the child of a node ARG times.  If ARG is ommited, nil or zero, move once.
+  If =denote-tree-preserve-teleports-p= is set to t, teleport to the parent
+  the point came from.
+- =denote-tree-child-node= (&optional arg)
+  Move the point to the child of a node ARG times.  If ARG is negative move to
+  the parent of a node ARG times.  If ARG is ommited, nil or zero, move once.
+  With =universal-argument= reverse =denote-tree-preserve-teleports-p= one
+  time.  If =denote-tree-preserve-teleports-p= is set to t, preserve the parent
+  node position for future backtracking.
+- =denote-tree-redraw= (&optional arg)
+  Redraw the entire tree.  With =universal-argument=, redraw from node at
+  point.
+- =denote-tree-enter-edit= ()
+  Edit current note.
+- =denote-tree-enter-node= (&optional button)
+  Enter node at point in other window.  BUTTON is pased as node's ID.
 
 ** Contributing
 
