@@ -335,10 +335,14 @@ Everything else is still read-only.  All newlines will be dropped.
                (line-end-position))
   (goto-char (line-end-position))
   (dolist (el denote-tree-include-from-front-matter)
-    (widget-create 'editable-field
-                   :size 13
-                   (substring-no-properties
-                    (alist-get el denote-tree-edit--current-note)))
+    (cond
+     ((symbolp el)
+      (widget-create 'editable-field
+                     :size 13
+                     (substring-no-properties
+                      (alist-get el denote-tree-edit--current-note))))
+     ((stringp el)
+      (widget-insert el)))
     (widget-insert " "))
   (use-local-map widget-keymap)
   (widget-setup))
