@@ -409,9 +409,8 @@ Denote wont ask you to confirm it, this is final."
     (apply #'denote-rename-file (mapcar #'cdr denote-tree-edit--current-note)))
   (denote-tree-edit--clean-up))
 
-(defun denote-tree-edit--save-from-widgets ()
+(defun denote-tree-edit--save-from-widgets (copy)
   ""
-  (goto-char denote-tree-edit--current-line)
   (let ((possible-widgets (mapcar #'widget-at
                                   (mapcar #'overlay-start
                                           (overlays-in (line-beginning-position)
@@ -419,9 +418,10 @@ Denote wont ask you to confirm it, this is final."
         (front-matter denote-tree-include-from-front-matter))
     (dolist (el possible-widgets)
       (let ((value (widget-value el)))
-        (setcdr (assq (car front-matter) denote-tree-edit--current-note)
+        (setcdr (assq (car front-matter) copy)
                 value))
-      (setq front-matter (cdr front-matter)))))
+      (setq front-matter (cdr front-matter))))
+  copy)
 
 (defun denote-tree-edit-abort-changes ()
   "Restore the note from `denote-tree-edit--current-note'."
