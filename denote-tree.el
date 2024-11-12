@@ -349,13 +349,8 @@ Everything else is still read-only.  All newlines will be dropped.
   (let ((possible-widgets (mapcar #'widget-at
                                   (mapcar #'overlay-start
                                           (overlays-in (line-beginning-position)
-                                                       (line-end-position)))))
-        (front-matter denote-tree-include-from-front-matter))
+                                                       (line-end-position))))))
     (dolist (el possible-widgets)
-      (let ((value (widget-value el)))
-        (setcdr (assq (car front-matter) denote-tree-edit--current-note)
-                value))
-      (setq front-matter (cdr front-matter))
       (widget-delete el))
     (kill-region (+ (next-single-property-change denote-tree-edit--current-line
                                                  'button-data)
