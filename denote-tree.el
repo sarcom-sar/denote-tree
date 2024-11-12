@@ -401,12 +401,17 @@ Denote wont ask you to confirm it, this is final."
   ;; placeholder + cleanup
   (denote-tree-mode))
 
-(defun denote-tree-edit--restore-line (start end element)
+(defun denote-tree-edit--restore-line ()
   "Stub"
-  (let ((props (text-properties-at start)))
-    (delete-region start end)
-    (goto-char start)
-    (insert (alist-get element denote-tree-edit--current-note))))
+  (let ((inhibit-read-only t)
+        (props (text-properties-at denote-tree-edit--current-line))
+        (front-pos (+ (next-single-property-change denote-tree-edit--current-line
+                                                   'button-data)
+                      (length denote-tree-node))))
+    (goto-char front-pos)
+    (dolist (el denote-tree-include-from-front-matter)
+      (insert (alist-get el denote-tree-edit--current-note)))
+    (set-text-properties front-pos (line-end-position) props)))
 
 (defun denote-tree-edit--clean-up ()
   "Return the line to read-only state."
