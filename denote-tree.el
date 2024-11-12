@@ -411,6 +411,8 @@ Denote wont ask you to confirm it, this is final."
 (defun denote-tree-edit--clean-up ()
   "Return the line to read-only state."
   (save-excursion
+    (denote-tree-edit--dewidgetize-line)
+    (denote-tree-edit--restore-line)
     (denote-tree-mode)))
 
 (defun denote-tree-edit--remove-newline (beg end length)
