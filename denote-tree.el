@@ -2,10 +2,10 @@
 
 ;; Copyright 2024, Sararin
 ;; Created: 2024-09-15 Sun
-;; Version: 0.5.0
+;; Version: 0.7.0
 ;; Keywords: convenience
 ;; URL: http://github.com/sarcom-sar/denote-tree.el
-;; Package-Requires: ((emacs "27.1") (denote "3.1.0"))
+;; Package-Requires: ((emacs "29.1"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -109,11 +109,15 @@ Currently supported elements:
 - title
 - identifier
 - keywords
+- signature
+- date
 - arbitrary string"
   :group 'denote-tree
   :type '(set (choice (const title)
                       (const identifier)
                       (const keywords)
+                      (const signature)
+                      (const date)
                       string)))
 
 (defcustom denote-tree-preserve-teleports-p t
@@ -278,20 +282,22 @@ If ARG is omitted, nil or zero, move once."
   (denote-tree-next-node (- arg)))
 
 (defun denote-tree-edit-node ()
-  "Edit node's front matter.
-What is editable is dependent on `denote-prompts'."
+  "Edit node's front matter.  What is editable is dependent on `denote-prompts'.
+If `denote-tree-edit-mode' is loaded, use it's UI."
   (interactive)
-  (let* ((identifier (get-text-property
-                      (next-single-property-change (line-beginning-position)
-                                                   'button-data)
-                      'button-data))
-         (buffer (denote-tree--edit-node (denote-get-path-by-id identifier))))
-    (save-excursion
-      (goto-char (point-min))
-      (while (text-property-search-forward 'button-data
-                                           identifier
-                                           t)
-        (denote-tree--redraw-node buffer (point))))))
+  (if (featurep 'denote-tree-edit)
+      (denote-tree-edit-mode)
+    (let* ((identifier (get-text-property
+                        (next-single-property-change (line-beginning-position)
+                                                     'button-data)
+                        'button-data))
+           (buffer (denote-tree--edit-node (denote-get-path-by-id identifier))))
+      (save-excursion
+        (goto-char (point-min))
+        (while (text-property-search-forward 'button-data
+                                             identifier
+                                             t)
+          (denote-tree--redraw-node buffer (point)))))))
 
 
 ;; Utilities for node editing
@@ -480,19 +486,21 @@ Return \"\" if none are found."
     (when filetype
       (with-current-buffer buffer
         (dolist (el keywords)
-          (goto-char (point-min))
-          (when (cond
-                 ((eq el 'title)
-                  (re-search-forward (plist-get filetype :title-key-regexp)
-                                     nil t))
-                 ((eq el 'identifier)
-                  (re-search-forward denote-id-regexp
-                                     nil t)
-                  (backward-word-strictly))
-                 ((eq el 'keywords)
-                  (re-search-forward (plist-get filetype :keywords-key-regexp)
-                                     nil t))
-                 (t nil))
+          (when-let ((key
+                      (cond
+                       ((eq el 'title)
+                        :title-key-regexp)
+                       ((eq el 'identifier)
+                        :identifier-key-regexp)
+                       ((eq el 'keywords)
+                        :keywords-key-regexp)
+                       ((eq el 'signature)
+                        :signature-key-regexp)
+                       ((eq el 'date)
+                        :date-key-regexp)
+                       (t nil))))
+            (goto-char (point-min))
+            (re-search-forward (plist-get filetype key))
             (setq type el)
             (setq el (denote-trim-whitespace
                       (buffer-substring-no-properties (point)
