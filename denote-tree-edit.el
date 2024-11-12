@@ -194,7 +194,7 @@ Denote wont ask you to confirm it, this is final."
                       (length denote-tree-node))))
     (goto-char front-pos)
     (dolist (el denote-tree-include-from-front-matter)
-      (if (symbolp)
+      (if (symbolp el)
           (insert (alist-get el denote-tree-edit--current-note) " ")
         (insert el " ")))))
 
