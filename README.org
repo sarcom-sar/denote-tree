@@ -28,7 +28,7 @@ redraw entire tree from scratch if anything changes.
 | f          | denote-tree-child-node  |
 | b          | denote-tree-parent-node |
 | g          | denote-tree-redraw      |
-| e          | denote-tree-edit-node   |
+| e          | denote-tree-enter-edit  |
 | RET        | denote-tree-enter-node  |
 
 *** Visualization
