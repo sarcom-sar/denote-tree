@@ -401,12 +401,16 @@ If EL is not a symbol or EL is not in line return nil."
   "Replace front matter of note with user inputed data.
 Denote wont ask you to confirm it, this is final."
   (interactive)
-  (save-excursion
-    (denote-tree-edit--save-from-widgets))
-  (let ((denote-rename-confirmations nil)
+  (let ((copy (copy-tree denote-tree-edit--current-note))
+        (denote-rename-confirmations nil)
         (denote-save-buffers t)
         (denote-kill-buffers t))
-    (apply #'denote-rename-file (mapcar #'cdr denote-tree-edit--current-note)))
+    (save-excursion
+      (goto-char denote-tree-edit--current-line)
+      (setq copy
+            (denote-tree-edit--fix-current-note
+             (denote-tree-edit--save-from-widgets copy))))
+    (apply #'denote-rename-file (mapcar #'cdr copy)))
   (denote-tree-edit--clean-up))
 
 
