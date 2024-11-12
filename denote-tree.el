@@ -383,7 +383,8 @@ If EL is not a symbol or EL is not in line return nil."
   "Replace front matter of note with user inputed data.
 Denote wont ask you to confirm it, this is final."
   (interactive)
-  ;; placeholder + clean up
+  (save-excursion
+    (denote-tree-edit--save-from-widgets))
   (let ((denote-rename-confirmations nil)
         (denote-save-buffers t)
         (denote-kill-buffers t))
