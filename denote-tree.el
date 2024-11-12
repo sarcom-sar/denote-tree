@@ -425,11 +425,12 @@ Denote wont ask you to confirm it, this is final."
 
 (defun denote-tree-edit--clean-up ()
   "Return the line to read-only state."
-  (save-excursion
-    (denote-tree-edit--dewidgetize-line)
-    (denote-tree-edit--restore-line)
-    (setq denote-tree-edit--current-line nil)
-    (denote-tree-mode)))
+  (let ((inhibit-read-only t))
+    (save-excursion
+      (denote-tree-edit--dewidgetize-line)
+      (denote-tree-edit--restore-line)
+      (setq denote-tree-edit--current-line nil)
+      (denote-tree-mode))))
 
 (defun denote-tree-edit--save-match (start end type)
   "Save match to `denote-tree-edit--current-note'."
