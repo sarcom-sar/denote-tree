@@ -340,6 +340,15 @@ Everything else is still read-only.  All newlines will be dropped.
      ((symbolp el)
       (widget-create 'editable-field
                      :size 13
+                     :keymap (let ((map (make-sparse-keymap)))
+                               (set-keymap-parent map widget-field-keymap)
+                               (define-key map
+                                           (kbd "C-c C-c")
+                                           #'denote-tree-edit-commit-changes)
+                               (define-key map
+                                           (kbd "C-c C-k")
+                                           #'denote-tree-edit-abort-changes)
+                               map)
                      (substring-no-properties
                       (alist-get el denote-tree-edit--current-note))))
      ((stringp el)
