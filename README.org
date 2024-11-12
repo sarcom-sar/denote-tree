@@ -72,7 +72,7 @@ contributions.
 - [X] Make it major mode agnostic;
 - [X] give the user the ability to colorize node titles;
 - [X] unite traversal functions;
-- [ ] smarter redrawing of a tree;
+- [ ] smarter redrawing of a tree (with hierarchy.el);
 - [X] ability to edit the front matter at point;
 - [ ] edit front matter with widgets.
 
