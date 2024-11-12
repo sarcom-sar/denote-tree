@@ -408,7 +408,6 @@ Denote wont ask you to confirm it, this is final."
 (defun denote-tree-edit-abort-changes ()
   "Restore the note from `denote-tree-edit--current-note'."
   (interactive)
-  ;; placeholder + cleanup
   (denote-tree-edit--clean-up))
 
 (defun denote-tree-edit--restore-line ()
