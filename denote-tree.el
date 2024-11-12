@@ -427,6 +427,7 @@ Denote wont ask you to confirm it, this is final."
   (save-excursion
     (denote-tree-edit--dewidgetize-line)
     (denote-tree-edit--restore-line)
+    (setq denote-tree-edit--current-line nil)
     (denote-tree-mode)))
 
 (defun denote-tree-edit--remove-newline (beg end length)
