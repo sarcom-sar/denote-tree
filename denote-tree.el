@@ -108,11 +108,15 @@ Currently supported elements:
 - title
 - identifier
 - keywords
+- signature
+- date
 - arbitrary string"
   :group 'denote-tree
   :type '(set (choice (const title)
                       (const identifier)
                       (const keywords)
+                      (const signature)
+                      (const date)
                       string)))
 
 (defcustom denote-tree-preserve-teleports-p t
@@ -610,19 +614,21 @@ Return \"\" if none are found."
     (when filetype
       (with-current-buffer buffer
         (dolist (el keywords)
-          (goto-char (point-min))
-          (when (cond
-                 ((eq el 'title)
-                  (re-search-forward (plist-get filetype :title-key-regexp)
-                                     nil t))
-                 ((eq el 'identifier)
-                  (re-search-forward denote-id-regexp
-                                     nil t)
-                  (backward-word-strictly))
-                 ((eq el 'keywords)
-                  (re-search-forward (plist-get filetype :keywords-key-regexp)
-                                     nil t))
-                 (t nil))
+          (when-let ((key
+                      (cond
+                       ((eq el 'title)
+                        :title-key-regexp)
+                       ((eq el 'identifier)
+                        :identifier-key-regexp)
+                       ((eq el 'keywords)
+                        :keywords-key-regexp)
+                       ((eq el 'signature)
+                        :signature-key-regexp)
+                       ((eq el 'date)
+                        :date-key-regexp)
+                       (t nil))))
+            (goto-char (point-min))
+            (re-search-forward (plist-get filetype key))
             (setq type el)
             (setq el (denote-trim-whitespace
                       (buffer-substring-no-properties (point)
