@@ -300,6 +300,7 @@ If ARG is omitted, nil or zero, move once."
 
 (defvar denote-tree-edit-mode-map
   (let ((map (make-sparse-keymap)))
+    (set-keymap-parent map widget-keymap)
     (define-key map (kbd "C-c C-c") #'denote-tree-edit-commit-changes)
     (define-key map (kbd "C-c C-k") #'denote-tree-edit-abort-changes)
     map)
@@ -344,7 +345,7 @@ Everything else is still read-only.  All newlines will be dropped.
      ((stringp el)
       (widget-insert el)))
     (widget-insert " "))
-  (use-local-map widget-keymap)
+  (use-local-map denote-tree-edit-mode-map)
   (widget-setup))
 
 (defun denote-tree-edit--dewidgetize-line ()
