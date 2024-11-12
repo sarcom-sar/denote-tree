@@ -311,7 +311,6 @@ If ARG is omitted, nil or zero, move once."
 Everything else is still read-only.  All newlines will be dropped.
 \\{denote-tree-edit-mode}"
   (setq buffer-read-only nil)
-  (add-hook 'after-change-functions #'denote-tree-edit--remove-newline nil t)
   (setq denote-tree-edit--current-line (line-beginning-position))
   (setcdr (assq 'file denote-tree-edit--current-note)
           (denote-get-path-by-id
@@ -429,12 +428,6 @@ Denote wont ask you to confirm it, this is final."
     (denote-tree-edit--restore-line)
     (setq denote-tree-edit--current-line nil)
     (denote-tree-mode)))
-
-(defun denote-tree-edit--remove-newline (beg end length)
-  "Silently drop a newline if user tries to enter one."
-  (save-excursion
-    (and (search-forward "\n" end t)
-         (delete-region (1- (point)) end))))
 
 (defun denote-tree-edit--save-match (start end type)
   "Save match to `denote-tree-edit--current-note'."
