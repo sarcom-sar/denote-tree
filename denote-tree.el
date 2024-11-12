@@ -452,7 +452,9 @@ Denote wont ask you to confirm it, this is final."
                       (length denote-tree-node))))
     (goto-char front-pos)
     (dolist (el denote-tree-include-from-front-matter)
-      (insert (alist-get el denote-tree-edit--current-note) " "))))
+      (if (symbolp)
+          (insert (alist-get el denote-tree-edit--current-note) " ")
+        (insert el " ")))))
 
 (defun denote-tree-edit--clean-up ()
   "Return the line to read-only state."
