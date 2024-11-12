@@ -344,6 +344,24 @@ Everything else is still read-only.  All newlines will be dropped.
   (use-local-map widget-keymap)
   (widget-setup))
 
+(defun denote-tree-edit--dewidgetize-line ()
+  "Destroy widgets in line."
+  (let ((possible-widgets (mapcar #'widget-at
+                                  (mapcar #'overlay-start
+                                          (overlays-in (line-beginning-position)
+                                                       (line-end-position)))))
+        (front-matter denote-tree-include-from-front-matter))
+    (dolist (el possible-widgets)
+      (let ((value (widget-value el)))
+        (setcdr (assq (car front-matter) denote-tree-edit--current-note)
+                value))
+      (setq front-matter (cdr front-matter))
+      (widget-delete el))
+    (kill-region (+ (next-single-property-change denote-tree-edit--current-line
+                                                 'button-data)
+                    (length denote-tree-node))
+                 (line-end-position))))
+
 (defun denote-tree-edit--set-from-front-matter
     (front-matter-els func &optional any)
   "Iterate over FRONT-MATTER-ELS applying FUNC to it.
@@ -393,10 +411,7 @@ Denote wont ask you to confirm it, this is final."
 (defun denote-tree-edit--clean-up ()
   "Return the line to read-only state."
   (save-excursion
-    (denote-tree-edit--set-from-front-matter
-     denote-tree-include-from-front-matter
-     #'add-text-properties
-     '(inhibit-read-only nil))))
+    (denote-tree-mode)))
 
 (defun denote-tree-edit--remove-newline (beg end length)
   "Silently drop a newline if user tries to enter one."
