@@ -415,6 +415,7 @@ Denote wont ask you to confirm it, this is final."
 
 
 (defun denote-tree-edit--fix-current-note (copy)
+  "De-listify keywords alist element in COPY."
   (let (filetype)
     (with-temp-buffer
       (insert-file-contents (alist-get 'file denote-tree-edit--current-note))
@@ -426,7 +427,7 @@ Denote wont ask you to confirm it, this is final."
   copy)
 
 (defun denote-tree-edit--save-from-widgets (copy)
-  ""
+  "Save values from `denote-tree-include-from-front-matter' in COPY."
   (let ((possible-widgets (mapcar #'widget-at
                                   (mapcar #'overlay-start
                                           (overlays-in (line-beginning-position)
@@ -446,7 +447,7 @@ Denote wont ask you to confirm it, this is final."
   (denote-tree-edit--clean-up))
 
 (defun denote-tree-edit--restore-line ()
-  "Stub"
+  "Restore edited note to previous state."
   (let ((front-pos (+ (next-single-property-change denote-tree-edit--current-line
                                                    'button-data)
                       (length denote-tree-node))))
