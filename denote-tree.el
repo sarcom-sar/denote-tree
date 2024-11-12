@@ -331,7 +331,7 @@ Preserve properties."
   "Walk along the links starting from BUFFER.
 
 Draw the current buffer as a node in `denote-tree-buffer-name'.  Set it's
-properties. Collect all the links and call `denote-tree--walk-links' on
+properties.  Collect all the links and call `denote-tree--walk-links' on
 them recursively.  If one of the buffers was already visited do not iterate
 over it.
 
@@ -427,7 +427,7 @@ Argument LASTP is the current node last child of parent."
                     'button-data buffer))
 
 (defun denote-tree--add-props-to-children (node-children parent)
-  "Iterate over NODE-CHILDREN to set node's props. Keep node's PARENT.
+  "Iterate over NODE-CHILDREN to set node's props.  Keep node's PARENT.
 
 Every node contains props denote-tree--next, denote-tree--prev and
 denote-tree--parent which contain point's position to go to get to
