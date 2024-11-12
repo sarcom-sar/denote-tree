@@ -168,8 +168,8 @@ Denote wont ask you to confirm it, this is final."
                        (cdr (assq 'keywords copy))))))
   copy)
 
-(defun denote-tree-edit--save-from-widgets (copy)
-  "Save values from `denote-tree-include-from-front-matter' in COPY."
+(defun denote-tree-edit--save-from-widgets ()
+  "Save values from fields into `denote-tree-edit--current-note'."
   (let ((possible-widgets (mapcar #'widget-at
                                   (mapcar #'overlay-start
                                           (overlays-in (line-beginning-position)
@@ -178,10 +178,9 @@ Denote wont ask you to confirm it, this is final."
     (dolist (el possible-widgets)
       (when (symbolp (car front-matter))
         (let ((value (widget-value el)))
-          (setcdr (assq (car front-matter) copy)
+          (setcdr (assq (car front-matter) denote-tree-edit--current-note)
                   value)))
-      (setq front-matter (cdr front-matter))))
-  copy)
+      (setq front-matter (cdr front-matter)))))
 
 (defun denote-tree-edit-abort-changes ()
   "Restore the note from `denote-tree-edit--current-note'."
