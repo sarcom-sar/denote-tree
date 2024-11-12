@@ -159,12 +159,13 @@ Denote wont ask you to confirm it, this is final."
   "De-listify keywords alist element in COPY."
   (let (filetype)
     (with-temp-buffer
-      (insert-file-contents (alist-get 'file denote-tree-edit--current-note))
+      (insert-file-contents (alist-get 'file copy))
       (goto-char (point-min))
       (setq filetype (denote-tree--find-filetype (current-buffer))))
-    (setcdr (assq 'keywords copy)
-            (funcall (plist-get filetype :keywords-value-reverse-function)
-                     (cdr (assq 'keywords copy)))))
+    (when (listp (cdr (assq 'keywords copy)))
+      (setcdr (assq 'keywords copy)
+              (funcall (plist-get filetype :keywords-value-reverse-function)
+                       (cdr (assq 'keywords copy))))))
   copy)
 
 (defun denote-tree-edit--save-from-widgets (copy)
