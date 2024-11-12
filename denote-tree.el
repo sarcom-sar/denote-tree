@@ -433,9 +433,10 @@ Denote wont ask you to confirm it, this is final."
                                                        (line-end-position)))))
         (front-matter denote-tree-include-from-front-matter))
     (dolist (el possible-widgets)
-      (let ((value (widget-value el)))
-        (setcdr (assq (car front-matter) copy)
-                value))
+      (when (symbolp (car front-matter))
+        (let ((value (widget-value el)))
+          (setcdr (assq (car front-matter) copy)
+                  value)))
       (setq front-matter (cdr front-matter))))
   copy)
 
