@@ -310,7 +310,7 @@ If ARG is omitted, nil or zero, move once."
   "Edit the front matter of the note at point from within a tree.
 
 Everything else is still read-only.  All newlines will be dropped.
-\\{denote-tree-edit-mode}"
+\\{denote-tree-edit-mode-map}"
   (setq buffer-read-only nil)
   (setq denote-tree-edit--current-line (line-beginning-position))
   (setcdr (assq 'file denote-tree-edit--current-note)
