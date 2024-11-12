@@ -349,6 +349,7 @@ Everything else is still read-only.  All newlines will be dropped.
 
 (defun denote-tree-edit--dewidgetize-line ()
   "Destroy widgets in line."
+  (goto-char denote-tree-edit--current-line)
   (let ((possible-widgets (mapcar #'widget-at
                                   (mapcar #'overlay-start
                                           (overlays-in (line-beginning-position)
