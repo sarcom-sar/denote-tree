@@ -72,13 +72,17 @@ Everything else is still read-only.  All newlines will be dropped.
        #'denote-tree-edit--save-match)
       (denote-tree-edit--widgetize-line))))
 
-
 (defun denote-tree-edit--after-button (pos)
-  "Return position of prop 'button-data in POS."
+  "Return position of prop 'button-data in line POS or nil."
   (save-excursion
     (goto-char pos)
-    (+ (next-single-property-change (line-beginning-position) 'button-data)
-       (length denote-tree-node))))
+    (save-restriction
+      (narrow-to-region (line-beginning-position) (line-end-position))
+      (when-let ((after-button (next-single-property-change
+                                (line-beginning-position)
+                                'button-data)))
+        (+ after-button
+           (length denote-tree-node))))))
 
 (defun denote-tree-edit--widgetize-line ()
   "Make line widgetized."
