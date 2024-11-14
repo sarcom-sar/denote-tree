@@ -72,12 +72,17 @@ Everything else is still read-only.  All newlines will be dropped.
        #'denote-tree-edit--save-match)
       (denote-tree-edit--widgetize-line))))
 
+
+(defun denote-tree-edit--after-button (pos)
+  "Return position of prop 'button-data in POS."
+  (save-excursion
+    (goto-char pos)
+    (+ (next-single-property-change (line-beginning-position) 'button-data)
+       (length denote-tree-node))))
+
 (defun denote-tree-edit--widgetize-line ()
   "Make line widgetized."
-  (kill-region (+ (next-single-property-change
-                   denote-tree-edit--current-line
-                   'button-data)
-                  (length denote-tree-node))
+  (kill-region (denote-tree-edit--after-button denote-tree-edit--current-line)
                (line-end-position))
   (goto-char (line-end-position))
   (dolist (el denote-tree-include-from-front-matter)
@@ -111,9 +116,7 @@ Everything else is still read-only.  All newlines will be dropped.
                                                        (line-end-position))))))
     (dolist (el possible-widgets)
       (widget-delete el))
-    (kill-region (+ (next-single-property-change denote-tree-edit--current-line
-                                                 'button-data)
-                    (length denote-tree-node))
+    (kill-region (denote-tree-edit--after-button denote-tree-edit--current-line)
                  (line-end-position))))
 
 (defun denote-tree-edit--set-from-front-matter
@@ -188,9 +191,8 @@ Denote wont ask you to confirm it, this is final."
 
 (defun denote-tree-edit--restore-line ()
   "Restore edited note to previous state."
-  (let ((front-pos (+ (next-single-property-change denote-tree-edit--current-line
-                                                   'button-data)
-                      (length denote-tree-node))))
+  (let ((front-pos (denote-tree-edit--after-button
+                    denote-tree-edit--current-line)))
     (goto-char front-pos)
     (dolist (el denote-tree-include-from-front-matter)
       (if (symbolp el)
