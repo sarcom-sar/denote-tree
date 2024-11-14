@@ -142,7 +142,8 @@ set defaults to currently iterated over element of FRONT-MATTER-ELS."
 If EL is not a symbol or EL is not in line return nil."
   (when (symbolp el)
     (goto-char (line-beginning-position))
-    (with-restriction (line-beginning-position) (line-end-position)
+    (save-restriction
+      (narrow-to-region (line-beginning-position) (line-end-position))
       (text-property-search-forward 'denote-tree--type el t))))
 
 (defun denote-tree-edit-commit-changes ()
