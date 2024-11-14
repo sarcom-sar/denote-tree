@@ -131,20 +131,21 @@ Restrict search of props to the current line.
 FUNC takes two positional arguments START END and ANY, which if not
 set defaults to currently iterated over element of FRONT-MATTER-ELS."
   (dolist (el front-matter-els)
-    (when-let* ((match (denote-tree-edit--prop-match el))
+    (when-let* ((match (denote-tree-edit--prop-match el 'denote-tree--type))
                 (start (prop-match-beginning match))
                 (end (prop-match-end match))
                 (thing (if any any el)))
       (funcall func start end thing))))
 
-(defun denote-tree-edit--prop-match (el)
-  "Match prop of denote-tree--type EL in current line.
-If EL is not a symbol or EL is not in line return nil."
-  (when (symbolp el)
+(defun denote-tree-edit--prop-match (type el)
+  "Match prop of TYPE equal to EL in current line.
+If TYPE or EL are not symbols or EL is not in line return nil."
+  (when (or (symbolp el)
+            (symbolp type))
     (goto-char (line-beginning-position))
     (save-restriction
       (narrow-to-region (line-beginning-position) (line-end-position))
-      (text-property-search-forward 'denote-tree--type el t))))
+      (text-property-search-forward type el t))))
 
 (defun denote-tree-edit-commit-changes ()
   "Replace front matter of note with user inputed data.
