@@ -118,7 +118,8 @@ contributions.
 - [ ] smarter redrawing of a tree (with hierarchy.el),
   - [ ] collapsible tree;
 - [X] ability to edit the front matter at point;
-- [X] edit front matter with widgets (as optional denote-tree-edit).
+- [X] edit front matter with widgets (as optional denote-tree-edit);
+- [ ] multiple denote-tree buffers.
 
 *** Bare minimum before going public
 
