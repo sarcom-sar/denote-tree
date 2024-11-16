@@ -169,12 +169,11 @@ Denote wont ask you to confirm it, this is final."
 
 (defun denote-tree-edit--widgets-in-line (loc)
   "Get all widgets from LOC."
-  (save-excursion
-    (goto-char loc)
-    (mapcar #'widget-at
-            (mapcar #'overlay-start
-                    (overlays-in (line-beginning-position)
-                                 (line-end-position))))))
+  (goto-char loc)
+  (mapcar #'widget-at
+          (mapcar #'overlay-start
+                  (overlays-in (line-beginning-position)
+                               (line-end-position)))))
 
 (defun denote-tree-edit--construct-type-widget-alist (loc)
   "Construct an alist of (type . widget) starting from LOC."
