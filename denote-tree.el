@@ -83,8 +83,11 @@
   "Visualise your notes as a tree."
   :group 'convenience)
 
-(defcustom denote-tree-buffer-name "*denote-tree*"
-  "Name of the buffer `denote-tree' will be built in."
+(defcustom denote-tree-buffer-prefix "*denote-tree*"
+  "Prefix of the buffer `denote-tree' will be built in.
+
+Every `denote-tree' buffer has a unique name made from this prefix
+and root node of it's tree."
   :group 'denote-tree
   :type 'string)
 
@@ -150,6 +153,9 @@ set to the list of positions at which that denote ID is present.")
 FROM-WHERE is a positions of first child node.  WHERE-TO
 is a point position of cyclical parent node.")
 
+(defvar-local denote-tree--buffer-name ""
+  "Actual name of the buffer with denote-tree's tree.")
+
 
 ;; Mode and interactive functions
 
@@ -183,12 +189,17 @@ or a BUFFER provided by the user."
         (or buffer (setq buffer (denote-tree--collect-keywords (current-buffer)
                                                                '(identifier))))
         (denote-tree--open-link-maybe buffer)
+        (if (bufferp buffer)
+            (setq denote-tree--buffer-name (concat denote-tree-buffer-prefix
+                                        (buffer-name buffer)))
+          (setq denote-tree--buffer-name (concat denote-tree-buffer-prefix
+                                      buffer)))
         (let ((inhibit-read-only t))
-          (with-current-buffer (get-buffer-create denote-tree-buffer-name)
+          (with-current-buffer (get-buffer-create denote-tree--buffer-name)
             (erase-buffer)
             (denote-tree-mode)
             (denote-tree--draw-tree buffer)))
-        (pop-to-buffer denote-tree-buffer-name)
+        (pop-to-buffer denote-tree--buffer-name)
         (goto-char (1+ (length denote-tree-lower-knee))))
     (denote-tree--clean-up)))
 
@@ -340,7 +351,7 @@ Preserve properties."
 (defun denote-tree--walk-links (buffer parent indent lastp depth)
   "Walk along the links starting from BUFFER.
 
-Draw the current buffer as a node in `denote-tree-buffer-name'.  Set it's
+Draw the current buffer as a node in `denote-tree--buffer-name'.  Set it's
 properties.  Collect all the links and call `denote-tree--walk-links' on
 them recursively.  If one of the buffers was already visited do not iterate
 over it.

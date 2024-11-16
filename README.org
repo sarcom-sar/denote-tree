@@ -63,7 +63,8 @@ redraw entire tree from scratch if anything changes.
   node according to type.  Function accepts two arguments STR and TYPE.  Choosen
   string from front-matter is propertized according to type
   =from denote-tree-include-from-front-matter=.
-- =denote-tree-buffer-name=, name of the buffer denote-tree will be built in.
+- =denote-tree-buffer-prefix=, every denote tree is built by a custom custom
+  prefix, customizable here, and root node of a tree.
 
 **** Faces
 
@@ -119,7 +120,7 @@ contributions.
   - [ ] collapsible tree;
 - [X] ability to edit the front matter at point;
 - [X] edit front matter with widgets (as optional denote-tree-edit);
-- [ ] multiple denote-tree buffers.
+- [X] multiple denote-tree buffers.
 
 *** Bare minimum before going public
 
