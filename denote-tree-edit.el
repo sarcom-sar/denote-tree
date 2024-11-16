@@ -5,7 +5,7 @@
 ;; Version: 0.7.0
 ;; Keywords: convenience
 ;; URL: http://github.com/sarcom-sar/denote-tree.el
-;; Package-Requires: ((emacs "29.1"))
+;; Package-Requires: ((emacs "27.1"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -72,12 +72,15 @@ Everything else is still read-only.  All newlines will be dropped.
        #'denote-tree-edit--save-match)
       (denote-tree-edit--widgetize-line))))
 
+(defun denote-tree-edit--after-button (pos)
+  "Return position of prop 'button-data in line POS or nil."
+  (goto-char pos)
+  (+ (prop-match-end (denote-tree-edit--prop-match 'button-data nil))
+     (length denote-tree-node)))
+
 (defun denote-tree-edit--widgetize-line ()
   "Make line widgetized."
-  (kill-region (+ (next-single-property-change
-                   denote-tree-edit--current-line
-                   'button-data)
-                  (length denote-tree-node))
+  (kill-region (denote-tree-edit--after-button denote-tree-edit--current-line)
                (line-end-position))
   (goto-char (line-end-position))
   (dolist (el denote-tree-include-from-front-matter)
@@ -104,16 +107,11 @@ Everything else is still read-only.  All newlines will be dropped.
 
 (defun denote-tree-edit--dewidgetize-line ()
   "Destroy widgets in line."
-  (goto-char denote-tree-edit--current-line)
-  (let ((possible-widgets (mapcar #'widget-at
-                                  (mapcar #'overlay-start
-                                          (overlays-in (line-beginning-position)
-                                                       (line-end-position))))))
+  (let ((possible-widgets (denote-tree-edit--widgets-in-line
+                           denote-tree-edit--current-line)))
     (dolist (el possible-widgets)
       (widget-delete el))
-    (kill-region (+ (next-single-property-change denote-tree-edit--current-line
-                                                 'button-data)
-                    (length denote-tree-node))
+    (kill-region (denote-tree-edit--after-button denote-tree-edit--current-line)
                  (line-end-position))))
 
 (defun denote-tree-edit--set-from-front-matter
@@ -124,33 +122,35 @@ Restrict search of props to the current line.
 FUNC takes two positional arguments START END and ANY, which if not
 set defaults to currently iterated over element of FRONT-MATTER-ELS."
   (dolist (el front-matter-els)
-    (when-let* ((match (denote-tree-edit--prop-match el))
+    (when-let* ((match (denote-tree-edit--prop-match el 'denote-tree--type))
                 (start (prop-match-beginning match))
                 (end (prop-match-end match))
                 (thing (if any any el)))
       (funcall func start end thing))))
 
-(defun denote-tree-edit--prop-match (el)
-  "Match prop of denote-tree--type EL in current line.
-If EL is not a symbol or EL is not in line return nil."
-  (when (symbolp el)
+(defun denote-tree-edit--prop-match (type el)
+  "Match prop of TYPE equal to EL in current line.
+If TYPE or EL are not symbols or EL is not in line return nil."
+  (when (or (symbolp el)
+            (symbolp type))
     (goto-char (line-beginning-position))
-    (with-restriction (line-beginning-position) (line-end-position)
-      (text-property-search-forward 'denote-tree--type el t))))
+    (save-restriction
+      (narrow-to-region (line-beginning-position) (line-end-position))
+      (text-property-search-forward type el t))))
 
 (defun denote-tree-edit-commit-changes ()
   "Replace front matter of note with user inputed data.
 Denote wont ask you to confirm it, this is final."
   (interactive)
-  (save-excursion
-    (goto-char denote-tree-edit--current-line)
-    (denote-tree-edit--save-from-widgets)
-    (let ((copy (denote-tree-edit--fix-current-note
-                 (copy-tree denote-tree-edit--current-note)))
-          (denote-rename-confirmations nil)
-          (denote-save-buffers t)
-          (denote-kill-buffers t))
-      (apply #'denote-rename-file (mapcar #'cdr copy))))
+  (setq denote-tree-edit--current-note
+        (denote-tree-edit--save-from-widgets denote-tree-edit--current-note
+                             denote-tree-edit--current-line))
+  (let ((copy (denote-tree-edit--fix-current-note
+               (copy-tree denote-tree-edit--current-note)))
+        (denote-rename-confirmations nil)
+        (denote-save-buffers t)
+        (denote-kill-buffers t))
+    (apply #'denote-rename-file (mapcar #'cdr copy)))
   (denote-tree-edit--clean-up))
 
 
@@ -167,19 +167,32 @@ Denote wont ask you to confirm it, this is final."
                        (cdr (assq 'keywords copy))))))
   copy)
 
-(defun denote-tree-edit--save-from-widgets ()
-  "Save values from fields into `denote-tree-edit--current-note'."
-  (let ((possible-widgets (mapcar #'widget-at
-                                  (mapcar #'overlay-start
-                                          (overlays-in (line-beginning-position)
-                                                       (line-end-position)))))
-        (front-matter denote-tree-include-from-front-matter))
-    (dolist (el possible-widgets)
-      (when (symbolp (car front-matter))
-        (let ((value (widget-value el)))
-          (setcdr (assq (car front-matter) denote-tree-edit--current-note)
-                  value)))
-      (setq front-matter (cdr front-matter)))))
+(defun denote-tree-edit--widgets-in-line (loc)
+  "Get all widgets from LOC."
+  (goto-char loc)
+  (mapcar #'widget-at
+          (mapcar #'overlay-start
+                  (overlays-in (line-beginning-position)
+                               (line-end-position)))))
+
+(defun denote-tree-edit--construct-type-widget-alist (loc)
+  "Construct an alist of (type . widget) starting from LOC."
+  (let ((possible-widgets (denote-tree-edit--widgets-in-line loc))
+        (front-matter denote-tree-include-from-front-matter)
+        new-alist)
+    (dolist (el front-matter new-alist)
+      (when (symbolp el)
+        (push (cons el (widget-value (car possible-widgets))) new-alist)
+        (setq possible-widgets (cdr possible-widgets))))))
+
+(defun denote-tree-edit--save-from-widgets (alist loc)
+  "Save values from widgets in line LOC into ALIST."
+  (let ((type-widget-alist (denote-tree-edit--construct-type-widget-alist loc))
+        new-alist)
+    (dolist (el alist new-alist)
+      (if (assq (car el) widget-type-alist)
+          (push (assq (car el) widget-type-alist) new-alist)
+        (push new-alist el)))))
 
 (defun denote-tree-edit-abort-changes ()
   "Restore the note from `denote-tree-edit--current-note'."
@@ -188,9 +201,8 @@ Denote wont ask you to confirm it, this is final."
 
 (defun denote-tree-edit--restore-line ()
   "Restore edited note to previous state."
-  (let ((front-pos (+ (next-single-property-change denote-tree-edit--current-line
-                                                   'button-data)
-                      (length denote-tree-node))))
+  (let ((front-pos (denote-tree-edit--after-button
+                    denote-tree-edit--current-line)))
     (goto-char front-pos)
     (dolist (el denote-tree-include-from-front-matter)
       (if (symbolp el)

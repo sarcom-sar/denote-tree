@@ -155,12 +155,12 @@ is a point position of cyclical parent node.")
 
 (defvar denote-tree-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map "n" #'denote-tree-next-node)
-    (define-key map "p" #'denote-tree-prev-node)
-    (define-key map "f" #'denote-tree-child-node)
-    (define-key map "b" #'denote-tree-parent-node)
-    (define-key map "g" #'denote-tree-redraw)
-    (define-key map "e" #'denote-tree-edit-node)
+    (bind-key "n" #'denote-tree-next-node map)
+    (bind-key "p" #'denote-tree-prev-node map)
+    (bind-key "f" #'denote-tree-child-node map)
+    (bind-key "b" #'denote-tree-parent-node map)
+    (bind-key "g" #'denote-tree-redraw map)
+    (bind-key "e" #'denote-tree-edit-node map)
     map)
   "Keymap for `denote-tree-mode'.")
 
@@ -205,8 +205,12 @@ BUTTON is pased as node's ID."
 With \\[universal-argument], redraw from node at point."
   (interactive "P")
   (unless (equal arg '(4))
-    (goto-char (1+ (length denote-tree-node))))
-  (when-let ((current-node (get-text-property (point) 'button-data)))
+    (goto-char (point-min)))
+  (when-let ((current-node
+              (get-text-property
+               (next-single-property-change (line-beginning-position)
+                                            'button-data)
+               'button-data)))
     (denote-tree current-node)))
 
 (defun denote-tree-child-node (&optional arg)
@@ -251,10 +255,10 @@ the parent the point came from."
     (dotimes (el arg)
       (when-let ((next-point (get-text-property (point)
                                                 'denote-tree--parent))
-                 (canonical-point (get-text-property next-point
-                                                     'denote-tree--child)))
+                 (canon-point (get-text-property next-point
+                                                 'denote-tree--child)))
         (let ((current-teleport (car denote-tree--teleport-stack)))
-          (if (equal canonical-point (cadr current-teleport))
+          (if (equal canon-point (cadr current-teleport))
               (progn
                 (goto-char (car current-teleport))
                 (pop denote-tree--teleport-stack))
