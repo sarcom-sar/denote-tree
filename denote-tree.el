@@ -205,8 +205,12 @@ BUTTON is pased as node's ID."
 With \\[universal-argument], redraw from node at point."
   (interactive "P")
   (unless (equal arg '(4))
-    (goto-char (1+ (length denote-tree-node))))
-  (when-let ((current-node (get-text-property (point) 'button-data)))
+    (goto-char (point-min)))
+  (when-let ((current-node
+              (get-text-property
+               (next-single-property-change (line-beginning-position)
+                                            'button-data)
+               'button-data)))
     (denote-tree current-node)))
 
 (defun denote-tree-child-node (&optional arg)
