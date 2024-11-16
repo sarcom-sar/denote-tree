@@ -107,11 +107,8 @@ Everything else is still read-only.  All newlines will be dropped.
 
 (defun denote-tree-edit--dewidgetize-line ()
   "Destroy widgets in line."
-  (goto-char denote-tree-edit--current-line)
-  (let ((possible-widgets (mapcar #'widget-at
-                                  (mapcar #'overlay-start
-                                          (overlays-in (line-beginning-position)
-                                                       (line-end-position))))))
+  (let ((possible-widgets (denote-tree-edit--widgets-in-line
+                           denote-tree-edit--current-line)))
     (dolist (el possible-widgets)
       (widget-delete el))
     (kill-region (denote-tree-edit--after-button denote-tree-edit--current-line)
