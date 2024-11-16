@@ -145,15 +145,15 @@ If TYPE or EL are not symbols or EL is not in line return nil."
   "Replace front matter of note with user inputed data.
 Denote wont ask you to confirm it, this is final."
   (interactive)
-  (save-excursion
-    (goto-char denote-tree-edit--current-line)
-    (denote-tree-edit--save-from-widgets)
-    (let ((copy (denote-tree-edit--fix-current-note
-                 (copy-tree denote-tree-edit--current-note)))
-          (denote-rename-confirmations nil)
-          (denote-save-buffers t)
-          (denote-kill-buffers t))
-      (apply #'denote-rename-file (mapcar #'cdr copy))))
+  (setq denote-tree-edit--current-note
+        (denote-tree-edit--save-from-widgets denote-tree-edit--current-note
+                             denote-tree-edit--current-line))
+  (let ((copy (denote-tree-edit--fix-current-note
+               (copy-tree denote-tree-edit--current-note)))
+        (denote-rename-confirmations nil)
+        (denote-save-buffers t)
+        (denote-kill-buffers t))
+    (apply #'denote-rename-file (mapcar #'cdr copy)))
   (denote-tree-edit--clean-up))
 
 
@@ -170,19 +170,33 @@ Denote wont ask you to confirm it, this is final."
                        (cdr (assq 'keywords copy))))))
   copy)
 
-(defun denote-tree-edit--save-from-widgets ()
-  "Save values from fields into `denote-tree-edit--current-note'."
-  (let ((possible-widgets (mapcar #'widget-at
-                                  (mapcar #'overlay-start
-                                          (overlays-in (line-beginning-position)
-                                                       (line-end-position)))))
-        (front-matter denote-tree-include-from-front-matter))
-    (dolist (el possible-widgets)
-      (when (symbolp (car front-matter))
-        (let ((value (widget-value el)))
-          (setcdr (assq (car front-matter) denote-tree-edit--current-note)
-                  value)))
-      (setq front-matter (cdr front-matter)))))
+(defun denote-tree-edit--widgets-in-line (loc)
+  "Get all widgets from LOC."
+  (save-excursion
+    (goto-char loc)
+    (mapcar #'widget-at
+            (mapcar #'overlay-start
+                    (overlays-in (line-beginning-position)
+                                 (line-end-position))))))
+
+(defun denote-tree-edit--construct-type-widget-alist (loc)
+  "Construct an alist of (type . widget) starting from LOC."
+  (let ((possible-widgets (denote-tree-edit--widgets-in-line loc))
+        (front-matter denote-tree-include-from-front-matter)
+        new-alist)
+    (dolist (el front-matter new-alist)
+      (when (symbolp el)
+        (push (cons el (widget-value (car possible-widgets))) new-alist)
+        (setq possible-widgets (cdr possible-widgets))))))
+
+(defun denote-tree-edit--save-from-widgets (alist loc)
+  "Save values from widgets in line LOC into ALIST."
+  (let ((type-widget-alist (denote-tree-edit--construct-type-widget-alist loc))
+        new-alist)
+    (dolist (el alist new-alist)
+      (if (assq (car el) widget-type-alist)
+          (push (assq (car el) widget-type-alist) new-alist)
+        (push new-alist el)))))
 
 (defun denote-tree-edit-abort-changes ()
   "Restore the note from `denote-tree-edit--current-note'."
