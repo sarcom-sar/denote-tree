@@ -255,10 +255,10 @@ the parent the point came from."
     (dotimes (el arg)
       (when-let ((next-point (get-text-property (point)
                                                 'denote-tree--parent))
-                 (canonical-point (get-text-property next-point
-                                                     'denote-tree--child)))
+                 (canon-point (get-text-property next-point
+                                                 'denote-tree--child)))
         (let ((current-teleport (car denote-tree--teleport-stack)))
-          (if (equal canonical-point (cadr current-teleport))
+          (if (equal canon-point (cadr current-teleport))
               (progn
                 (goto-char (car current-teleport))
                 (pop denote-tree--teleport-stack))
