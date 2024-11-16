@@ -155,12 +155,12 @@ is a point position of cyclical parent node.")
 
 (defvar denote-tree-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map "n" #'denote-tree-next-node)
-    (define-key map "p" #'denote-tree-prev-node)
-    (define-key map "f" #'denote-tree-child-node)
-    (define-key map "b" #'denote-tree-parent-node)
-    (define-key map "g" #'denote-tree-redraw)
-    (define-key map "e" #'denote-tree-edit-node)
+    (bind-key "n" #'denote-tree-next-node map)
+    (bind-key "p" #'denote-tree-prev-node map)
+    (bind-key "f" #'denote-tree-child-node map)
+    (bind-key "b" #'denote-tree-parent-node map)
+    (bind-key "g" #'denote-tree-redraw map)
+    (bind-key "e" #'denote-tree-edit-node map)
     map)
   "Keymap for `denote-tree-mode'.")
 
