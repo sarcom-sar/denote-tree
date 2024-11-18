@@ -249,7 +249,7 @@ the parent node position for future backtracking."
       (setq arg 1))
     (if (< arg 0)
         (denote-tree-parent-node (- arg))
-      (dotimes (el arg)
+      (dotimes (_ arg)
         (when-let ((next-point
                     (get-text-property (point) 'denote-tree--child))
                    (curr-point
@@ -272,7 +272,7 @@ the parent the point came from."
   (or arg (setq arg 1))
   (if (< arg 0)
       (denote-tree-child-node (- arg))
-    (dotimes (el arg)
+    (dotimes (_ arg)
       (when-let ((next-point (get-text-property (point)
                                                 'denote-tree--parent))
                  (canon-point (get-text-property next-point
@@ -292,7 +292,7 @@ If ARG is omitted, nil or zero, move once."
   (or arg (setq arg 1))
   (let ((direction (if (<= arg 0) 'denote-tree--prev 'denote-tree--next))
         (arg (abs arg)))
-    (dotimes (el arg)
+    (dotimes (_ arg)
       (when-let ((next-point
                   (get-text-property (point) direction)))
         (goto-char next-point)))))
