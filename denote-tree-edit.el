@@ -122,7 +122,7 @@ Restrict search of props to the current line.
 FUNC takes two positional arguments START END and ANY, which if not
 set defaults to currently iterated over element of FRONT-MATTER-ELS."
   (dolist (el front-matter-els)
-    (when-let* ((match (denote-tree-edit--prop-match el 'denote-tree--type))
+    (when-let* ((match (denote-tree-edit--prop-match 'denote-tree--type el))
                 (start (prop-match-beginning match))
                 (end (prop-match-end match))
                 (thing (if any any el)))
