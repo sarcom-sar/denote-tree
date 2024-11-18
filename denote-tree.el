@@ -64,6 +64,8 @@
   (require 'denote)
   (require 'compat))
 
+(declare-function #'denote-tree-edit-mode "./denote-tree-edit.el")
+
 
 ;; Faces and Custom
 
