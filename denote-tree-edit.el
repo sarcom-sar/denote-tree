@@ -38,10 +38,10 @@
 (declare-function #'denote-tree--find-filetype "./denote-tree.el")
 
 (defvar-local denote-tree-edit--current-note '((file)
-                                    (title . keep-current)
-                                    (keywords . keep-current)
-                                    (signature . keep-current)
-                                    (date . keep-current))
+                                               (title . keep-current)
+                                               (keywords . keep-current)
+                                               (signature . keep-current)
+                                               (date . keep-current))
   "Alist of a current note elements.")
 
 (defvar-local denote-tree-edit--current-line nil
