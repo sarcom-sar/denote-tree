@@ -216,7 +216,8 @@ Denote wont ask you to confirm it, this is final."
       (denote-tree-edit--dewidgetize-line)
       (denote-tree-edit--restore-line)
       (setq denote-tree-edit--current-line nil)
-      (denote-tree-mode))))
+      (denote-tree-mode)
+      (setq denote-tree--buffer-name (buffer-name)))))
 
 (defun denote-tree-edit--save-match (start end type)
   "Save match to `denote-tree-edit--current-note'."
