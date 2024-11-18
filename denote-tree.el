@@ -83,7 +83,7 @@
   "Visualise your notes as a tree."
   :group 'convenience)
 
-(defcustom denote-tree-buffer-prefix "*denote-tree*"
+(defcustom denote-tree-buffer-prefix "denote-tree"
   "Prefix of the buffer `denote-tree' will be built in.
 
 Every `denote-tree' buffer has a unique name made from this prefix
@@ -190,10 +190,18 @@ or a BUFFER provided by the user."
                                                                '(identifier))))
         (denote-tree--open-link-maybe buffer)
         (if (bufferp buffer)
-            (setq denote-tree--buffer-name (concat denote-tree-buffer-prefix
-                                        (buffer-name buffer)))
-          (setq denote-tree--buffer-name (concat denote-tree-buffer-prefix
-                                      buffer)))
+            (setq denote-tree--buffer-name (concat
+                                 "*"
+                                 denote-tree-buffer-prefix
+                                 " "
+                                 (buffer-name buffer)
+                                 "*"))
+          (setq denote-tree--buffer-name (concat
+                               "*"
+                               denote-tree-buffer-prefix
+                               " "
+                               buffer
+                               "*")))
         (let ((inhibit-read-only t))
           (with-current-buffer (get-buffer-create denote-tree--buffer-name)
             (erase-buffer)
