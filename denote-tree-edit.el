@@ -170,10 +170,15 @@ Denote wont ask you to confirm it, this is final."
 (defun denote-tree-edit--widgets-in-line (loc)
   "Get all widgets from LOC."
   (goto-char loc)
-  (mapcar #'widget-at
-          (mapcar #'overlay-start
-                  (overlays-in (line-beginning-position)
-                               (line-end-position)))))
+  (let ((potential-widgets
+         (mapcar #'widget-at
+                 (mapcar #'overlay-start
+                         (overlays-in (line-beginning-position)
+                                      (line-end-position)))))
+        lst)
+    (dolist (el potential-widgets lst)
+      (unless (null el)
+        (push el lst)))))
 
 (defun denote-tree-edit--construct-type-widget-alist (loc)
   "Construct an alist of (type . widget) starting from LOC."
