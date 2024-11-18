@@ -131,6 +131,12 @@ When nil, always move to \"real\" parent of a node."
   :group 'denote-tree
   :type 'boolean)
 
+(defcustom denote-tree-fancy-edit t
+  "If t, use fancy editing with widgets.
+If nil fall back thin `denote-rename-file' wrapper."
+  :group 'denote-tree
+  :type 'boolean)
+
 
 ;; Vars and consts
 
@@ -311,8 +317,10 @@ If ARG is omitted, nil or zero, move once."
   "Edit node's front matter.  What is editable is dependent on `denote-prompts'.
 If `denote-tree-edit-mode' is loaded, use it's UI."
   (interactive)
-  (if (featurep 'denote-tree-edit)
-      (denote-tree-edit-mode)
+  (if denote-tree-fancy-edit
+      (progn
+        (require 'denote-tree-edit)
+        (denote-tree-edit-mode))
     (let* ((identifier (get-text-property
                         (next-single-property-change (line-beginning-position)
                                                      'button-data)

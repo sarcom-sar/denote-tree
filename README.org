@@ -65,6 +65,8 @@ redraw entire tree from scratch if anything changes.
   =from denote-tree-include-from-front-matter=.
 - =denote-tree-buffer-prefix=, every denote tree is built by a custom custom
   prefix, customizable here, and root node of a tree.
+- =denote-tree-fancy-edit=, use fancy propertized edit over thin wrapper around
+  =denote-rename-file=.
 
 **** Faces
 
