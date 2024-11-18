@@ -31,6 +31,9 @@
 (declare-function #'denote-tree-mode "./denote-tree.el")
 (declare-function #'denote-tree--find-filetype "./denote-tree.el")
 
+
+;;;; Variables
+
 (defvar-local denote-tree-edit--current-note '((file)
                                                (title . keep-current)
                                                (keywords . keep-current)
@@ -48,6 +51,9 @@
     (define-key map (kbd "C-c C-k") #'denote-tree-edit-abort-changes)
     map)
   "Keymap for `denote-tree-edit-mode'.")
+
+
+;;;; Mode definition and user-facing defuns
 
 (define-derived-mode denote-tree-edit-mode text-mode "denote-tree-edit"
   "Edit the front matter of the note at point from within a tree.
@@ -70,11 +76,53 @@ Everything else is still read-only.  All newlines will be dropped.
        #'denote-tree-edit--save-match)
       (denote-tree-edit--widgetize-line))))
 
-(defun denote-tree-edit--after-button (pos)
-  "Return position of prop \='button-data in line POS or nil."
-  (goto-char pos)
-  (+ (prop-match-end (denote-tree-edit--prop-match 'button-data nil))
-     (length denote-tree-node)))
+(defun denote-tree-edit-commit-changes ()
+  "Replace front matter of note with user inputed data.
+Denote wont ask you to confirm it, this is final."
+  (interactive)
+  (unwind-protect
+      (progn
+        (setq denote-tree-edit--current-note
+              (denote-tree-edit--save-from-widgets denote-tree-edit--current-note
+                                                   denote-tree-edit--current-line))
+        (let ((copy (denote-tree-edit--fix-current-note
+                     (copy-tree denote-tree-edit--current-note)))
+              (denote-rename-confirmations nil)
+              (denote-save-buffers t)
+              (denote-kill-buffers t))
+          (apply #'denote-rename-file (mapcar #'cdr copy))))
+    (denote-tree-edit--clean-up)))
+
+(defun denote-tree-edit-abort-changes ()
+  "Restore the note from `denote-tree-edit--current-note'."
+  (interactive)
+  (denote-tree-edit--clean-up))
+
+
+;;;; Clean-up and utilities
+
+(defun denote-tree-edit--clean-up ()
+  "Return the line to read-only state."
+  (let ((inhibit-read-only t))
+    (save-excursion
+      (denote-tree-edit--dewidgetize-line)
+      (denote-tree-edit--restore-line)
+      (setq denote-tree-edit--current-line nil)
+      (denote-tree-mode)
+      (setq denote-tree--buffer-name (buffer-name)))))
+
+(defun denote-tree-edit--restore-line ()
+  "Restore edited note to previous state."
+  (let ((front-pos (denote-tree-edit--after-button
+                    denote-tree-edit--current-line)))
+    (goto-char front-pos)
+    (dolist (el denote-tree-include-from-front-matter)
+      (if (symbolp el)
+          (insert (alist-get el denote-tree-edit--current-note) " ")
+        (insert el " ")))))
+
+
+;;;; Widget-related defuns
 
 (defun denote-tree-edit--widgetize-line ()
   "Make line widgetized."
@@ -112,61 +160,6 @@ Everything else is still read-only.  All newlines will be dropped.
     (kill-region (denote-tree-edit--after-button denote-tree-edit--current-line)
                  (line-end-position))))
 
-(defun denote-tree-edit--set-from-front-matter
-    (front-matter-els func &optional any)
-  "Iterate over FRONT-MATTER-ELS applying FUNC to it.
-Restrict search of props to the current line.
-
-FUNC takes two positional arguments START END and ANY, which if not
-set defaults to currently iterated over element of FRONT-MATTER-ELS."
-  (dolist (el front-matter-els)
-    (when-let* ((match (denote-tree-edit--prop-match 'denote-tree--type el))
-                (start (prop-match-beginning match))
-                (end (prop-match-end match))
-                (thing (if any any el)))
-      (funcall func start end thing))))
-
-(defun denote-tree-edit--prop-match (type el)
-  "Match prop of TYPE equal to EL in current line.
-If TYPE or EL are not symbols or EL is not in line return nil."
-  (when (or (symbolp el)
-            (symbolp type))
-    (goto-char (line-beginning-position))
-    (save-restriction
-      (narrow-to-region (line-beginning-position) (line-end-position))
-      (text-property-search-forward type el t))))
-
-(defun denote-tree-edit-commit-changes ()
-  "Replace front matter of note with user inputed data.
-Denote wont ask you to confirm it, this is final."
-  (interactive)
-  (unwind-protect
-      (progn
-        (setq denote-tree-edit--current-note
-              (denote-tree-edit--save-from-widgets denote-tree-edit--current-note
-                                                   denote-tree-edit--current-line))
-        (let ((copy (denote-tree-edit--fix-current-note
-                     (copy-tree denote-tree-edit--current-note)))
-              (denote-rename-confirmations nil)
-              (denote-save-buffers t)
-              (denote-kill-buffers t))
-          (apply #'denote-rename-file (mapcar #'cdr copy))))
-    (denote-tree-edit--clean-up)))
-
-
-(defun denote-tree-edit--fix-current-note (copy)
-  "De-listify keywords alist element in COPY."
-  (let (filetype)
-    (with-temp-buffer
-      (insert-file-contents (alist-get 'file copy))
-      (goto-char (point-min))
-      (setq filetype (denote-tree--find-filetype (current-buffer))))
-    (when (listp (cdr (assq 'keywords copy)))
-      (setcdr (assq 'keywords copy)
-              (funcall (plist-get filetype :keywords-value-reverse-function)
-                       (cdr (assq 'keywords copy))))))
-  (nreverse copy))
-
 (defun denote-tree-edit--widgets-in-line (loc)
   "Get all widgets from LOC."
   (goto-char loc)
@@ -199,36 +192,55 @@ Denote wont ask you to confirm it, this is final."
           (push (assq (car el) type-widget-alist) new-alist)
         (push el new-alist)))))
 
-(defun denote-tree-edit-abort-changes ()
-  "Restore the note from `denote-tree-edit--current-note'."
-  (interactive)
-  (denote-tree-edit--clean-up))
+;;;; Helpers
 
-(defun denote-tree-edit--restore-line ()
-  "Restore edited note to previous state."
-  (let ((front-pos (denote-tree-edit--after-button
-                    denote-tree-edit--current-line)))
-    (goto-char front-pos)
-    (dolist (el denote-tree-include-from-front-matter)
-      (if (symbolp el)
-          (insert (alist-get el denote-tree-edit--current-note) " ")
-        (insert el " ")))))
+(defun denote-tree-edit--after-button (pos)
+  "Return position of prop \='button-data in line POS or nil."
+  (goto-char pos)
+  (+ (prop-match-end (denote-tree-edit--prop-match 'button-data nil))
+     (length denote-tree-node)))
 
-(defun denote-tree-edit--clean-up ()
-  "Return the line to read-only state."
-  (let ((inhibit-read-only t))
-    (save-excursion
-      (denote-tree-edit--dewidgetize-line)
-      (denote-tree-edit--restore-line)
-      (setq denote-tree-edit--current-line nil)
-      (denote-tree-mode)
-      (setq denote-tree--buffer-name (buffer-name)))))
+(defun denote-tree-edit--prop-match (type el)
+  "Match prop of TYPE equal to EL in current line.
+If TYPE or EL are not symbols or EL is not in line return nil."
+  (when (or (symbolp el)
+            (symbolp type))
+    (goto-char (line-beginning-position))
+    (save-restriction
+      (narrow-to-region (line-beginning-position) (line-end-position))
+      (text-property-search-forward type el t))))
 
 (defun denote-tree-edit--save-match (start end type)
   "Save match to `denote-tree-edit--current-note'."
   (setcdr (assq type denote-tree-edit--current-note)
           (buffer-substring start end)))
 
+(defun denote-tree-edit--fix-current-note (copy)
+  "De-listify keywords alist element in COPY."
+  (let (filetype)
+    (with-temp-buffer
+      (insert-file-contents (alist-get 'file copy))
+      (goto-char (point-min))
+      (setq filetype (denote-tree--find-filetype (current-buffer))))
+    (when (listp (cdr (assq 'keywords copy)))
+      (setcdr (assq 'keywords copy)
+              (funcall (plist-get filetype :keywords-value-reverse-function)
+                       (cdr (assq 'keywords copy))))))
+  (nreverse copy))
+
+(defun denote-tree-edit--set-from-front-matter
+    (front-matter-els func &optional any)
+  "Iterate over FRONT-MATTER-ELS applying FUNC to it.
+Restrict search of props to the current line.
+
+FUNC takes two positional arguments START END and ANY, which if not
+set defaults to currently iterated over element of FRONT-MATTER-ELS."
+  (dolist (el front-matter-els)
+    (when-let* ((match (denote-tree-edit--prop-match 'denote-tree--type el))
+                (start (prop-match-beginning match))
+                (end (prop-match-end match))
+                (thing (if any any el)))
+      (funcall func start end thing))))
 
 (provide 'denote-tree-edit)
 ;;; denote-tree-edit.el ends here
