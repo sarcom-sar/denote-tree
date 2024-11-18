@@ -165,7 +165,7 @@ Denote wont ask you to confirm it, this is final."
       (setcdr (assq 'keywords copy)
               (funcall (plist-get filetype :keywords-value-reverse-function)
                        (cdr (assq 'keywords copy))))))
-  copy)
+  (nreverse copy))
 
 (defun denote-tree-edit--widgets-in-line (loc)
   "Get all widgets from LOC."
