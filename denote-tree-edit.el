@@ -31,7 +31,11 @@
 
 (eval-when-compile
   (require 'denote)
-  (require 'wid-edit))
+  (require 'wid-edit)
+  (require 'denote-tree))
+
+(declare-function #'denote-tree-mode "./denote-tree.el")
+(declare-function #'denote-tree--find-filetype "./denote-tree.el")
 
 (defvar-local denote-tree-edit--current-note '((file)
                                     (title . keep-current)
@@ -73,7 +77,7 @@ Everything else is still read-only.  All newlines will be dropped.
       (denote-tree-edit--widgetize-line))))
 
 (defun denote-tree-edit--after-button (pos)
-  "Return position of prop 'button-data in line POS or nil."
+  "Return position of prop \='button-data in line POS or nil."
   (goto-char pos)
   (+ (prop-match-end (denote-tree-edit--prop-match 'button-data nil))
      (length denote-tree-node)))
