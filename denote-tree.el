@@ -67,7 +67,7 @@
 (declare-function #'denote-tree-edit-mode "./denote-tree-edit.el")
 
 
-;; Faces and Custom
+;;;; Faces and Custom
 
 (defgroup denote-tree-faces ()
   "Faces for `denote-tree'."
@@ -138,7 +138,7 @@ If nil fall back thin `denote-rename-file' wrapper."
   :type 'boolean)
 
 
-;; Vars and consts
+;;;; Vars and consts
 
 (defconst denote-tree-lower-knee "'-")
 (defconst denote-tree-tee "+-")
@@ -165,7 +165,7 @@ is a point position of cyclical parent node.")
   "Actual name of the buffer with denote-tree's tree.")
 
 
-;; Mode and interactive functions
+;;;; Mode and interactive functions
 
 (defvar denote-tree-mode-map
   (let ((map (make-sparse-keymap)))
@@ -334,7 +334,7 @@ If `denote-tree-edit-mode' is loaded, use it's UI."
           (denote-tree--redraw-node buffer (point)))))))
 
 
-;; Utilities for node editing
+;;;; Utilities for node editing
 
 (defun denote-tree--edit-node (buffer)
   "Call `denote-rename-file' interactively to edit BUFFER.
@@ -360,7 +360,7 @@ Preserve properties."
       (add-text-properties pos (line-end-position) props))))
 
 
-;; Tree traversal
+;;;; Tree traversal
 
 (defun denote-tree--draw-tree (buffer)
   "Draw and propertize a tree in current buffer starting with BUFFER."
@@ -494,8 +494,7 @@ previous/next sibling node or a parent."
       (setq prev el))))
 
 
-
-;; Helpers for Links and Buffers
+;;;; Helpers for Links and Buffers
 
 (defun denote-tree--collect-links (buffer)
   "Collect all denote style identifiers in BUFFER.
@@ -566,7 +565,7 @@ Add ELEMENT to `denote-tree--visited-buffers' to delete it after
   element)
 
 
-;; Helper functions
+;;;; Helper functions
 
 (defun denote-tree--clean-up ()
   "Clean up buffers created during the tree walk."
