@@ -197,7 +197,7 @@ Denote wont ask you to confirm it, this is final."
     (dolist (el alist new-alist)
       (if (assq (car el) type-widget-alist)
           (push (assq (car el) type-widget-alist) new-alist)
-        (push new-alist el)))))
+        (push el new-alist)))))
 
 (defun denote-tree-edit-abort-changes ()
   "Restore the note from `denote-tree-edit--current-note'."
