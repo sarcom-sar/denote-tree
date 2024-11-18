@@ -569,7 +569,7 @@ Add ELEMENT to `denote-tree--visited-buffers' to delete it after
 
 (defun denote-tree--default-props (str type)
   "Default function returning STR of TYPE with properties."
-  (propertize str))
+  (propertize str 'denote-tree--type type))
 
 (provide 'denote-tree)
 ;;; denote-tree.el ends here
