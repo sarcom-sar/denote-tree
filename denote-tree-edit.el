@@ -190,8 +190,8 @@ Denote wont ask you to confirm it, this is final."
   (let ((type-widget-alist (denote-tree-edit--construct-type-widget-alist loc))
         new-alist)
     (dolist (el alist new-alist)
-      (if (assq (car el) widget-type-alist)
-          (push (assq (car el) widget-type-alist) new-alist)
+      (if (assq (car el) type-widget-alist)
+          (push (assq (car el) type-widget-alist) new-alist)
         (push new-alist el)))))
 
 (defun denote-tree-edit-abort-changes ()
