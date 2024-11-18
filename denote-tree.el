@@ -354,10 +354,10 @@ Preserve properties."
 
 (defun denote-tree--draw-tree (buffer)
   "Draw and propertize a tree in current buffer starting with BUFFER."
-  (denote-tree--walk-links buffer nil "" t denote-tree-max-traversal-depth)
+  (denote-tree--walk-links buffer "" t denote-tree-max-traversal-depth)
   (denote-tree--add-props-to-cycles))
 
-(defun denote-tree--walk-links (buffer parent indent lastp depth)
+(defun denote-tree--walk-links (buffer indent lastp depth)
   "Walk along the links starting from BUFFER.
 
 Draw the current buffer as a node in `denote-tree--buffer-name'.  Set it's
@@ -365,7 +365,6 @@ properties.  Collect all the links and call `denote-tree--walk-links' on
 them recursively.  If one of the buffers was already visited do not iterate
 over it.
 
-Argument PARENT - parent of current node.
 Argument INDENT - state of INDENT between traversals.
 Argument LASTP  - is the node the last child of parent node?
 Argument DEPTH  - maximum depth of the traversal."
@@ -394,7 +393,7 @@ Argument DEPTH  - maximum depth of the traversal."
                        (lambda (a b) (string= (car a) (car b)))))
         (when depth
           (setq lastp (eq el (car (last links-in-buffer))))
-          (push (denote-tree--walk-links el buffer indent lastp depth)
+          (push (denote-tree--walk-links el indent lastp depth)
                 node-children)))))
     ;; add props to current node and it's children
     (denote-tree--set-button pos buffer)
