@@ -557,7 +557,7 @@ Return \"\" if none are found."
                         :date-key-regexp)
                        (t nil))))
             (goto-char (point-min))
-            (re-search-forward (plist-get filetype key))
+            (re-search-forward (plist-get (cdr filetype) key))
             (setq type el)
             (setq el (denote-trim-whitespace
                       (buffer-substring-no-properties (point)
@@ -572,11 +572,11 @@ Return \"\" if none are found."
   (let ((types denote-file-types))
     (with-current-buffer buffer
       (goto-char (point-min))
-      (cdr (seq-find
-            (lambda (type)
-              (re-search-forward
-               (plist-get (cdr type) :title-key-regexp) nil t))
-            types)))))
+      (seq-find
+       (lambda (type)
+         (re-search-forward
+          (plist-get (cdr type) :title-key-regexp) nil t))
+       types))))
 
 (defun denote-tree--open-link-maybe (element)
   "Return ELEMENT buffer, create if necessary.
