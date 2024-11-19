@@ -510,6 +510,31 @@ Return as a list sans BUFFER own identifiers."
       ;; first element is /always/ the buffer's id
       (cdr (nreverse found-ids)))))
 
+(defun denote-tree--build-full-filetype (filetype)
+  "Build extended FILETYPE with additional regexps."
+  (let ((f-type (copy-tree filetype))
+        (type (car filetype)))
+    (setf (cdr f-type)
+          (append (cdr f-type)
+                  (cond
+                   ((eq type 'org)
+                    (list :date-key-regexp "^#\\+date\\s-*:"
+                          :signature-key-regexp "^#\\+signature\\s-*:"
+                          :identifier-key-regexp "^#\\+identifier\\s-*:"))
+                   ((eq type 'markdown-yaml)
+                    (list :date-key-regexp "^date\\s-*:"
+                          :signature-key-regexp "^signature\\s-*:"
+                          :identifier-key-regexp "^identifier\\s-*:"))
+                   ((eq type 'markdown-toml)
+                    (list :date-key-regexp "^date\\s-*="
+                          :signature-key-regexp "^signature\\s-*="
+                          :identifier-key-regexp "^identifier\\s-*="))
+                   ((eq type 'text)
+                    (list :date-key-regexp "^date\\s-*:"
+                          :signature-key-regexp "^signature\\s-*:"
+                          :identifier-key-regexp "^identifier\\s-*:")))))
+    f-type))
+
 (defun denote-tree--collect-keywords (buffer keywords)
   "Return denote propertized KEYWORDS from BUFFER.
 Return \"\" if none are found."
