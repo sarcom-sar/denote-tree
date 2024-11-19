@@ -541,6 +541,8 @@ Return \"\" if none are found."
   (let ((filetype (denote-tree--find-filetype buffer))
         lst type)
     (when filetype
+      (unless (plist-get filetype :date-key-regexp)
+        (setq filetype (denote-tree--build-full-filetype filetype)))
       (with-current-buffer buffer
         (dolist (el keywords)
           (when-let ((key
