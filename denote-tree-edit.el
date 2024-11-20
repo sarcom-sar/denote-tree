@@ -201,9 +201,15 @@ Denote wont ask you to confirm it, this is final."
   (let ((type-widget-alist (denote-tree-edit--construct-type-widget-alist loc))
         new-alist)
     (dolist (el alist new-alist)
-      (if (assq (car el) type-widget-alist)
-          (push (assq (car el) type-widget-alist) new-alist)
-        (push el new-alist)))))
+      (let ((pair (assq (car el) type-widget-alist))
+            (value (alist-get (car el) alist))
+            props)
+        (if (not pair)
+            (push el new-alist)
+          (when value
+            (setq props (text-properties-at 0 value))
+            (set-text-properties 0 (length (cdr pair)) props (cdr pair)))
+          (push pair new-alist))))))
 
 ;;;; Helpers
 
