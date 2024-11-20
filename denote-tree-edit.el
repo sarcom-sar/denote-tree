@@ -35,10 +35,10 @@
 ;;;; Variables
 
 (defvar-local denote-tree-edit--current-note '((file)
-                                               (title . keep-current)
-                                               (keywords . keep-current)
-                                               (signature . keep-current)
-                                               (date . keep-current))
+                                               (title)
+                                               (keywords)
+                                               (signature)
+                                               (date))
   "Alist of a current note elements.")
 
 (defvar-local denote-tree-edit--current-line nil
