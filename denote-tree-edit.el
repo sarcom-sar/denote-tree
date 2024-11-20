@@ -71,9 +71,18 @@ Everything else is still read-only.  All newlines will be dropped.
   (save-excursion
     (let ((inhibit-read-only t))
       ;; save to denote-tree-edit--current-note
-      (denote-tree-edit--set-from-front-matter
-       denote-tree-include-from-front-matter
-       #'denote-tree-edit--save-match)
+      (with-temp-buffer
+        (insert-file-contents (alist-get 'file denote-tree-edit--current-note))
+        (goto-char (point-min))
+        (let* ((keywords-keys '(title keywords signature date))
+               (keywords-values (nreverse
+                                 (denote-tree--collect-keywords (current-buffer)
+                                                                keywords-keys))))
+          (dolist (el keywords-keys)
+            (let ((pair (assq el denote-tree-edit--current-note)))
+              (when (car keywords-values)
+                (setcdr pair (car keywords-values))))
+            (setq keywords-values (cdr keywords-values)))))
       (denote-tree-edit--widgetize-line))))
 
 (defun denote-tree-edit-commit-changes ()
