@@ -194,8 +194,10 @@ or a BUFFER provided by the user."
   (interactive)
   (unwind-protect
       (progn
-        (or buffer (setq buffer (denote-tree--collect-keywords (current-buffer)
-                                                               '(identifier))))
+        (or buffer (setq buffer
+                         (denote-tree--collect-keywords-as-string
+                          (current-buffer)
+                          '(identifier))))
         (denote-tree--open-link-maybe buffer)
         (if (bufferp buffer)
             (setq denote-tree--buffer-name (concat
@@ -354,7 +356,7 @@ Preserve properties."
     (save-excursion
       (goto-char pos)
       (delete-region pos (line-end-position))
-      (insert (denote-tree--collect-keywords
+      (insert (denote-tree--collect-keywords-as-string
                buffer
                denote-tree-include-from-front-matter))
       (add-text-properties pos (line-end-position) props))))
@@ -454,7 +456,7 @@ Argument LASTP is the current node last child of parent."
                         'face (if circularp
                                   'denote-tree-circular-node
                                 'denote-tree-node))
-            (denote-tree--collect-keywords node-name keywords)
+            (denote-tree--collect-keywords-as-string node-name keywords)
             "\n")
     (cons point-star-loc indent)))
 
@@ -559,15 +561,23 @@ Return \"\" if none are found."
                         :date-key-regexp)
                        (t nil))))
             (goto-char (point-min))
-            (re-search-forward (plist-get (cdr filetype) key))
-            (setq type el)
-            (setq el (denote-trim-whitespace
-                      (buffer-substring-no-properties (point)
-                                                      (line-end-position)))))
-          (when (stringp el)
-            (push (funcall denote-tree-node-colorize-function el type) lst)
-            (push " " lst)))))
-    (apply #'concat (nreverse (cdr lst)))))
+            ;; if element is nil, dont set anything
+            (when (re-search-forward (plist-get (cdr filetype) key) nil t)
+              (setq type el)
+              (setq el (denote-trim-whitespace
+                        (buffer-substring-no-properties (point)
+                                                        (line-end-position))))))
+          (cond
+           ((stringp el)
+            (push (funcall denote-tree-node-colorize-function el type) lst))
+           ((symbolp el)
+            (push nil lst))))))
+    lst))
+
+(defun denote-tree--collect-keywords-as-string (buffer keywords)
+  "Returns KEYWORDS as a joint string from BUFFER."
+  (let ((lst (denote-tree--collect-keywords buffer keywords)))
+    (string-join (nreverse lst) " ")))
 
 (defun denote-tree--find-filetype (buffer)
   "Guess the filetype in BUFFER and return it as a symbol."
