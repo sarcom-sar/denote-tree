@@ -230,8 +230,8 @@ If TYPE or EL are not symbols or EL is not in line return nil."
     (with-temp-buffer
       (insert-file-contents (alist-get 'file copy))
       (goto-char (point-min))
-      (setq filetype (denote-tree--find-filetype (current-buffer))))
-    (when (listp (cdr (assq 'keywords copy)))
+      (setq filetype (cdr (denote-tree--find-filetype (current-buffer)))))
+    (unless (listp (cdr (assq 'keywords copy)))
       (setcdr (assq 'keywords copy)
               (funcall (plist-get filetype :keywords-value-reverse-function)
                        (cdr (assq 'keywords copy))))))
