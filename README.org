@@ -6,7 +6,8 @@ it operates, stuff like setting a mark /just works/ without reimplementing them.
 
 ** Usage
 
-Just clone this very repository and enable the package:
+Just clone this very repository, add it to your load path and enable the
+package:
 
 #+begin_src emacs-lisp
  (require 'denote-tree)

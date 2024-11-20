@@ -2,10 +2,10 @@
 
 ;; Copyright 2024, Sararin
 ;; Created: 2024-09-15 Sun
-;; Version: 0.7.0
+;; Version: 0.7.5
 ;; Keywords: convenience
 ;; URL: http://github.com/sarcom-sar/denote-tree.el
-;; Package-Requires: ((emacs "29.1"))
+;; Package-Requires: ((emacs "27.1") (denote "3.0.1"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -61,8 +61,7 @@
 ;;; Code:
 
 (eval-when-compile
-  (require 'denote)
-  (require 'compat))
+  (require 'denote))
 
 (declare-function #'denote-tree-edit-mode "./denote-tree-edit.el")
 
