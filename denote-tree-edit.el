@@ -84,7 +84,7 @@ Everything else is still read-only.  All newlines will be dropped.
                 (setcdr pair (car keywords-values))))
             (setq keywords-values (cdr keywords-values)))))
       ;; add info about neighbors
-      (denote-tree-edit--set-from-front-matter
+      (denote-tree-edit--set-from-tree
        denote-tree-include-from-front-matter
        #'denote-tree-edit--save-match)
       (denote-tree-edit--widgetize-line))))
@@ -247,7 +247,7 @@ If TYPE or EL are not symbols or EL is not in line return nil."
                        (cdr (assq 'keywords copy))))))
   (nreverse copy))
 
-(defun denote-tree-edit--set-from-front-matter
+(defun denote-tree-edit--set-from-tree
     (front-matter-els func &optional any)
   "Iterate over FRONT-MATTER-ELS applying FUNC to it.
 Restrict search of props to the current line.
