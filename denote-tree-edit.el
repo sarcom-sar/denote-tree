@@ -83,6 +83,10 @@ Everything else is still read-only.  All newlines will be dropped.
               (when (car keywords-values)
                 (setcdr pair (car keywords-values))))
             (setq keywords-values (cdr keywords-values)))))
+      ;; add info about neighbors
+      (denote-tree-edit--set-from-front-matter
+       denote-tree-include-from-front-matter
+       #'denote-tree-edit--save-match)
       (denote-tree-edit--widgetize-line))))
 
 (defun denote-tree-edit-commit-changes ()
