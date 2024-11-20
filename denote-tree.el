@@ -569,14 +569,18 @@ Return \"\" if none are found."
                                                         (line-end-position))))))
           (cond
            ((stringp el)
-            (push (funcall denote-tree-node-colorize-function el type) lst))
+            (push (cons type
+                        (funcall denote-tree-node-colorize-function
+                                 el
+                                 type))
+                  lst))
            ((symbolp el)
-            (push nil lst))))))
+            (push (list el) lst))))))
     lst))
 
 (defun denote-tree--collect-keywords-as-string (buffer keywords)
   "Returns KEYWORDS as a joint string from BUFFER."
-  (let ((lst (denote-tree--collect-keywords buffer keywords)))
+  (let ((lst (mapcar #'cdr (denote-tree--collect-keywords buffer keywords))))
     (string-join (nreverse lst) " ")))
 
 (defun denote-tree--find-filetype (buffer)
