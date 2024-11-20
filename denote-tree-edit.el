@@ -70,19 +70,20 @@ Everything else is still read-only.  All newlines will be dropped.
             'button-data)))
   (save-excursion
     (let ((inhibit-read-only t))
-      ;; save to denote-tree-edit--current-note
+      ;; save to denote-tree-edit--current-note from front-matter
       (with-temp-buffer
         (insert-file-contents (alist-get 'file denote-tree-edit--current-note))
         (goto-char (point-min))
-        (let* ((keywords-keys '(title keywords signature date))
-               (keywords-values (nreverse
-                                 (denote-tree--collect-keywords (current-buffer)
-                                                                keywords-keys))))
-          (dolist (el keywords-keys)
-            (let ((pair (assq el denote-tree-edit--current-note)))
-              (when (car keywords-values)
-                (setcdr pair (car keywords-values))))
-            (setq keywords-values (cdr keywords-values)))))
+        (let ((keywords-pairs
+               (denote-tree--collect-keywords (current-buffer)
+                                              '(title
+                                                keywords
+                                                signature
+                                                date))))
+          (dolist (el keywords-pairs)
+            (let ((pair (assq (car el) denote-tree-edit--current-note)))
+              (when (cdr el)
+                (setcdr pair (cdr el)))))))
       ;; add info about neighbors
       (denote-tree-edit--set-from-tree
        denote-tree-include-from-front-matter
