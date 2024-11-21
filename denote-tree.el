@@ -579,7 +579,7 @@ Return \"\" if none are found."
 
 (defun denote-tree--collect-keywords-as-string (buffer keywords)
   "Returns KEYWORDS as a joint string from BUFFER."
-  (let ((lst (mapcar #'cdr (denote-tree--collect-keywords buffer keywords))))
+  (let ((lst (seq-filter #'identity (mapcar #'cdr (denote-tree--collect-keywords buffer keywords)))))
     (string-join (nreverse lst) " ")))
 
 (defun denote-tree--find-filetype (buffer)
