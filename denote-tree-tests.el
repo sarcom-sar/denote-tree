@@ -80,3 +80,38 @@ Argument VISITED    - \"buffers\" to be cleaned up."
                  (c)))))
     (should (equal (denote-tree--collect-keywords-as-string '_ '_)
                    ""))))
+
+(ert-deftest denote-tree--find-filetype-test ()
+  "Tests for `denote-tree--find-filetype'."
+  (let ((denote-file-types '((org
+                              :title-key-regexp "o:")
+                             (markdown-yaml
+                              :title-key-regexp "y:")
+                             (markdown-toml
+                              :title-key-regexp "t:")
+                             (text
+                              :title-key-regexp "x:"))))
+    (with-temp-buffer
+      (insert "o: title")
+      (should (equal (car (denote-tree--find-filetype (current-buffer)))
+                     'org)))
+    (with-temp-buffer
+      (insert "y: title")
+      (should (equal (car (denote-tree--find-filetype (current-buffer)))
+                     'markdown-yaml)))
+    (with-temp-buffer
+      (insert "t: title")
+      (should (equal (car (denote-tree--find-filetype (current-buffer)))
+                     'markdown-toml)))
+    (with-temp-buffer
+      (insert "x: title")
+      (should (equal (car (denote-tree--find-filetype (current-buffer)))
+                     'text)))
+    (with-temp-buffer
+      (insert "p: title")
+      (should (equal (car (denote-tree--find-filetype (current-buffer)))
+                     nil)))
+    (with-temp-buffer
+      (insert "")
+      (should (equal (car (denote-tree--find-filetype (current-buffer)))
+                     nil)))))
