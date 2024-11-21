@@ -45,3 +45,38 @@ Argument VISITED    - \"buffers\" to be cleaned up."
    '(a b c d e f) '(b d e f) '(c a))
   (denote-tree-test--prepare-buffer-space
    '(a b c d e f) '(a b c d e f) '(g)))
+
+(ert-deftest denote-tree--collect-keywords-as-string-test ()
+  "Tests for `denote-tree--collect-keywords-as-string'."
+  (cl-letf (((symbol-function 'denote-tree--collect-keywords)
+             ;; real functions returns in reverse
+             (lambda (_ _)
+               '((a . "a")
+                 (b . "b")
+                 (c . "c")))))
+    (should (equal (denote-tree--collect-keywords-as-string '_ '_)
+                   "c b a")))
+  (cl-letf (((symbol-function 'denote-tree--collect-keywords)
+             ;; real functions returns in reverse
+             (lambda (_ _)
+               '((a . "a")
+                 (b)
+                 (c . "c")))))
+    (should (equal (denote-tree--collect-keywords-as-string '_ '_)
+                   "c a")))
+  (cl-letf (((symbol-function 'denote-tree--collect-keywords)
+             ;; real functions returns in reverse
+             (lambda (_ _)
+               '((a)
+                 (b)
+                 (c . "c")))))
+    (should (equal (denote-tree--collect-keywords-as-string '_ '_)
+                   "c")))
+  (cl-letf (((symbol-function 'denote-tree--collect-keywords)
+             ;; real functions returns in reverse
+             (lambda (_ _)
+               '((a)
+                 (b)
+                 (c)))))
+    (should (equal (denote-tree--collect-keywords-as-string '_ '_)
+                   ""))))
