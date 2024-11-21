@@ -584,14 +584,16 @@ Return \"\" if none are found."
 
 (defun denote-tree--find-filetype (buffer)
   "Guess the filetype in BUFFER and return it as a symbol."
-  (let ((types denote-file-types))
-    (with-current-buffer buffer
-      (goto-char (point-min))
-      (seq-find
-       (lambda (type)
-         (re-search-forward
-          (plist-get (cdr type) :title-key-regexp) nil t))
-       types))))
+  (with-current-buffer buffer
+    (goto-char (point-min))
+    (let ((type (seq-find
+                 (lambda (type)
+                   (re-search-forward
+                    (plist-get (cdr type) :title-key-regexp) nil t))
+                 denote-file-types)))
+      (unless type
+        (message "%s not a denote-style buffer" buffer))
+      type)))
 
 (defun denote-tree--open-link-maybe (element)
   "Return ELEMENT buffer, create if necessary.
