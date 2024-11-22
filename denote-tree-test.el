@@ -1,7 +1,9 @@
+;;; denote-tree-test.el --- Test denote-tree -*- lexical-binding: nil -*-
+
 (require 'denote-tree)
 (require 'ert)
 
-(ert-deftest denote-tree--default-props-test ()
+(ert-deftest denote-tree-test--default-props ()
   "Tests for `denote-tree--default-props'."
   (should (equal-including-properties
            (denote-tree--default-props "a" 'b)
@@ -37,7 +39,7 @@ Argument VISITED    - \"buffers\" to be cleaned up."
        (denote-tree--clean-up)
        (should (equal fake-buffers ,after-bufs)))))
 
-(ert-deftest denote-tree--clean-up-test ()
+(ert-deftest denote-tree-test--clean-up ()
   "Tests for `denote-tree--clean-up'."
   (denote-tree-test--prepare-buffer-space
    '(a b c d e f) '(a b c d e f) '())
@@ -46,7 +48,7 @@ Argument VISITED    - \"buffers\" to be cleaned up."
   (denote-tree-test--prepare-buffer-space
    '(a b c d e f) '(a b c d e f) '(g)))
 
-(ert-deftest denote-tree--collect-keywords-as-string-test ()
+(ert-deftest denote-tree-test--collect-keywords-as-string ()
   "Tests for `denote-tree--collect-keywords-as-string'."
   (cl-letf (((symbol-function 'denote-tree--collect-keywords)
              ;; real functions returns in reverse
@@ -81,7 +83,7 @@ Argument VISITED    - \"buffers\" to be cleaned up."
     (should (equal (denote-tree--collect-keywords-as-string '_ '_)
                    ""))))
 
-(ert-deftest denote-tree--find-filetype-test ()
+(ert-deftest denote-tree-test--find-filetype ()
   "Tests for `denote-tree--find-filetype'."
   (let ((denote-file-types '((org
                               :title-key-regexp "o:")
@@ -115,3 +117,6 @@ Argument VISITED    - \"buffers\" to be cleaned up."
       (insert "")
       (should (equal (car (denote-tree--find-filetype (current-buffer)))
                      nil)))))
+(ert-deftest )
+
+(provide 'denote-tree-test)
