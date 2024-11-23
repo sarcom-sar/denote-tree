@@ -60,8 +60,8 @@
 
 ;;; Code:
 
-(eval-when-compile
-  (require 'denote))
+(require 'denote)
+(require 'cl-lib)
 
 (declare-function #'denote-tree-edit-mode "./denote-tree-edit.el")
 

@@ -23,10 +23,9 @@
 
 ;;; Code:
 
-(eval-when-compile
-  (require 'denote)
-  (require 'wid-edit)
-  (require 'denote-tree))
+(require 'denote)
+(require 'wid-edit)
+(require 'denote-tree)
 
 (declare-function #'denote-tree-mode "./denote-tree.el")
 (declare-function #'denote-tree--find-filetype "./denote-tree.el")
@@ -102,8 +101,7 @@ Denote wont ask you to confirm it, this is final."
         (let ((copy (denote-tree-edit--fix-current-note
                      (copy-tree denote-tree-edit--current-note)))
               (denote-rename-confirmations nil)
-              (denote-save-buffers t)
-              (denote-kill-buffers t))
+              (denote-save-buffers t))
           (apply #'denote-rename-file (mapcar #'cdr copy))))
     (denote-tree-edit--clean-up)))
 
