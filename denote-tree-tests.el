@@ -17,13 +17,13 @@
            (propertize "a" 'denote-tree--type '(b c)))))
 
 (defmacro denote-tree-test--prepare-buffer-space
-    (buffers equal-to visited)
+    (start-bufs after-bufs visited)
   "Prepare an environment for testing `denote-tree--clean-up'.
 
-Argument BUFFERS  - starting \"buffers\";
-Argument EQUAL-TO - what BUFFERS should be after the call;
-Argument VISITED  - \"buffers\" to be cleaned up."
-  `(let ((fake-buffers ,buffers)
+Argument START-BUFS - starting \"buffers\";
+Argument AFTER-BUFS - what BUFFERS should be after the call;
+Argument VISITED    - \"buffers\" to be cleaned up."
+  `(let ((fake-buffers ,start-bufs)
          (denote-tree--visited-buffers ,visited)
          (denote-tree--cyclic-buffers '()))
      (cl-letf (((symbol-function 'kill-buffer)
@@ -35,7 +35,7 @@ Argument VISITED  - \"buffers\" to be cleaned up."
                 (lambda (thing)
                   (member thing fake-buffers))))
        (denote-tree--clean-up)
-       (should (equal fake-buffers ,equal-to)))))
+       (should (equal fake-buffers ,after-bufs)))))
 
 (ert-deftest denote-tree--clean-up-test ()
   "Tests for `denote-tree--clean-up'."
