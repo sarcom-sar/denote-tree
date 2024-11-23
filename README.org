@@ -54,10 +54,13 @@ redraw entire tree from scratch if anything changes.
 **** Customizable elements
 
 - =denote-tree-preserve-teleports-p=, teleport back when accessing cyclical node
-   from it's child.  When nil, always move to "real" parent of a node.
-- =denote-tree-include-from-front-matter=, elements of front matter to include,
-  when drawing a node.  Currently supported elements: TITLE, IDENTIFIER,
-  KEYWORDS, arbitrary string.
+  from it's child.  When nil, always move to "real" parent of a node.
+- =denote-tree-node-description=, elements of front matter to include in node's
+  description.  User can also extend denote's front matter by any arbitrary
+  element, but they have to add corresponding regex to `denote-file-types' in
+  order for denote-tree to recognize it.  That user variable also supports
+  arbitrary strings.  Denote's default front matter elements: title, identifier,
+  keywords, signature, date.
 - =denote-tree-max-traversal-depth=, maximum traversal depth of =denote-tree=.
   If t traverse all the way, if num, traverse n nodes deep.
 - =denote-tree-title-colorize-function=, Add properties to information from the

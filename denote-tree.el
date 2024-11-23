@@ -44,9 +44,9 @@
 ;;   '-* Dui dui euismod elit, vitae placerat urna tortor vitae lacus.
 ;;
 ;; Parts of front matter to include are customizable via
-;; `denote-tree-include-from-front-matter'.  It is able to handle cyclical
-;; nodes and provides a mechanism to move between those cyclical nodes
-;; (called "teleportations") by default (customizable via
+;; `denote-tree-node-description'.  It is able to handle cyclical nodes and
+;; provides a mechanism to move between those cyclical nodes (called
+;; "teleportations") by default (customizable via
 ;; `denote-tree-preserve-teleports-p').  As a drawback, it is pretty stupid
 ;; and has to redraw entire thing from scratch, if anything changes.
 ;;
@@ -106,22 +106,26 @@ If t traverse all the way, if num, traverse n nodes deep."
   :group 'denote-tree
   :type '(choice symbol natnum))
 
-(defcustom denote-tree-include-from-front-matter '(title)
-  "Elements of front matter to include, when drawing a node.
+(defcustom denote-tree-node-description '(title)
+  "Elements of front matter to include in node's description.
 
-Currently supported elements:
+User can also extend denote's front matter by any arbitrary element, but they
+have to add corresponding regex to `denote-file-types' in order for denote-tree
+to recognize it.  That user variable also supports arbitrary strings.
+
+Denote's default front matter elements:
 - title
 - identifier
 - keywords
 - signature
-- date
-- arbitrary string"
+- date string"
   :group 'denote-tree
   :type '(set (choice (const title)
                       (const identifier)
                       (const keywords)
                       (const signature)
                       (const date)
+                      symbol
                       string)))
 
 (defcustom denote-tree-preserve-teleports-p t
@@ -200,17 +204,17 @@ or a BUFFER provided by the user."
         (denote-tree--open-link-maybe buffer)
         (if (bufferp buffer)
             (setq denote-tree--buffer-name (concat
-                                 "*"
-                                 denote-tree-buffer-prefix
-                                 " "
-                                 (buffer-name buffer)
-                                 "*"))
+                                            "*"
+                                            denote-tree-buffer-prefix
+                                            " "
+                                            (buffer-name buffer)
+                                            "*"))
           (setq denote-tree--buffer-name (concat
-                               "*"
-                               denote-tree-buffer-prefix
-                               " "
-                               buffer
-                               "*")))
+                                          "*"
+                                          denote-tree-buffer-prefix
+                                          " "
+                                          buffer
+                                          "*")))
         (let ((inhibit-read-only t))
           (with-current-buffer (get-buffer-create denote-tree--buffer-name)
             (erase-buffer)
@@ -347,7 +351,7 @@ Return current buffer object."
 
 (defun denote-tree--redraw-node (buffer pos)
   "Redraw node based on BUFFER's front matter at POS.
-Include only elements from `denote-tree-include-from-front-matter'.
+Include only elements from `denote-tree-node-description'.
 
 Preserve properties."
   (let ((inhibit-read-only t)
@@ -357,7 +361,7 @@ Preserve properties."
       (delete-region pos (line-end-position))
       (insert (denote-tree--collect-keywords-as-string
                buffer
-               denote-tree-include-from-front-matter))
+               denote-tree-node-description))
       (add-text-properties pos (line-end-position) props))))
 
 
@@ -440,7 +444,7 @@ Call `denote-tree-node-colorize-function' on title.
 Return location of a point where the node starts and the current indent.
 Argument LASTP is the current node last child of parent."
   (let ((circularp (assoc node-name denote-tree--cyclic-buffers))
-        (keywords denote-tree-include-from-front-matter)
+        (keywords denote-tree-node-description)
         point-star-loc)
     (insert indent)
     (cond
@@ -542,7 +546,7 @@ Return \"\" if none are found."
   (let ((filetype (denote-tree--find-filetype buffer))
         lst type)
     (when filetype
-      (unless (plist-get filetype :date-key-regexp)
+      (unless (plist-get (cdr filetype) :date-key-regexp)
         (setq filetype (denote-tree--build-full-filetype filetype)))
       (with-current-buffer buffer
         (dolist (el keywords)

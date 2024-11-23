@@ -86,7 +86,7 @@ Everything else is still read-only.  All newlines will be dropped.
                 (setcdr pair (cdr el)))))))
       ;; add info about neighbors
       (denote-tree-edit--set-from-tree
-       denote-tree-include-from-front-matter
+       denote-tree-node-description
        #'denote-tree-edit--save-match)
       (denote-tree-edit--widgetize-line))))
 
@@ -130,7 +130,7 @@ Denote wont ask you to confirm it, this is final."
   (let ((front-pos (denote-tree-edit--after-button
                     denote-tree-edit--current-line)))
     (goto-char front-pos)
-    (dolist (el denote-tree-include-from-front-matter)
+    (dolist (el denote-tree-node-description)
       (if (symbolp el)
           (insert (alist-get el denote-tree-edit--current-note) " ")
         (insert el " ")))))
@@ -143,7 +143,7 @@ Denote wont ask you to confirm it, this is final."
   (kill-region (denote-tree-edit--after-button denote-tree-edit--current-line)
                (line-end-position))
   (goto-char (line-end-position))
-  (dolist (el denote-tree-include-from-front-matter)
+  (dolist (el denote-tree-node-description)
     (cond
      ((symbolp el)
       (widget-create 'editable-field
@@ -190,7 +190,7 @@ Denote wont ask you to confirm it, this is final."
 (defun denote-tree-edit--construct-type-widget-alist (loc)
   "Construct an alist of (type . widget) starting from LOC."
   (let ((possible-widgets (denote-tree-edit--widgets-in-line loc))
-        (front-matter denote-tree-include-from-front-matter)
+        (front-matter denote-tree-node-description)
         new-alist)
     (dolist (el front-matter new-alist)
       (when (symbolp el)
