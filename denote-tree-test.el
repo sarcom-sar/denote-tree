@@ -111,14 +111,7 @@ Argument VISITED    - \"buffers\" to be cleaned up."
 
 (ert-deftest denote-tree-test--find-filetype ()
   "Tests for `denote-tree--find-filetype'."
-  (let ((denote-file-types '((org
-                              :title-key-regexp "o:")
-                             (markdown-yaml
-                              :title-key-regexp "y:")
-                             (markdown-toml
-                              :title-key-regexp "t:")
-                             (text
-                              :title-key-regexp "x:"))))
+  (let ((denote-file-types denote-tree-test-mock--denote-file-types))
     (with-temp-buffer
       (insert "o: title")
       (should (equal (car (denote-tree--find-filetype (current-buffer)))
@@ -143,6 +136,50 @@ Argument VISITED    - \"buffers\" to be cleaned up."
       (insert "")
       (should (equal (car (denote-tree--find-filetype (current-buffer)))
                      nil)))))
-(ert-deftest )
+
+(ert-deftest denote-tree-test--collect-keywords ()
+  "Tests for `denote-tree--collect-keywords'."
+  (cl-letf (((symbol-function 'denote-tree--find-filetype)
+             (lambda (_)
+               (assq 'org denote-tree-test-mock--denote-file-types))))
+    (with-temp-buffer
+      (insert "o: foo\nb: bar\nc: baz\nd: foz\ne: fazboo\n")
+      (should (equal-including-properties
+               (denote-tree--collect-keywords (current-buffer)
+                                   '(title
+                                     identifier
+                                     keywords
+                                     signature
+                                     date))
+               `((date . ,(propertize "fazboo" 'denote-tree--type 'date))
+                 (signature . ,(propertize "foz" 'denote-tree--type 'signature))
+                 (keywords . ,(propertize "baz" 'denote-tree--type 'keywords))
+                 (identifier . ,(propertize "bar" 'denote-tree--type 'identifier))
+                 (title . ,(propertize "foo" 'denote-tree--type 'title))))))
+    (with-temp-buffer
+      (insert "o: foo\nb: bar\nd: foz\ne: fazboo\n")
+      (should (equal-including-properties
+               (denote-tree--collect-keywords (current-buffer)
+                                   '(title
+                                     identifier
+                                     keywords
+                                     signature
+                                     date))
+               `((date . ,(propertize "fazboo" 'denote-tree--type 'date))
+                 (signature . ,(propertize "foz" 'denote-tree--type 'signature))
+                 (keywords)
+                 (identifier . ,(propertize "bar" 'denote-tree--type 'identifier))
+                 (title . ,(propertize "foo" 'denote-tree--type 'title))))))
+    (with-temp-buffer
+      (should (equal-including-properties
+               (denote-tree--collect-keywords (current-buffer)
+                                   '())
+               nil)))
+    ;; possible extension point for future keywords
+    (with-temp-buffer
+      (should (equal-including-properties
+               (denote-tree--collect-keywords (current-buffer)
+                                   '(kazoo))
+               '((kazoo)))))))
 
 (provide 'denote-tree-test)
