@@ -3,6 +3,32 @@
 (require 'denote-tree)
 (require 'ert)
 
+(defvar denote-tree-test-mock--denote-file-types
+  '((org
+     :title-key-regexp "o:"
+     :identifier-key-regexp "b:"
+     :keywords-key-regexp "c:"
+     :signature-key-regexp "d:"
+     :date-key-regexp "e:")
+    (markdown-yaml
+     :title-key-regexp "y:"
+     :identifier-key-regexp "b:"
+     :keywords-key-regexp "c:"
+     :signature-key-regexp "d:"
+     :date-key-regexp "e:")
+    (markdown-toml
+     :title-key-regexp "t:"
+     :identifier-key-regexp "b:"
+     :keywords-key-regexp "c:"
+     :signature-key-regexp "d:"
+     :date-key-regexp "e:")
+    (text
+     :title-key-regexp "x:"
+     :identifier-key-regexp "b:"
+     :keywords-key-regexp "c:"
+     :signature-key-regexp "d:"
+     :date-key-regexp "e:")))
+
 (ert-deftest denote-tree-test--default-props ()
   "Tests for `denote-tree--default-props'."
   (should (equal-including-properties
