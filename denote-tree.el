@@ -517,37 +517,36 @@ Return as a list sans BUFFER own identifiers."
 
 (defun denote-tree--build-full-filetype (filetype)
   "Build extended FILETYPE with additional regexps."
-  (let ((f-type (copy-tree filetype))
-        (type (car filetype)))
-    (setf (cdr f-type)
-          (append (cdr f-type)
-                  (cond
-                   ((eq type 'org)
-                    (list :date-key-regexp "^#\\+date\\s-*:"
-                          :signature-key-regexp "^#\\+signature\\s-*:"
-                          :identifier-key-regexp "^#\\+identifier\\s-*:"))
-                   ((eq type 'markdown-yaml)
-                    (list :date-key-regexp "^date\\s-*:"
-                          :signature-key-regexp "^signature\\s-*:"
-                          :identifier-key-regexp "^identifier\\s-*:"))
-                   ((eq type 'markdown-toml)
-                    (list :date-key-regexp "^date\\s-*="
-                          :signature-key-regexp "^signature\\s-*="
-                          :identifier-key-regexp "^identifier\\s-*="))
-                   ((eq type 'text)
-                    (list :date-key-regexp "^date\\s-*:"
-                          :signature-key-regexp "^signature\\s-*:"
-                          :identifier-key-regexp "^identifier\\s-*:")))))
+  (let ((f-type (copy-tree filetype)))
+    (when-let ((type (car filetype))
+               (oldp (not (plist-get (cdr filetype) :date-key-regexp))))
+      (setf (cdr f-type)
+            (append (cdr f-type)
+                    (cond
+                     ((eq type 'org)
+                      (list :date-key-regexp "^#\\+date\\s-*:"
+                            :signature-key-regexp "^#\\+signature\\s-*:"
+                            :identifier-key-regexp "^#\\+identifier\\s-*:"))
+                     ((eq type 'markdown-yaml)
+                      (list :date-key-regexp "^date\\s-*:"
+                            :signature-key-regexp "^signature\\s-*:"
+                            :identifier-key-regexp "^identifier\\s-*:"))
+                     ((eq type 'markdown-toml)
+                      (list :date-key-regexp "^date\\s-*="
+                            :signature-key-regexp "^signature\\s-*="
+                            :identifier-key-regexp "^identifier\\s-*="))
+                     ((eq type 'text)
+                      (list :date-key-regexp "^date\\s-*:"
+                            :signature-key-regexp "^signature\\s-*:"
+                            :identifier-key-regexp "^identifier\\s-*:"))))))
     f-type))
 
 (defun denote-tree--collect-keywords (buffer keywords)
   "Return denote propertized KEYWORDS from BUFFER.
 Return \"\" if none are found."
-  (let ((filetype (denote-tree--find-filetype buffer))
-        lst type)
-    (when filetype
-      (unless (plist-get (cdr filetype) :date-key-regexp)
-        (setq filetype (denote-tree--build-full-filetype filetype)))
+  (when-let ((filetype (cdr (denote-tree--build-full-filetype
+                             (denote-tree--find-filetype buffer)))))
+    (let (lst type)
       (with-current-buffer buffer
         (dolist (el keywords)
           (when-let ((key
@@ -565,7 +564,7 @@ Return \"\" if none are found."
                        (t nil))))
             (goto-char (point-min))
             ;; if element is nil, dont set anything
-            (when (re-search-forward (plist-get (cdr filetype) key) nil t)
+            (when (re-search-forward (plist-get filetype key) nil t)
               (setq type el)
               (setq el (denote-trim-whitespace
                         (buffer-substring-no-properties (point)
@@ -578,8 +577,8 @@ Return \"\" if none are found."
                                  type))
                   lst))
            ((symbolp el)
-            (push (list el) lst))))))
-    lst))
+            (push (list el) lst)))))
+      lst)))
 
 (defun denote-tree--collect-keywords-as-string (buffer keywords)
   "Returns KEYWORDS as a joint string from BUFFER."
