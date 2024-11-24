@@ -3,7 +3,7 @@
 (require 'denote-tree)
 (require 'ert)
 
-(defvar denote-tree-test-mock--denote-file-types
+(defvar denote-tree-test-mock--denote-file-types-1
   '((org
      :title-key-regexp "o:"
      :identifier-key-regexp "b:"
@@ -28,6 +28,17 @@
      :keywords-key-regexp "c:"
      :signature-key-regexp "d:"
      :date-key-regexp "e:")))
+
+(defvar denote-tree-test-mock--denote-file-types-2
+  '((org
+     :title-key-regexp "o:"
+     :identifier-key-regexp "b:")
+    (markdown-toml
+     :title-key-regexp "t:"
+     :identifier-key-regexp "b:")
+    (text
+     :title-key-regexp "x:"
+     :identifier-key-regexp "b:")))
 
 (ert-deftest denote-tree-test--default-props ()
   "Tests for `denote-tree--default-props'."
@@ -111,7 +122,7 @@ Argument VISITED    - \"buffers\" to be cleaned up."
 
 (ert-deftest denote-tree-test--find-filetype ()
   "Tests for `denote-tree--find-filetype'."
-  (let ((denote-file-types denote-tree-test-mock--denote-file-types))
+  (let ((denote-file-types denote-tree-test-mock--denote-file-types-1))
     (with-temp-buffer
       (insert "o: title")
       (should (equal (car (denote-tree--find-filetype (current-buffer)))
@@ -141,7 +152,7 @@ Argument VISITED    - \"buffers\" to be cleaned up."
   "Tests for `denote-tree--collect-keywords'."
   (cl-letf (((symbol-function 'denote-tree--find-filetype)
              (lambda (_)
-               (assq 'org denote-tree-test-mock--denote-file-types))))
+               (assq 'org denote-tree-test-mock--denote-file-types-1))))
     (with-temp-buffer
       (insert "o: foo\nb: bar\nc: baz\nd: foz\ne: fazboo\n")
       (should (equal-including-properties
