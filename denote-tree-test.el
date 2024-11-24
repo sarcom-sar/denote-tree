@@ -193,4 +193,23 @@ Argument VISITED    - \"buffers\" to be cleaned up."
                                    '(kazoo))
                '((kazoo)))))))
 
+(ert-deftest denote-tree-test--build-full-filetype ()
+  "Tests for `denote-tree--build-full-filetype'."
+  (let ((type (assq 'org denote-tree-test-mock--denote-file-types-1)))
+    (should (equal (denote-tree--build-full-filetype type)
+                   '(org
+                     :title-key-regexp "o:"
+                     :identifier-key-regexp "b:"
+                     :keywords-key-regexp "c:"
+                     :signature-key-regexp "d:"
+                     :date-key-regexp "e:"))))
+  (let ((type (assq 'org denote-tree-test-mock--denote-file-types-2)))
+    (should (equal (denote-tree--build-full-filetype type)
+                   '(org
+                     :title-key-regexp "o:"
+                     :identifier-key-regexp "b:"
+                     :date-key-regexp "^#\\+date\\s-*:"
+                     :signature-key-regexp "^#\\+signature\\s-*:"
+                     :identifier-key-regexp "^#\\+identifier\\s-*:")))))
+
 (provide 'denote-tree-test)
