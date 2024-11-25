@@ -130,30 +130,60 @@ Argument VISITED    - \"buffers\" to be cleaned up."
       (insert "org-title: title")
       (should (equal (car (denote-tree--find-filetype (current-buffer)))
                      'org)))
+    (with-temp-buffer
+      (insert "org-identifier: identifier")
+      (should (equal (car (denote-tree--find-filetype (current-buffer)))
+                     'org)))
+    (with-temp-buffer
+      (insert "org-keywords: keywords")
       (should (equal (car (denote-tree--find-filetype (current-buffer)))
                      'org)))
     (with-temp-buffer
       (insert "yaml-title: title")
       (should (equal (car (denote-tree--find-filetype (current-buffer)))
                      'markdown-yaml)))
+    (with-temp-buffer
+      (insert "yaml-identifier: identifier")
       (should (equal (car (denote-tree--find-filetype (current-buffer)))
                      'markdown-yaml)))
     (with-temp-buffer
       (insert "yaml-keywords: keywords")
       (should (equal (car (denote-tree--find-filetype (current-buffer)))
                      'markdown-yaml)))
+    (with-temp-buffer
+      (insert "toml-title: title")
+      (should (equal (car (denote-tree--find-filetype (current-buffer)))
+                     'markdown-toml)))
+    (with-temp-buffer
+      (insert "toml-identifier: identifier")
+      (should (equal (car (denote-tree--find-filetype (current-buffer)))
+                     'markdown-toml)))
+    (with-temp-buffer
+      (insert "toml-keywords: keywords")
       (should (equal (car (denote-tree--find-filetype (current-buffer)))
                      'markdown-toml)))
     (with-temp-buffer
       (insert "text-title: title")
       (should (equal (car (denote-tree--find-filetype (current-buffer)))
                      'text)))
+    (with-temp-buffer
+      (insert "text-identifier: identifier")
+      (should (equal (car (denote-tree--find-filetype (current-buffer)))
+                     'text)))
+    (with-temp-buffer
+      (insert "text-keywords: keywords")
       (should (equal (car (denote-tree--find-filetype (current-buffer)))
                      'text)))
     (with-temp-buffer
       (insert "p-title: title")
       (should (equal (car (denote-tree--find-filetype (current-buffer)))
                      nil)))
+    (with-temp-buffer
+      (insert "p-identifier: identifier")
+      (should (equal (car (denote-tree--find-filetype (current-buffer)))
+                     nil)))
+    (with-temp-buffer
+      (insert "p-keywords: keywords")
       (should (equal (car (denote-tree--find-filetype (current-buffer)))
                      nil)))
     (with-temp-buffer
