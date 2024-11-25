@@ -5,40 +5,43 @@
 
 (defvar denote-tree-test-mock--denote-file-types-1
   '((org
-     :title-key-regexp "o:"
-     :identifier-key-regexp "b:"
-     :keywords-key-regexp "c:"
-     :signature-key-regexp "d:"
-     :date-key-regexp "e:")
+     :title-key-regexp "org-title:"
+     :identifier-key-regexp "org-identifier:"
+     :keywords-key-regexp "org-keywords:"
+     :signature-key-regexp "org-signature:"
+     :date-key-regexp "org-date:")
     (markdown-yaml
-     :title-key-regexp "y:"
-     :identifier-key-regexp "b:"
-     :keywords-key-regexp "c:"
-     :signature-key-regexp "d:"
-     :date-key-regexp "e:")
+     :title-key-regexp "yaml-title:"
+     :identifier-key-regexp "yaml-identifier:"
+     :keywords-key-regexp "yaml-keywords:"
+     :signature-key-regexp "yaml-signature:"
+     :date-key-regexp "yaml-date:")
     (markdown-toml
-     :title-key-regexp "t:"
-     :identifier-key-regexp "b:"
-     :keywords-key-regexp "c:"
-     :signature-key-regexp "d:"
-     :date-key-regexp "e:")
+     :title-key-regexp "toml-title:"
+     :identifier-key-regexp "toml-identifier:"
+     :keywords-key-regexp "toml-keywords:"
+     :signature-key-regexp "toml-signature:"
+     :date-key-regexp "toml-date:")
     (text
-     :title-key-regexp "x:"
-     :identifier-key-regexp "b:"
-     :keywords-key-regexp "c:"
-     :signature-key-regexp "d:"
-     :date-key-regexp "e:")))
+     :title-key-regexp "text-title:"
+     :identifier-key-regexp "text-identifier:"
+     :keywords-key-regexp "text-keywords:"
+     :signature-key-regexp "text-signature:"
+     :date-key-regexp "text-date:")))
 
 (defvar denote-tree-test-mock--denote-file-types-2
   '((org
-     :title-key-regexp "o:"
-     :identifier-key-regexp "b:")
+     :title-key-regexp "org-title:"
+     :identifier-key-regexp "org-identifier:")
+    (markdown-yaml
+     :title-key-regexp "yaml-title:"
+     :identifier-key-regexp "yaml-identifier:")
     (markdown-toml
-     :title-key-regexp "t:"
-     :identifier-key-regexp "b:")
+     :title-key-regexp "toml-title:"
+     :identifier-key-regexp "toml-identifier:")
     (text
-     :title-key-regexp "x:"
-     :identifier-key-regexp "b:")))
+     :title-key-regexp "text-title:"
+     :identifier-key-regexp "text-identifier:")))
 
 (ert-deftest denote-tree-test--default-props ()
   "Tests for `denote-tree--default-props'."
@@ -124,23 +127,33 @@ Argument VISITED    - \"buffers\" to be cleaned up."
   "Tests for `denote-tree--find-filetype'."
   (let ((denote-file-types denote-tree-test-mock--denote-file-types-1))
     (with-temp-buffer
-      (insert "o: title")
+      (insert "org-title: title")
+      (should (equal (car (denote-tree--find-filetype (current-buffer)))
+                     'org)))
       (should (equal (car (denote-tree--find-filetype (current-buffer)))
                      'org)))
     (with-temp-buffer
-      (insert "y: title")
+      (insert "yaml-title: title")
+      (should (equal (car (denote-tree--find-filetype (current-buffer)))
+                     'markdown-yaml)))
       (should (equal (car (denote-tree--find-filetype (current-buffer)))
                      'markdown-yaml)))
     (with-temp-buffer
-      (insert "t: title")
+      (insert "yaml-keywords: keywords")
+      (should (equal (car (denote-tree--find-filetype (current-buffer)))
+                     'markdown-yaml)))
       (should (equal (car (denote-tree--find-filetype (current-buffer)))
                      'markdown-toml)))
     (with-temp-buffer
-      (insert "x: title")
+      (insert "text-title: title")
+      (should (equal (car (denote-tree--find-filetype (current-buffer)))
+                     'text)))
       (should (equal (car (denote-tree--find-filetype (current-buffer)))
                      'text)))
     (with-temp-buffer
-      (insert "p: title")
+      (insert "p-title: title")
+      (should (equal (car (denote-tree--find-filetype (current-buffer)))
+                     nil)))
       (should (equal (car (denote-tree--find-filetype (current-buffer)))
                      nil)))
     (with-temp-buffer
@@ -154,7 +167,12 @@ Argument VISITED    - \"buffers\" to be cleaned up."
              (lambda (_)
                (assq 'org denote-tree-test-mock--denote-file-types-1))))
     (with-temp-buffer
-      (insert "o: foo\nb: bar\nc: baz\nd: foz\ne: fazboo\n")
+      (insert "org-title: foo
+org-identifier: bar
+org-keywords: baz
+org-signature: foz
+org-date: fazboo
+")
       (should (equal-including-properties
                (denote-tree--collect-keywords (current-buffer)
                                    '(title
@@ -168,7 +186,11 @@ Argument VISITED    - \"buffers\" to be cleaned up."
                  (identifier . ,(propertize "bar" 'denote-tree--type 'identifier))
                  (title . ,(propertize "foo" 'denote-tree--type 'title))))))
     (with-temp-buffer
-      (insert "o: foo\nb: bar\nd: foz\ne: fazboo\n")
+      (insert "org-title: foo
+org-identifier: bar
+org-signature: foz
+org-date: fazboo
+")
       (should (equal-including-properties
                (denote-tree--collect-keywords (current-buffer)
                                    '(title
@@ -198,16 +220,16 @@ Argument VISITED    - \"buffers\" to be cleaned up."
   (let ((type (assq 'org denote-tree-test-mock--denote-file-types-1)))
     (should (equal (denote-tree--build-full-filetype type)
                    '(org
-                     :title-key-regexp "o:"
-                     :identifier-key-regexp "b:"
-                     :keywords-key-regexp "c:"
-                     :signature-key-regexp "d:"
-                     :date-key-regexp "e:"))))
+                     :title-key-regexp "org-title:"
+                     :identifier-key-regexp "org-identifier:"
+                     :keywords-key-regexp "org-keywords:"
+                     :signature-key-regexp "org-signature:"
+                     :date-key-regexp "org-date:"))))
   (let ((type (assq 'org denote-tree-test-mock--denote-file-types-2)))
     (should (equal (denote-tree--build-full-filetype type)
                    '(org
-                     :title-key-regexp "o:"
-                     :identifier-key-regexp "b:"
+                     :title-key-regexp "org-title:"
+                     :identifier-key-regexp "org-identifier:"
                      :date-key-regexp "^#\\+date\\s-*:"
                      :signature-key-regexp "^#\\+signature\\s-*:"
                      :identifier-key-regexp "^#\\+identifier\\s-*:")))))
