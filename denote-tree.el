@@ -505,7 +505,8 @@ previous/next sibling node or a parent."
   "Collect all denote style identifiers in BUFFER.
 Return as a list sans BUFFER own identifiers."
   (setq buffer (denote-tree--open-link-maybe buffer))
-  (let (found-ids)
+  (let ((buffer-id (cdar (denote-tree--collect-keywords buffer '(identifier))))
+        found-ids)
     (with-current-buffer buffer
       (goto-char (point-min))
       (while (search-forward-regexp denote-id-regexp nil t)
@@ -513,7 +514,7 @@ Return as a list sans BUFFER own identifiers."
                       (match-string-no-properties 2))
               found-ids))
       ;; first element is /always/ the buffer's id
-      (cdr (nreverse found-ids)))))
+      (delete buffer-id (nreverse found-ids)))))
 
 (defun denote-tree--build-full-filetype (filetype)
   "Build extended FILETYPE with additional regexps."
