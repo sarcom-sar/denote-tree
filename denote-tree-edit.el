@@ -64,8 +64,8 @@ Everything else is still read-only.  All newlines will be dropped.
   (setcdr (assq 'file denote-tree-edit--current-note)
           (denote-get-path-by-id
            (get-text-property
-            (next-single-property-change (line-beginning-position)
-                                         'button-data)
+            (next-single-property-change
+             (line-beginning-position) 'button-data)
             'button-data)))
   (save-excursion
     (let ((inhibit-read-only t))
@@ -96,8 +96,8 @@ Denote wont ask you to confirm it, this is final."
   (unwind-protect
       (progn
         (setq denote-tree-edit--current-note
-              (denote-tree-edit--save-from-widgets denote-tree-edit--current-note
-                                                   denote-tree-edit--current-line))
+              (denote-tree-edit--save-from-widgets
+               denote-tree-edit--current-note denote-tree-edit--current-line))
         (let ((copy (denote-tree-edit--fix-current-note
                      (copy-tree denote-tree-edit--current-note)))
               (denote-rename-confirmations nil)
@@ -165,8 +165,8 @@ Denote wont ask you to confirm it, this is final."
 
 (defun denote-tree-edit--dewidgetize-line ()
   "Destroy widgets in line."
-  (let ((possible-widgets (denote-tree-edit--widgets-in-line
-                           denote-tree-edit--current-line)))
+  (let ((possible-widgets
+         (denote-tree-edit--widgets-in-line denote-tree-edit--current-line)))
     (dolist (el possible-widgets)
       (widget-delete el))
     (kill-region (denote-tree-edit--after-button denote-tree-edit--current-line)
@@ -229,7 +229,7 @@ If TYPE or EL are not symbols or EL is not in line return nil."
       (text-property-search-forward type el t))))
 
 (defun denote-tree-edit--save-match (start end type)
-  "Save match to `denote-tree-edit--current-note'."
+  "Save match of TYPE from START to END to `denote-tree-edit--current-note'."
   (setcdr (assq type denote-tree-edit--current-note)
           (buffer-substring start end)))
 

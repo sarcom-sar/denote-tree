@@ -110,8 +110,8 @@ If t traverse all the way, if num, traverse n nodes deep."
   "Elements of front matter to include in node's description.
 
 User can also extend denote's front matter by any arbitrary element, but they
-have to add corresponding regex to `denote-file-types' in order for denote-tree
-to recognize it.  That user variable also supports arbitrary strings.
+have to add corresponding regex to `denote-file-types' for `denote-tree' to
+recognize it.  That user variable also supports arbitrary strings.
 
 Denote's default front matter elements:
 - title
@@ -199,22 +199,17 @@ or a BUFFER provided by the user."
       (progn
         (or buffer (setq buffer
                          (denote-tree--collect-keywords-as-string
-                          (current-buffer)
-                          '(identifier))))
+                          (current-buffer) '(identifier))))
         (denote-tree--open-link-maybe buffer)
-        (if (bufferp buffer)
-            (setq denote-tree--buffer-name (concat
-                                            "*"
-                                            denote-tree-buffer-prefix
-                                            " "
-                                            (buffer-name buffer)
-                                            "*"))
-          (setq denote-tree--buffer-name (concat
-                                          "*"
-                                          denote-tree-buffer-prefix
-                                          " "
-                                          buffer
-                                          "*")))
+        (setq denote-tree--buffer-name
+              (concat
+               "*"
+               denote-tree-buffer-prefix
+               " "
+               (if (bufferp buffer)
+                   (buffer-name buffer)
+                 buffer)
+               "*"))
         (let ((inhibit-read-only t))
           (with-current-buffer (get-buffer-create denote-tree--buffer-name)
             (erase-buffer)
@@ -235,14 +230,14 @@ BUTTON is pased as node's ID."
 
 (defun denote-tree-redraw (&optional arg)
   "Redraw the entire tree.
-With \\[universal-argument], redraw from node at point."
+With ARG set to \\[universal-argument], redraw from node at point."
   (interactive "P")
   (unless (equal arg '(4))
     (goto-char (point-min)))
   (when-let ((current-node
               (get-text-property
-               (next-single-property-change (line-beginning-position)
-                                            'button-data)
+               (next-single-property-change
+                (line-beginning-position) 'button-data)
                'button-data)))
     (denote-tree current-node)))
 
@@ -266,8 +261,8 @@ the parent node position for future backtracking."
         (when-let ((next-point
                     (get-text-property (point) 'denote-tree--child))
                    (curr-point
-                    (next-single-property-change (line-beginning-position)
-                                                 'button-data)))
+                    (next-single-property-change
+                     (line-beginning-position) 'button-data)))
           (when (and preserve-teleport-p
                      (> (point) next-point))
             (push (list curr-point next-point)
@@ -286,10 +281,10 @@ the parent the point came from."
   (if (< arg 0)
       (denote-tree-child-node (- arg))
     (dotimes (_ arg)
-      (when-let ((next-point (get-text-property (point)
-                                                'denote-tree--parent))
-                 (canon-point (get-text-property next-point
-                                                 'denote-tree--child)))
+      (when-let ((next-point (get-text-property
+                              (point) 'denote-tree--parent))
+                 (canon-point (get-text-property
+                               next-point 'denote-tree--child)))
         (let ((current-teleport (car denote-tree--teleport-stack)))
           (if (equal canon-point (cadr current-teleport))
               (progn
@@ -327,15 +322,14 @@ If `denote-tree-edit-mode' is loaded, use it's UI."
         (require 'denote-tree-edit)
         (denote-tree-edit-mode))
     (let* ((identifier (get-text-property
-                        (next-single-property-change (line-beginning-position)
-                                                     'button-data)
+                        (next-single-property-change
+                         (line-beginning-position) 'button-data)
                         'button-data))
            (buffer (denote-tree--edit-node (denote-get-path-by-id identifier))))
       (save-excursion
         (goto-char (point-min))
-        (while (text-property-search-forward 'button-data
-                                             identifier
-                                             t)
+        (while (text-property-search-forward
+                'button-data identifier t)
           (denote-tree--redraw-node buffer (point)))))))
 
 
@@ -360,8 +354,7 @@ Preserve properties."
       (goto-char pos)
       (delete-region pos (line-end-position))
       (insert (denote-tree--collect-keywords-as-string
-               buffer
-               denote-tree-node-description))
+               buffer denote-tree-node-description))
       (add-text-properties pos (line-end-position) props))))
 
 
@@ -568,8 +561,8 @@ Return \"\" if none are found."
             (when (re-search-forward (plist-get filetype key) nil t)
               (setq type el)
               (setq el (denote-trim-whitespace
-                        (buffer-substring-no-properties (point)
-                                                        (line-end-position))))))
+                        (buffer-substring-no-properties
+                         (point) (line-end-position))))))
           (cond
            ((stringp el)
             (push (cons type
@@ -582,7 +575,7 @@ Return \"\" if none are found."
       lst)))
 
 (defun denote-tree--collect-keywords-as-string (buffer keywords)
-  "Returns KEYWORDS as a joint string from BUFFER."
+  "Return KEYWORDS as a joint string from BUFFER."
   (let ((lst (seq-filter #'identity (mapcar #'cdr (denote-tree--collect-keywords buffer keywords)))))
     (string-join (nreverse lst) " ")))
 
