@@ -607,22 +607,20 @@ This can be potentially expensive (worst case scenario is not finding
 a match), but guaranteed to work as long the user set the front-matter."
   (with-current-buffer buffer
     (goto-char (point-min))
-    (let ((type (seq-find
-                 (lambda (type)
-                   (let ((type (denote-tree--build-full-filetype type)))
-                     (seq-find
-                      (lambda (el)
-                        (when-let* (((symbolp el))
-                                    ((string-suffix-p "-regexp" (symbol-name el)))
-                                    (val (plist-get (cdr type) el))
-                                    (regex (when (stringp val) val)))
-                          (save-excursion
-                            (re-search-forward regex nil t))))
-                      type)))
-                 denote-file-types)))
-      (unless type
+    (let ((filetype (seq-find
+                     (lambda (type)
+                       (let ((types-plist
+                              (denote-tree--build-full-filetype type)))
+                         (seq-find
+                          (lambda (el)
+                            (save-excursion
+                              (re-search-forward
+                               (plist-get (cdr types-plist) el) nil t)))
+                          (nreverse (denote-tree--get-regexps types-plist)))))
+                     denote-file-types)))
+      (unless filetype
         (message "%s not a denote-style buffer" buffer))
-      type)))
+      filetype)))
 
 (defun denote-tree--open-link-maybe (element)
   "Return ELEMENT buffer, create if necessary.
