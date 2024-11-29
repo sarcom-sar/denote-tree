@@ -239,11 +239,16 @@ org-date: fazboo
                                    '())
                nil)))
     ;; possible extension point for future keywords
-    (with-temp-buffer
-      (should (equal-including-properties
-               (denote-tree--collect-keywords (current-buffer)
-                                   '(kazoo))
-               '((kazoo)))))))
+    (let ((denote-tree-test-mock--denote-file-types-1 (copy-tree denote-tree-test-mock--denote-file-types-2)))
+      (setf (alist-get 'org denote-tree-test-mock--denote-file-types-1)
+            (append (alist-get 'org denote-tree-test-mock--denote-file-types-1)
+                    '(:kazoo-key-regexp "org-kazoo:")))
+      (with-temp-buffer
+        (insert "org-kazoo: PRRT")
+        (should (equal-including-properties
+                 (denote-tree--collect-keywords (current-buffer)
+                                     '(kazoo))
+                 `((kazoo . ,(propertize "PRRT" 'denote-tree--type 'kazoo)))))))))
 
 (ert-deftest denote-tree-test--build-full-filetype ()
   "Tests for `denote-tree--build-full-filetype'."
