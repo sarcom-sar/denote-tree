@@ -538,41 +538,60 @@ Return as a list sans BUFFER own identifiers."
 (defun denote-tree--collect-keywords (buffer keywords)
   "Return denote propertized KEYWORDS from BUFFER.
 Return \"\" if none are found."
-  (when-let ((filetype (cdr (denote-tree--build-full-filetype
-                             (denote-tree--find-filetype buffer)))))
+  (when-let* ((filetype (denote-tree--build-full-filetype
+                         (denote-tree--find-filetype buffer)))
+              (regexps (denote-tree--get-regexps filetype)))
     (let (lst type)
       (with-current-buffer buffer
         (dolist (el keywords)
-          (when-let ((key
-                      (cond
-                       ((eq el 'title)
-                        :title-key-regexp)
-                       ((eq el 'identifier)
-                        :identifier-key-regexp)
-                       ((eq el 'keywords)
-                        :keywords-key-regexp)
-                       ((eq el 'signature)
-                        :signature-key-regexp)
-                       ((eq el 'date)
-                        :date-key-regexp)
-                       (t nil))))
-            (goto-char (point-min))
-            ;; if element is nil, dont set anything
-            (when (re-search-forward (plist-get filetype key) nil t)
-              (setq type el)
-              (setq el (denote-trim-whitespace
-                        (buffer-substring-no-properties
-                         (point) (line-end-position))))))
+          (when-let* ((matching-regexp
+                       (plist-get
+                        (cdr filetype) (seq-find
+                                        (lambda (reg)
+                                          (denote-tree--compare reg el))
+                                        regexps)))
+                      ((goto-char (point-min)))
+                      ((re-search-forward matching-regexp nil t)))
+            (setq type el)
+            (setq el (denote-trim-whitespace
+                      (buffer-substring-no-properties
+                       (point) (line-end-position)))))
           (cond
            ((stringp el)
             (push (cons type
-                        (funcall denote-tree-node-colorize-function
-                                 el
-                                 type))
+                        (funcall
+                         denote-tree-node-colorize-function el type))
                   lst))
            ((symbolp el)
             (push (list el) lst)))))
       lst)))
+
+(defun denote-tree--get-regexps (plist)
+  "Return list of all symbols ending in -regexp in PLIST."
+  (let ((lst))
+    (dolist (el plist lst)
+      (when-let* (((symbolp el))
+                  ((string-suffix-p
+                    "-regexp" (symbol-name el)))
+                  (val (plist-get
+                        (cdr plist) el))
+                  ((when (stringp val) val)))
+        (push el lst)))))
+
+(defun denote-tree--compare (pot-regexp element)
+  "Compare POT-REGEXP to ELEMENT.
+
+Format of POT-REGEXP has to be :FOO-BAR-regexp, for example:
+
+:key-value-regexp       -> key
+:foo-bar-regexp        -> foo
+:identifier-val-regexp -> identifier"
+  (and (eq (intern
+            (replace-regexp-in-string
+             ":\\(.+?\\)-.+-regexp" "\\1" (symbol-name
+                                           pot-regexp)))
+           element)
+       pot-regexp))
 
 (defun denote-tree--collect-keywords-as-string (buffer keywords)
   "Return KEYWORDS as a joint string from BUFFER."
