@@ -384,4 +384,88 @@ C
   (should (equal (denote-tree--add-props-to-children '(4 5 6) nil)
                  nil)))
 
+(defmacro denote-tree-test-mock--draw-node-macro (properties cyclic &rest body)
+  "Execute BODY with denote-tree--cyclic-buffers set to CYCLIC and
+denote-tree--collect-keywords-as-string set to return PROPERTIES."
+  (declare (indent 2))
+  `(cl-letf (((symbol-function 'denote-tree--collect-keywords-as-string)
+              (lambda (_ _)
+                (concat ,@properties))))
+     (let ((denote-tree--cyclic-buffers ,cyclic))
+       (with-temp-buffer
+         ,@body))))
+
+(ert-deftest denote-tree-test-properties--draw-node ()
+  "Tests of changed properties for `denote-tree--draw-node'."
+  (denote-tree-test-mock--draw-node-macro
+      ((propertize "A" 'denote-tree--type 'a))
+      nil
+    (denote-tree--draw-node "name" "" t)
+    (should (equal (text-properties-at 3)
+                   '(face denote-tree-node)))
+    (should (equal (text-properties-at 5)
+                   '(denote-tree--type a))))
+  (denote-tree-test-mock--draw-node-macro
+      ((propertize "A" 'denote-tree--type 'a))
+      nil
+    (denote-tree--draw-node "name" "   " t)
+    (should (equal (text-properties-at 8)
+                   '(denote-tree--type a))))
+  (denote-tree-test-mock--draw-node-macro
+      nil
+      nil
+    (should-error (denote-tree--draw-node nil nil nil)))
+  (denote-tree-test-mock--draw-node-macro
+      ((propertize "A " 'denote-tree--type 'a)
+       (propertize "B" 'denote-tree--type 'b))
+      nil
+    (denote-tree--draw-node "name" "" t)
+    (should (equal (text-properties-at 3)
+                   '(face denote-tree-node)))
+    (should (equal (text-properties-at 5)
+                   '(denote-tree--type a)))
+    (should (equal (text-properties-at 7)
+                   '(denote-tree--type b))))
+  (denote-tree-test-mock--draw-node-macro
+      ((propertize "A " 'denote-tree--type 'a)
+       (propertize "B" 'denote-tree--type 'b))
+      '(("name" 3 5))
+    (denote-tree--draw-node "name" "" t)
+    (should (equal (text-properties-at 3)
+                   '(face denote-tree-circular-node)))
+    (should (equal (text-properties-at 5)
+                   '(denote-tree--type a)))
+    (should (equal (text-properties-at 7)
+                   '(denote-tree--type b))))
+  (denote-tree-test-mock--draw-node-macro
+      nil
+      nil
+    (denote-tree--draw-node "name" "" nil)
+    (should (equal (text-properties-at 5)
+                   nil))))
+
+(ert-deftest denote-tree-test-ret--draw-node ()
+  "Tests of return values for `denote-tree--draw-node'."
+  (denote-tree-test-mock--draw-node-macro
+      ((propertize "A" 'denote-tree--type 'a))
+      nil
+    (let ((ret-val (denote-tree--draw-node "name" "" nil)))
+      (goto-char 3)
+      (should (equal ret-val
+                     (cons (point-marker) "| ")))))
+  (denote-tree-test-mock--draw-node-macro
+      ((propertize "A" 'denote-tree--type 'a))
+      nil
+    (let ((ret-val (denote-tree--draw-node "name" "| | |" nil)))
+      (goto-char 8)
+      (should (equal ret-val
+                     (cons (point-marker) "| | || ")))))
+  (denote-tree-test-mock--draw-node-macro
+      ((propertize "A" 'denote-tree--type 'a))
+      nil
+    (let ((ret-val (denote-tree--draw-node "name" "" t)))
+      (goto-char 3)
+      (should (equal ret-val
+                     (cons (point-marker) "  "))))))
+
 (provide 'denote-tree-test)
