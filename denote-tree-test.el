@@ -344,4 +344,44 @@ org-date: fazboo
                                       :bar-regexp "baar"))
                  '(:bar-regexp :foo-regexp))))
 
+(ert-deftest denote-tree-test--add-props-to-children ()
+  "Tests for `denote-tree--add-props-to-children'."
+  (should (equal (denote-tree--add-props-to-children '() '())
+                 nil))
+  (with-temp-buffer
+    (insert "'-* A
+  '-* B")
+    (goto-char (point-min))
+    (denote-tree--add-props-to-children '(7) 1)
+    (should (equal (text-properties-at 1)
+                   '(denote-tree--child 7)))
+    (should (equal (text-properties-at 7)
+                   '(denote-tree--parent 1 denote-tree--prev 7 denote-tree--next 7))))
+  (with-temp-buffer
+    (insert "A
+ B
+ B
+ B
+ B")
+    (goto-char (point-min))
+    (denote-tree--add-props-to-children '(4 7 10 13) 1)
+    (should (equal (text-properties-at 1)
+                   '(denote-tree--child 4)))
+    (should (equal (text-properties-at 4)
+                   '(denote-tree--parent 1 denote-tree--prev 13 denote-tree--next 7))))
+  (with-temp-buffer
+    (insert " A
+ B
+C
+ B
+ B")
+    (goto-char (point-min))
+    (denote-tree--add-props-to-children '(2 4 10 13) 7)
+    (should (equal (text-properties-at 7)
+                   '(denote-tree--child 2)))
+    (should (equal (text-properties-at 2)
+                   '(denote-tree--parent 7 denote-tree--prev 13 denote-tree--next 4))))
+  (should (equal (denote-tree--add-props-to-children '(4 5 6) nil)
+                 nil)))
+
 (provide 'denote-tree-test)
