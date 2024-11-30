@@ -469,7 +469,7 @@ Argument LASTP is the current node last child of parent."
 Every node contains props denote-tree--next, denote-tree--prev and
 denote-tree--parent which contain point's position to go to get to
 previous/next sibling node or a parent."
-  (when node-children
+  (when (and parent node-children)
     (save-excursion
       (goto-char parent)
       (add-text-properties (line-beginning-position)
