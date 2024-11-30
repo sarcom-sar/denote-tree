@@ -548,7 +548,7 @@ Return \"\" if none are found."
                        (plist-get
                         (cdr filetype) (seq-find
                                         (lambda (reg)
-                                          (denote-tree--compare reg el))
+                                          (denote-tree--extract-and-compare-symbols reg el))
                                         regexps)))
                       ((goto-char (point-min)))
                       ((re-search-forward matching-regexp nil t)))
@@ -576,8 +576,7 @@ Return \"\" if none are found."
                   ((stringp (plist-get plist el))))
         (push el lst)))))
 
-(defun denote-tree--compare (pot-regexp element)
-  "Compare POT-REGEXP to ELEMENT.
+(defun denote-tree--extract-and-compare-symbols (pot-regexp element)
 
 Format of POT-REGEXP has to be :FOO-BAR-regexp, for example:
 

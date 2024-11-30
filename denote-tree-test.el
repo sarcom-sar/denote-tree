@@ -304,21 +304,28 @@ org-date: fazboo
       (should (equal (denote-tree--collect-links (current-buffer))
                      nil)))))
 
-(ert-deftest denote-tree-test--compare ()
-  "Tests for `denote-tree--compare'."
-  (should (eq (denote-tree--compare :title-key-regexp 'title)
+(ert-deftest denote-tree-test--extract-and-compare-symbols ()
+  "Tests for `denote-tree--extract-and-compare-symbols'."
+  (should (eq (denote-tree--extract-and-compare-symbols
+               :title-key-regexp 'title)
               :title-key-regexp))
-  (should (eq (denote-tree--compare 'title-key-regexp 'title)
+  (should (eq (denote-tree--extract-and-compare-symbols
+               'title-key-regexp 'title)
               nil))
-  (should (eq (denote-tree--compare :date-format 'date)
+  (should (eq (denote-tree--extract-and-compare-symbols
+               :date-format 'date)
               nil))
-  (should (eq (denote-tree--compare :foo-bar-baz-regexp 'foo)
+  (should (eq (denote-tree--extract-and-compare-symbols
+               :foo-bar-baz-regexp 'foo)
               :foo-bar-baz-regexp))
-  (should (eq (denote-tree--compare :foobar-regexp 'foobar)
+  (should (eq (denote-tree--extract-and-compare-symbols
+               :foobar-regexp 'foobar)
               :foobar-regexp))
-  (should (eq (denote-tree--compare :foo-regexp nil)
+  (should (eq (denote-tree--extract-and-compare-symbols
+               :foo-regexp nil)
               nil))
-  (should (eq (denote-tree--compare nil 'bar)
+  (should (eq (denote-tree--extract-and-compare-symbols
+               nil 'bar)
               nil)))
 
 (ert-deftest denote-tree-test--get-regexps ()
