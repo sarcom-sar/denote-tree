@@ -321,5 +321,20 @@ org-date: fazboo
   (should (eq (denote-tree--compare nil 'bar)
               nil)))
 
+(ert-deftest denote-tree-test--get-regexps ()
+  "Tests for `denote-tree--get-regexps'."
+  (should (equal (denote-tree--get-regexps '())
+                 '()))
+  (should (equal (denote-tree--get-regexps '("foor" "baz"))
+                 '()))
+  (should (equal (denote-tree--get-regexps '(org :foo-regexp "foor"
+                                      :bar-regexp bar))
+                 '(:foo-regexp)))
+  (should (equal (denote-tree--get-regexps '(org :foo-regexp "foor"
+                                      :bar "bar"))
+                 '(:foo-regexp)))
+  (should (equal (denote-tree--get-regexps '(org :foo-regexp "foor"
+                                      :bar-regexp "baar"))
+                 '(:bar-regexp :foo-regexp))))
 
 (provide 'denote-tree-test)
