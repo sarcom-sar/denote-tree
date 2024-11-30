@@ -588,8 +588,8 @@ Format of POT-REGEXP has to be :FOO-BAR-regexp, for example:
 :identifier-val-regexp -> identifier"
   (and (eq (intern
             (replace-regexp-in-string
-             ":\\(.+?\\)-.+-regexp" "\\1" (symbol-name
-                                           pot-regexp)))
+             ":\\(.+?\\)-\\(?:.*?\\)regexp" "\\1" (symbol-name
+                                                   pot-regexp)))
            element)
        pot-regexp))
 
