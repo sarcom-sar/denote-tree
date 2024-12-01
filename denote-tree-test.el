@@ -468,4 +468,66 @@ denote-tree--collect-keywords-as-string set to return PROPERTIES."
       (should (equal ret-val
                      (cons (point-marker) "  "))))))
 
+(ert-deftest denote-tree-test--add-props-to-cycles ()
+  "Tests for `denote-tree--add-props-to-children'."
+  (let ((denote-tree--cyclic-buffers nil))
+    (with-temp-buffer
+      (insert (propertize "* " 'button-data "name"))
+      (denote-tree--add-props-to-cycles)
+      (should (equal (text-properties-at 1)
+                     '(button-data "name")))))
+  (let ((denote-tree--cyclic-buffers '(("name" 22))))
+    (with-temp-buffer
+      (insert "'-"
+              (propertize "* " 'button-data "name" 'denote-tree--child 10)
+              "A\n"
+              "  '-"
+              (propertize "* " 'button-data "eman" 'denote-tree--child 22)
+              "B\n"
+              "     '-"
+              (propertize "* " 'button-data "name"))
+      (goto-char (point-min))
+      (denote-tree--add-props-to-cycles)
+      (should (equal (get-text-property 22 'denote-tree--child)
+                     10))))
+  (let ((denote-tree--cyclic-buffers '(("name" 14 20))))
+    (with-temp-buffer
+      (insert "-"
+              (propertize "* " 'button-data "name" 'denote-tree--child 8)
+              "A1\n "
+              (propertize "* " 'button-data "eman" 'denote-tree--child 19)
+              "B1\n  "
+              (propertize "* " 'button-data "name" 'denote-tree--child nil)
+              "A2\n "
+              (propertize "* " 'button-data "name")
+              "A3\n")
+      (goto-char (point-min))
+      (denote-tree--add-props-to-cycles)
+      (should (equal (get-text-property 15 'denote-tree--child)
+                     8))
+      (should (equal (get-text-property 21 'denote-tree--child)
+                     8))))
+  (let ((denote-tree--cyclic-buffers '(("name" 7))))
+    (with-temp-buffer
+      (insert "-"
+              (propertize "* " 'button-data "foo")
+              "B\n "
+              (propertize "* " 'button-data "name")
+              "A\n")
+      (goto-char (point-min))
+      (denote-tree--add-props-to-cycles)
+      (should (equal (get-text-property 7 'denote-tree--child)
+                     nil))))
+  (let ((denote-tree--cyclic-buffers '(("name" 7))))
+    (with-temp-buffer
+      (insert "-"
+              (propertize "* " 'button-data "foo")
+              "B\n "
+              (propertize "* " 'button-data "name" 'denote-tree--child 7)
+              "A\n")
+      (goto-char (point-min))
+      (denote-tree--add-props-to-cycles)
+      (should (equal (get-text-property 7 'denote-tree--child)
+                     7)))))
+
 (provide 'denote-tree-test)
