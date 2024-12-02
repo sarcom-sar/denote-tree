@@ -205,11 +205,11 @@ org-date: fazboo
 ")
       (should (equal-including-properties
                (denote-tree--collect-keywords (current-buffer)
-                                   '(title
-                                     identifier
-                                     keywords
-                                     signature
-                                     date))
+                                              '(title
+                                                identifier
+                                                keywords
+                                                signature
+                                                date))
                `((date . ,(propertize "fazboo" 'denote-tree--type 'date))
                  (signature . ,(propertize "foz" 'denote-tree--type 'signature))
                  (keywords . ,(propertize "baz" 'denote-tree--type 'keywords))
@@ -223,11 +223,11 @@ org-date: fazboo
 ")
       (should (equal-including-properties
                (denote-tree--collect-keywords (current-buffer)
-                                   '(title
-                                     identifier
-                                     keywords
-                                     signature
-                                     date))
+                                              '(title
+                                                identifier
+                                                keywords
+                                                signature
+                                                date))
                `((date . ,(propertize "fazboo" 'denote-tree--type 'date))
                  (signature . ,(propertize "foz" 'denote-tree--type 'signature))
                  (keywords)
@@ -236,7 +236,7 @@ org-date: fazboo
     (with-temp-buffer
       (should (equal-including-properties
                (denote-tree--collect-keywords (current-buffer)
-                                   '())
+                                              '())
                nil)))
     ;; possible extension point for future keywords
     (let ((denote-tree-test-mock--denote-file-types-1 (copy-tree denote-tree-test-mock--denote-file-types-2)))
@@ -247,7 +247,7 @@ org-date: fazboo
         (insert "org-kazoo: PRRT")
         (should (equal-including-properties
                  (denote-tree--collect-keywords (current-buffer)
-                                     '(kazoo))
+                                                '(kazoo))
                  `((kazoo . ,(propertize "PRRT" 'denote-tree--type 'kazoo)))))))))
 
 (ert-deftest denote-tree-test--build-full-filetype ()
@@ -334,14 +334,14 @@ org-date: fazboo
                  '()))
   (should (equal (denote-tree--get-regexps '("foor" "baz"))
                  '()))
-  (should (equal (denote-tree--get-regexps '(org :foo-regexp "foor"
-                                      :bar-regexp bar))
+  (should (equal (denote-tree--get-regexps '(:foo-regexp "foor"
+                                             :bar-regexp bar))
                  '(:foo-regexp)))
-  (should (equal (denote-tree--get-regexps '(org :foo-regexp "foor"
-                                      :bar "bar"))
+  (should (equal (denote-tree--get-regexps '(:foo-regexp "foor"
+                                             :bar "bar"))
                  '(:foo-regexp)))
-  (should (equal (denote-tree--get-regexps '(org :foo-regexp "foor"
-                                      :bar-regexp "baar"))
+  (should (equal (denote-tree--get-regexps '(:foo-regexp "foor"
+                                             :bar-regexp "baar"))
                  '(:bar-regexp :foo-regexp))))
 
 (ert-deftest denote-tree-test--add-props-to-children ()
