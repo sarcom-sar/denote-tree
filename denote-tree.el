@@ -540,7 +540,7 @@ Return as a list sans BUFFER own identifiers."
 Return \"\" if none are found."
   (when-let* ((filetype (denote-tree--build-full-filetype
                          (denote-tree--find-filetype buffer)))
-              (regexps (denote-tree--get-regexps filetype)))
+              (regexps (denote-tree--get-regexps (cdr filetype))))
     (let (lst type)
       (with-current-buffer buffer
         (dolist (el keywords)
@@ -573,9 +573,7 @@ Return \"\" if none are found."
       (when-let* (((symbolp el))
                   ((string-suffix-p
                     "-regexp" (symbol-name el)))
-                  (val (plist-get
-                        (cdr plist) el))
-                  ((when (stringp val) val)))
+                  ((stringp (plist-get plist el))))
         (push el lst)))))
 
 (defun denote-tree--compare (pot-regexp element)
@@ -616,7 +614,7 @@ a match), but guaranteed to work as long the user set the front-matter."
                             (save-excursion
                               (re-search-forward
                                (plist-get (cdr types-plist) el) nil t)))
-                          (nreverse (denote-tree--get-regexps types-plist)))))
+                          (nreverse (denote-tree--get-regexps (cdr types-plist))))))
                      denote-file-types)))
       (unless filetype
         (message "%s not a denote-style buffer" buffer))
