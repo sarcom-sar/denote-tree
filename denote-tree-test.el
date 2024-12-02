@@ -530,4 +530,31 @@ denote-tree--collect-keywords-as-string set to return PROPERTIES."
       (should (equal (get-text-property 7 'denote-tree--child)
                      7)))))
 
+(ert-deftest denote-tree-test--open-link-maybe ()
+  "Tests for `denote-tree--open-link-maybe'."
+  (cl-letf (((symbol-function 'get-buffer)
+             (lambda (x)
+               t)))
+    (should (string= (denote-tree--open-link-maybe "foo")
+                     "foo")))
+    (with-temp-buffer
+      (cl-letf (((symbol-function 'get-buffer)
+                 (lambda (x)
+                   nil))
+                ((symbol-function 'get-buffer-create)
+                 (lambda (x)
+                   (current-buffer)))
+                ((symbol-function 'insert-file-contents)
+                 (lambda (x)
+                   (insert "foo"))))
+        (let ((denote-tree--visited-buffers nil))
+          (denote-tree--open-link-maybe "foo")
+          (should (equal denote-tree--visited-buffers
+                         '("foo"))))
+        (erase-buffer)
+        (let ((denote-tree--visited-buffers '("foo")))
+          (denote-tree--open-link-maybe "foo")
+          (should (equal denote-tree--visited-buffers
+                         '("foo")))))))
+
 (provide 'denote-tree-test)
