@@ -576,19 +576,24 @@ Return \"\" if none are found."
                   ((stringp (plist-get plist el))))
         (push el lst)))))
 
-(defun denote-tree--extract-and-compare-symbols (pot-regexp element)
+(defun denote-tree--extract-and-compare-symbols
+    (symbol element &optional extractor-regexp)
+  "Apply EXTRACTOR-REGEXP to SYMBOL and compare with ELEMENT.
 
-Format of POT-REGEXP has to be :FOO-BAR-regexp, for example:
+EXTRACTOR-REGEXP should capture one group, which will be transformed
+into shortened form.  If EXTRACTOR-REGEXP is nil, then the default value
+mangles the SYMBOL like so,
 
-:key-value-regexp       -> key
+:key-value-regexp      -> key
 :foo-bar-regexp        -> foo
 :identifier-val-regexp -> identifier"
+  (unless extractor-regexp
+    (setq extractor-regexp ":\\(.+?\\)-\\(?:.*?\\)regexp"))
   (and (eq (intern
             (replace-regexp-in-string
-             ":\\(.+?\\)-\\(?:.*?\\)regexp" "\\1" (symbol-name
-                                                   pot-regexp)))
+             extractor-regexp "\\1" (symbol-name symbol)))
            element)
-       pot-regexp))
+       symbol))
 
 (defun denote-tree--collect-keywords-as-string (buffer keywords)
   "Return KEYWORDS as a joint string from BUFFER."
