@@ -423,7 +423,8 @@ that position as denote-tree--child of all the cyclic nodes."
         (goto-char node-pos)
         (add-text-properties (line-beginning-position)
                              (line-end-position)
-                             (list 'denote-tree--child child-prop))))))
+                             (list 'denote-tree--child (set-marker (make-marker)
+                                                                   child-prop)))))))
 
 (defun denote-tree--draw-node (node-name indent lastp)
   "Draw NODE-NAME according to INDENT in current buffer.
@@ -474,7 +475,9 @@ previous/next sibling node or a parent."
       (goto-char parent)
       (add-text-properties (line-beginning-position)
                            (line-end-position)
-                           (list 'denote-tree--child (car node-children)))))
+                           (list 'denote-tree--child (set-marker
+                                                      (make-marker)
+                                                      (car node-children))))))
   (let ((prev (car (last node-children)))
         (tail node-children))
     (dolist (el node-children)
@@ -486,9 +489,15 @@ previous/next sibling node or a parent."
           (goto-char el)
           (add-text-properties (line-beginning-position)
                                (line-end-position)
-                               (list 'denote-tree--next next
-                                     'denote-tree--prev prev
-                                     'denote-tree--parent parent))))
+                               (list 'denote-tree--next (set-marker
+                                                         (make-marker)
+                                                         next)
+                                     'denote-tree--prev (set-marker
+                                                         (make-marker)
+                                                         prev)
+                                     'denote-tree--parent (set-marker
+                                                           (make-marker)
+                                                           parent)))))
       (setq prev el))))
 
 
