@@ -666,4 +666,61 @@ denote-tree--collect-keywords-as-string set to return PROPERTIES."
                        (concat "'-* " (buffer-name (current-buffer)) "\n"
                                "  '-* a\n"))))))
 
+(ert-deftest denote-tree-test-props--walk-links ()
+  "Tests for how `denote-tree--walk-links' draws."
+  (with-temp-buffer
+    (denote-tree-test-mock--walk-links-macro
+     nil
+     nil
+     (denote-tree--walk-links "FOO" "" t t)
+     (should (equal (text-properties-at 3)
+                    `( button-data "FOO"
+                       action denote-tree-enter-node
+                       category default-button
+                       button (t)
+                       face denote-tree-node)))))
+  (with-temp-buffer
+    (denote-tree-test-mock--walk-links-macro
+        nil
+        '(("a"))
+      (denote-tree--walk-links "FOO" "" t t)
+      (let ((props (text-properties-at 13)))
+        (setq props (mapcar (lambda (x) (if (markerp x) (marker-position x) x))
+                            props))
+        (should (equal props
+                       '( denote-tree--parent 3
+                          denote-tree--prev 13
+                          denote-tree--next 13
+                          button-data "a"
+                          action denote-tree-enter-node
+                          category default-button
+                          button (t)
+                          face denote-tree-node))))))
+  (with-temp-buffer
+    (denote-tree-test-mock--walk-links-macro
+        nil
+        '(("b" "c" "d"))
+      (denote-tree--walk-links "FOO" "" t t)
+      (let ((props (text-properties-at 22)))
+        (setq props (mapcar (lambda (x) (if (markerp x) (marker-position x) x))
+                            props))
+        (should (equal props
+                       '( denote-tree--parent 3
+                          denote-tree--prev 13
+                          denote-tree--next 29
+                          button-data "c"
+                          action denote-tree-enter-node
+                          category default-button
+                          button (t)
+                          face denote-tree-node))))))
+  (with-temp-buffer
+    (denote-tree-test-mock--walk-links-macro
+        '(("c"))
+        '(("a") ("b" "d") ("c") ("e" "f") ("c"))
+      (denote-tree--walk-links "FOO" "" t t)
+      (should (equal (get-text-property 35 'face)
+                     'denote-tree-circular-node))
+      (should (equal (get-text-property 57 'face)
+                     'denote-tree-circular-node)))))
+
 (provide 'denote-tree-test)
