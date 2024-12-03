@@ -353,10 +353,18 @@ org-date: fazboo
   '-* B")
     (goto-char (point-min))
     (denote-tree--add-props-to-children '(7) 1)
-    (should (equal (text-properties-at 1)
-                   '(denote-tree--child 7)))
-    (should (equal (text-properties-at 7)
-                   '(denote-tree--parent 1 denote-tree--prev 7 denote-tree--next 7))))
+    (let ((props (text-properties-at 1)))
+      (setq props (mapcar (lambda (x) (if (markerp x) (marker-position x) x))
+                          props))
+      (should (equal props
+                     '(denote-tree--child 7))))
+    (let ((props (text-properties-at 7)))
+      (setq props (mapcar (lambda (x) (if (markerp x) (marker-position x) x))
+                          props))
+      (should (equal props
+                     '( denote-tree--parent 1
+                        denote-tree--prev 7
+                        denote-tree--next 7)))))
   (with-temp-buffer
     (insert "A
  B
@@ -365,10 +373,18 @@ org-date: fazboo
  B")
     (goto-char (point-min))
     (denote-tree--add-props-to-children '(4 7 10 13) 1)
-    (should (equal (text-properties-at 1)
-                   '(denote-tree--child 4)))
-    (should (equal (text-properties-at 4)
-                   '(denote-tree--parent 1 denote-tree--prev 13 denote-tree--next 7))))
+    (let ((props (text-properties-at 1)))
+      (setq props (mapcar (lambda (x) (if (markerp x) (marker-position x) x))
+                          props))
+      (should (equal props
+                     '(denote-tree--child 4))))
+    (let ((props (text-properties-at 4)))
+      (setq props (mapcar (lambda (x) (if (markerp x) (marker-position x) x))
+                          props))
+      (should (equal props
+                     '( denote-tree--parent 1
+                        denote-tree--prev 13
+                        denote-tree--next 7)))))
   (with-temp-buffer
     (insert " A
  B
@@ -377,10 +393,18 @@ C
  B")
     (goto-char (point-min))
     (denote-tree--add-props-to-children '(2 4 10 13) 7)
-    (should (equal (text-properties-at 7)
-                   '(denote-tree--child 2)))
-    (should (equal (text-properties-at 2)
-                   '(denote-tree--parent 7 denote-tree--prev 13 denote-tree--next 4))))
+    (let ((props (text-properties-at 7)))
+      (setq props (mapcar (lambda (x) (if (markerp x) (marker-position x) x))
+                          props))
+      (should (equal props
+                     '(denote-tree--child 2))))
+    (let ((props (text-properties-at 2)))
+      (setq props (mapcar (lambda (x) (if (markerp x) (marker-position x) x))
+                          props))
+      (should (equal props
+                     '( denote-tree--parent 7
+                        denote-tree--prev 13
+                        denote-tree--next 4)))))
   (should (equal (denote-tree--add-props-to-children '(4 5 6) nil)
                  nil)))
 
@@ -488,8 +512,10 @@ denote-tree--collect-keywords-as-string set to return PROPERTIES."
               (propertize "* " 'button-data "name"))
       (goto-char (point-min))
       (denote-tree--add-props-to-cycles)
-      (should (equal (get-text-property 22 'denote-tree--child)
-                     10))))
+      (let ((pos (marker-position
+                  (get-text-property 22 'denote-tree--child))))
+        (should (equal pos
+                       10)))))
   (let ((denote-tree--cyclic-buffers '(("name" 14 20))))
     (with-temp-buffer
       (insert "-"
@@ -503,10 +529,14 @@ denote-tree--collect-keywords-as-string set to return PROPERTIES."
               "A3\n")
       (goto-char (point-min))
       (denote-tree--add-props-to-cycles)
-      (should (equal (get-text-property 15 'denote-tree--child)
-                     8))
-      (should (equal (get-text-property 21 'denote-tree--child)
-                     8))))
+      (let ((pos (marker-position
+                  (get-text-property 15 'denote-tree--child))))
+        (should (equal pos
+                       8)))
+      (let ((pos (marker-position
+                  (get-text-property 21 'denote-tree--child))))
+        (should (equal pos
+                       8)))))
   (let ((denote-tree--cyclic-buffers '(("name" 7))))
     (with-temp-buffer
       (insert "-"
@@ -516,8 +546,10 @@ denote-tree--collect-keywords-as-string set to return PROPERTIES."
               "A\n")
       (goto-char (point-min))
       (denote-tree--add-props-to-cycles)
-      (should (equal (get-text-property 7 'denote-tree--child)
-                     nil))))
+      (let ((pos (marker-position
+                  (get-text-property 7 'denote-tree--child))))
+        (should (equal pos
+                       nil)))))
   (let ((denote-tree--cyclic-buffers '(("name" 7))))
     (with-temp-buffer
       (insert "-"
@@ -527,8 +559,10 @@ denote-tree--collect-keywords-as-string set to return PROPERTIES."
               "A\n")
       (goto-char (point-min))
       (denote-tree--add-props-to-cycles)
-      (should (equal (get-text-property 7 'denote-tree--child)
-                     7)))))
+      (let ((pos (marker-position
+                    (get-text-property 7 'denote-tree--child))))
+        (should (equal pos
+                       7))))))
 
 (ert-deftest denote-tree-test--open-link-maybe ()
   "Tests for `denote-tree--open-link-maybe'."
