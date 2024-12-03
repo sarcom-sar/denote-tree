@@ -557,4 +557,79 @@ denote-tree--collect-keywords-as-string set to return PROPERTIES."
           (should (equal denote-tree--visited-buffers
                          '("foo")))))))
 
+(defvar denote-tree-test-mock-next-links nil)
+(defun denote-tree-test-mock-make-next-links (lst-of-links)
+  (let ((x lst-of-links))
+    (setq denote-tree-test-mock-next-links
+          (lambda ()
+            (prog1
+                x
+              (setq x (cdr x)))))))
+
+(defmacro denote-tree-test-mock--walk-links-macro
+    (cyc-bufs lst-of-links &rest body)
+  ""
+  (declare (indent 2))
+  ;; ugly by hand check
+  `(let ((denote-tree--cyclic-buffers ,cyc-bufs)
+         (denote-tree--visited-buffers nil))
+     (denote-tree-test-mock-make-next-links ,lst-of-links)
+     (cl-letf (((symbol-function 'denote-tree--collect-links)
+                (lambda (x)
+                  (let ((y (funcall denote-tree-test-mock-next-links)))
+                    (car y))))
+               ((symbol-function 'denote-tree--collect-keywords-as-string)
+                (lambda (x y)
+                  (propertize x
+                              'denote-tree--type
+                              'title))))
+       ,@body)))
+
+(ert-deftest denote-tree-test-draw--walk-links ()
+  "Tests for how `denote-tree--walk-links' draws."
+  (with-temp-buffer
+    (denote-tree-test-mock--walk-links-macro
+        nil
+        '(("a"))
+      (denote-tree--walk-links (buffer-name (current-buffer)) "" t t)
+      (should (string= (buffer-substring-no-properties (point-min)
+                                                       (point-max))
+                       (concat "'-* " (buffer-name (current-buffer)) "\n"
+                               "  '-* a\n")))))
+  (with-temp-buffer
+    (denote-tree-test-mock--walk-links-macro
+        nil
+        '(("a") ("b" "c" "d"))
+      (denote-tree--walk-links (buffer-name (current-buffer)) "" t t)
+      (should (string= (buffer-substring-no-properties (point-min)
+                                                       (point-max))
+                       (concat "'-* "  (buffer-name (current-buffer)) "\n"
+                               "  '-* a\n"
+                               "    +-* b\n"
+                               "    +-* c\n"
+                               "    '-* d\n")))))
+  (with-temp-buffer
+    (denote-tree-test-mock--walk-links-macro
+        nil
+        '(("a") ("b" "c" "d") () ("e" "f"))
+      (denote-tree--walk-links (buffer-name (current-buffer)) "" t t)
+      (should (string= (buffer-substring-no-properties (point-min)
+                                                       (point-max))
+                       (concat "'-* " (buffer-name (current-buffer)) "\n"
+                               "  '-* a\n"
+                               "    +-* b\n"
+                               "    +-* c\n"
+                               "    | +-* e\n"
+                               "    | '-* f\n"
+                               "    '-* d\n")))))
+  (with-temp-buffer
+    (denote-tree-test-mock--walk-links-macro
+        '(("a"))
+        '(("a") ("b" "c" "d" "a"))
+      (denote-tree--walk-links (buffer-name (current-buffer)) "" t t)
+      (should (string= (buffer-substring-no-properties (point-min)
+                                                       (point-max))
+                       (concat "'-* " (buffer-name (current-buffer)) "\n"
+                               "  '-* a\n"))))))
+
 (provide 'denote-tree-test)
