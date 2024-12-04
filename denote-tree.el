@@ -640,7 +640,6 @@ Add ELEMENT to `denote-tree--visited-buffers' to delete it after
   (unless (get-buffer element)
     (add-to-list 'denote-tree--visited-buffers element)
     (with-current-buffer (get-buffer-create element)
-      (erase-buffer)
       (insert-file-contents (denote-get-path-by-id element))))
   element)
 
@@ -656,7 +655,8 @@ Add ELEMENT to `denote-tree--visited-buffers' to delete it after
   (setq denote-tree--cyclic-buffers nil))
 
 (defun denote-tree--default-props (str type)
-  "Default function returning STR of TYPE with properties."
+  "Default function returning STR of TYPE with properties.
+One props returned has to be denote-tree--type."
   (propertize str 'denote-tree--type type))
 
 (provide 'denote-tree)

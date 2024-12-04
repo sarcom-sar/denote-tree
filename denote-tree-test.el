@@ -44,7 +44,10 @@
      :identifier-key-regexp "text-identifier:")))
 
 (ert-deftest denote-tree-test--default-props ()
-  "Tests for `denote-tree--default-props'."
+  "Tests for `denote-tree--default-props'.
+
+`denote-tree--default-props' should return a string FOO with prop
+'denote-tree--type BAR."
   (should (equal-including-properties
            (denote-tree--default-props "a" 'b)
            (propertize "a" 'denote-tree--type 'b)))
@@ -80,7 +83,10 @@ Argument VISITED    - \"buffers\" to be cleaned up."
        (should (equal fake-buffers ,after-bufs)))))
 
 (ert-deftest denote-tree-test--clean-up ()
-  "Tests for `denote-tree--clean-up'."
+  "Tests for `denote-tree--clean-up'.
+
+After `denote-tree--clean-up' state of START-BUFS \"buffer list\" should be
+AFTER-BUFS. The VISITED buffers are the ones to disappear."
   (denote-tree-test--prepare-buffer-space
    '(a b c d e f) '(a b c d e f) '())
   (denote-tree-test--prepare-buffer-space
@@ -89,9 +95,13 @@ Argument VISITED    - \"buffers\" to be cleaned up."
    '(a b c d e f) '(a b c d e f) '(g)))
 
 (ert-deftest denote-tree-test--collect-keywords-as-string ()
-  "Tests for `denote-tree--collect-keywords-as-string'."
+  "Tests for `denote-tree--collect-keywords-as-string'.
+
+Collect arbitrary number of keywords and return them
+as one string."
   (cl-letf (((symbol-function 'denote-tree--collect-keywords)
              ;; real functions returns in reverse
+             ;; and attaches props
              (lambda (_ _)
                '((a . "a")
                  (b . "b")
@@ -99,7 +109,6 @@ Argument VISITED    - \"buffers\" to be cleaned up."
     (should (equal (denote-tree--collect-keywords-as-string '_ '_)
                    "c b a")))
   (cl-letf (((symbol-function 'denote-tree--collect-keywords)
-             ;; real functions returns in reverse
              (lambda (_ _)
                '((a . "a")
                  (b)
@@ -107,7 +116,6 @@ Argument VISITED    - \"buffers\" to be cleaned up."
     (should (equal (denote-tree--collect-keywords-as-string '_ '_)
                    "c a")))
   (cl-letf (((symbol-function 'denote-tree--collect-keywords)
-             ;; real functions returns in reverse
              (lambda (_ _)
                '((a)
                  (b)
@@ -115,7 +123,6 @@ Argument VISITED    - \"buffers\" to be cleaned up."
     (should (equal (denote-tree--collect-keywords-as-string '_ '_)
                    "c")))
   (cl-letf (((symbol-function 'denote-tree--collect-keywords)
-             ;; real functions returns in reverse
              (lambda (_ _)
                '((a)
                  (b)
@@ -124,7 +131,10 @@ Argument VISITED    - \"buffers\" to be cleaned up."
                    ""))))
 
 (ert-deftest denote-tree-test--find-filetype ()
-  "Tests for `denote-tree--find-filetype'."
+  "Tests for `denote-tree--find-filetype'.
+
+`denote-tree--find-filetype' searches for any regex within the buffer that
+allows to classify the type of front matter denote is dealing with."
   (let ((denote-file-types denote-tree-test-mock--denote-file-types-1))
     (with-temp-buffer
       (insert "org-title: title")
@@ -270,7 +280,9 @@ org-date: fazboo
                      :identifier-key-regexp "^#\\+identifier\\s-*:")))))
 
 (ert-deftest denote-tree-test--collect-links ()
-  "Tests for `denote-tree--collect-links'."
+  "Tests for `denote-tree--collect-links'.
+
+`denote-tree--collect-links' should NOT collect current buffer's id."
   (cl-letf (((symbol-function 'denote-tree--open-link-maybe)
              (lambda (buffer)
                buffer)))
@@ -329,19 +341,22 @@ org-date: fazboo
               nil)))
 
 (ert-deftest denote-tree-test--get-regexps ()
-  "Tests for `denote-tree--get-regexps'."
+  "Tests for `denote-tree--get-regexps'.
+
+`denote-tree--get-regexps' returns a symbol if and only if it ends with -regexp
+and it's value in plist is a string."
   (should (equal (denote-tree--get-regexps '())
                  '()))
   (should (equal (denote-tree--get-regexps '("foor" "baz"))
                  '()))
-  (should (equal (denote-tree--get-regexps '(:foo-regexp "foor"
-                                             :bar-regexp bar))
+  (should (equal (denote-tree--get-regexps '( :foo-regexp "foor"
+                                   :bar-regexp bar))
                  '(:foo-regexp)))
-  (should (equal (denote-tree--get-regexps '(:foo-regexp "foor"
-                                             :bar "bar"))
+  (should (equal (denote-tree--get-regexps '( :foo-regexp "foor"
+                                   :bar "bar"))
                  '(:foo-regexp)))
-  (should (equal (denote-tree--get-regexps '(:foo-regexp "foor"
-                                             :bar-regexp "baar"))
+  (should (equal (denote-tree--get-regexps '( :foo-regexp "foor"
+                                   :bar-regexp "baar"))
                  '(:bar-regexp :foo-regexp))))
 
 (ert-deftest denote-tree-test--add-props-to-children ()
@@ -349,8 +364,9 @@ org-date: fazboo
   (should (equal (denote-tree--add-props-to-children '() '())
                  nil))
   (with-temp-buffer
-    (insert "'-* A
-  '-* B")
+    (insert
+     (concat "'-* A\n"
+             "  '-* B"))
     (goto-char (point-min))
     (denote-tree--add-props-to-children '(7) 1)
     (let ((props (text-properties-at 1)))
@@ -409,8 +425,8 @@ C
                  nil)))
 
 (defmacro denote-tree-test-mock--draw-node-macro (properties cyclic &rest body)
-  "Execute BODY with denote-tree--cyclic-buffers set to CYCLIC and
-denote-tree--collect-keywords-as-string set to return PROPERTIES."
+  "Execute BODY with `denote-tree--cyclic-buffers' set to CYCLIC and
+`denote-tree--collect-keywords-as-string' set to return PROPERTIES."
   (declare (indent 2))
   `(cl-letf (((symbol-function 'denote-tree--collect-keywords-as-string)
               (lambda (_ _)
@@ -493,7 +509,10 @@ denote-tree--collect-keywords-as-string set to return PROPERTIES."
                      (cons (point-marker) "  "))))))
 
 (ert-deftest denote-tree-test--add-props-to-cycles ()
-  "Tests for `denote-tree--add-props-to-children'."
+  "Tests for `denote-tree--add-props-to-children'.
+
+If any 'button-data value repeats, then child of that node is
+somewhere earlier, find it."
   (let ((denote-tree--cyclic-buffers nil))
     (with-temp-buffer
       (insert (propertize "* " 'button-data "name"))
@@ -602,7 +621,16 @@ denote-tree--collect-keywords-as-string set to return PROPERTIES."
 
 (defmacro denote-tree-test-mock--walk-links-macro
     (cyc-bufs lst-of-links &rest body)
-  ""
+  "Execute BODY over mocked functions with CYC-BUFS and LST-OF-LINKS.
+
+       Mock functions - `denote-tree--collect-links',
+                        `denote-tree--collect-keywords-as-string'.
+    Argument CYC-BUFS - set `denote-tree--cyclic-buffers' to that value.
+Argument LST-OF-LINKS - list of links the `denote-tree--walk-links' will
+                        iterate over.  To simulate branching paths one
+                        has to insert empty list periodically.  For
+                        example '((\"a\") (\"b\" \"c\") nil (\"d\")) will
+                        construct a drawing where \"d\" is a child of \"c\";"
   (declare (indent 2))
   ;; ugly by hand check
   `(let ((denote-tree--cyclic-buffers ,cyc-bufs)
