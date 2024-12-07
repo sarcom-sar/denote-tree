@@ -1,7 +1,9 @@
-;;; denote-tree-test.el --- Test denote-tree -*- lexical-binding: nil -*-
+;;; denote-tree-test.el --- Test denote-tree -*- lexical-binding: t -*-
 
 (require 'denote-tree)
 (require 'ert)
+
+;;; Code:
 
 (defvar denote-tree-test-mock--denote-file-types-1
   '((org
@@ -634,6 +636,7 @@ somewhere earlier, find it."
 
 (defvar denote-tree-test-mock-next-links nil)
 (defun denote-tree-test-mock-make-next-links (lst-of-links)
+  "Closure returning next element from LST-OF-LINKS."
   (let ((x lst-of-links))
     (setq denote-tree-test-mock-next-links
           (lambda ()
@@ -774,3 +777,7 @@ Argument LST-OF-LINKS - list of links the `denote-tree--walk-links' will
                      'denote-tree-circular-node)))))
 
 (provide 'denote-tree-test)
+
+(provide 'denote-tree-test)
+
+;;; denote-tree-test.el ends here
