@@ -203,12 +203,18 @@ Denote wont ask you to confirm it, this is final."
       (let ((pair (assq (car el) type-widget-alist))
             (value (alist-get (car el) alist))
             props)
-        (if (not pair)
-            (push el new-alist)
-          (when value
-            (setq props (text-properties-at 0 value))
-            (set-text-properties 0 (length (cdr pair)) props (cdr pair)))
-          (push pair new-alist))))))
+        (cond
+         ((and (null (cdr pair))
+               value)
+          (setq pair (cons (car pair) value)))
+         ((and (cdr pair)
+               value)
+          (setq props (text-properties-at 0 value))
+          (set-text-properties 0 (length (cdr pair)) props (cdr pair)))
+         (t nil))
+        (if pair
+            (push pair new-alist)
+          (push el new-alist))))))
 
 ;;;; Helpers
 
