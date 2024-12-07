@@ -53,5 +53,24 @@
     (should (equal (denote-tree-edit--after-button 0)
                    nil))))
 
+(ert-deftest denote-tree-edit-test--set-from-tree ()
+  "Tests for `denote-tree-edit--set-from-tree'."
+  (let ((dat-struct '()))
+    (with-temp-buffer
+      (insert "'-*"
+              (propertize "Foo" 'denote-tree--type 'tootle)
+              " "
+              (propertize "Bar" 'denote-tree--type 'bartle)
+              "\n")
+      (goto-char 0)
+      (denote-tree-edit--set-from-tree
+       '(tootle bartle)
+       (lambda (s e t)
+         (setq dat-struct (append
+                           dat-struct
+                           (list (buffer-substring-no-properties s e))))))
+      (should (equal dat-struct
+                     '("Foo" "Bar"))))))
+
 (provide 'denote-tree-edit-test)
 ;;; denote-tree-edit-test.el ends here
