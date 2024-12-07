@@ -38,5 +38,20 @@
     (should (equal (denote-tree-edit--prop-match 'foo 'bar)
                    nil))))
 
+(ert-deftest denote-tree-edit-test--after-button ()
+  "Tests for `denote-tree-edit--after-button'."
+  (with-temp-buffer
+    (insert "'-"
+            (propertize "* " 'button-data "foo")
+            "A\n")
+    (should (equal (denote-tree-edit--after-button 0)
+                   5)))
+  (with-temp-buffer
+    (insert "'-"
+            (propertize "* " 'button "bar")
+            "A\n")
+    (should (equal (denote-tree-edit--after-button 0)
+                   nil))))
+
 (provide 'denote-tree-edit-test)
 ;;; denote-tree-edit-test.el ends here
