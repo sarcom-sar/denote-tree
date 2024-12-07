@@ -167,5 +167,28 @@
       (should (equal (widget-get (widget-at 23) :value)
                      "I am a iden")))))
 
+(ert-deftest denote-tree-edit-test--restore-line ()
+  "Tests for `denote-tree-edit--restore-line'."
+  (let ((denote-tree-edit--current-line 1)
+        (denote-tree-edit--current-note '((title . "foo")
+                          (tootle . "bar")))
+        (denote-tree-node-description '(title "far" tootle)))
+    (with-temp-buffer
+      (insert "'-"
+              (propertize "* " 'button-data "fooz"))
+      (denote-tree-edit--restore-line)
+      (should (equal (buffer-substring-no-properties 5 16)
+                     "foo far bar"))))
+  (let ((denote-tree-edit--current-line 1)
+        (denote-tree-edit--current-note '((title . "foo")
+                          (tootle . "bar")))
+        (denote-tree-node-description '(title "far")))
+    (with-temp-buffer
+      (insert "'-"
+              (propertize "* " 'button-data "fooz"))
+      (denote-tree-edit--restore-line)
+      (should (equal (buffer-substring-no-properties 5 12)
+                     "foo far")))))
+
 (provide 'denote-tree-edit-test)
 ;;; denote-tree-edit-test.el ends here
