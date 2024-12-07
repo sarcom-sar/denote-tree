@@ -70,6 +70,43 @@
                            dat-struct
                            (list (buffer-substring-no-properties s e))))))
       (should (equal dat-struct
+                     '("Foo" "Bar")))))
+  (let ((dat-struct '()))
+    (with-temp-buffer
+      (insert "'-*"
+              (propertize "Foo" 'denote-tree--type 'tootle)
+              " "
+              (propertize "Baz" 'denote-tree--type 'baztle)
+              "\n")
+      (goto-char 0)
+      (denote-tree-edit--set-from-tree
+       '(tootle bartle)
+       (lambda (s e t)
+         (setq dat-struct (append
+                           dat-struct
+                           (list (buffer-substring-no-properties s e))))))
+      (should (equal dat-struct
+                     '("Foo")))))
+  (let ((dat-struct '()))
+    (with-temp-buffer
+      (insert "'-*"
+              (propertize "Foo" 'denote-tree--type 'tootle)
+              " "
+              (propertize "Baz" 'denote-tree--type 'baztle)
+              " "
+              (propertize "Bar" 'denote-tree--type 'bartle)
+              "\n")
+      (goto-char 0)
+      (denote-tree-edit--set-from-tree
+       ;; nil here is allowed, because normally this list is built from
+       ;; `denote-tree-node-description' and will /always/ have this
+       ;; arrangement, none the less, it should for arbitrary output
+       '(tootle nil bartle)
+       (lambda (s e t)
+         (setq dat-struct (append
+                           dat-struct
+                           (list (buffer-substring-no-properties s e))))))
+      (should (equal dat-struct
                      '("Foo" "Bar"))))))
 
 (provide 'denote-tree-edit-test)
