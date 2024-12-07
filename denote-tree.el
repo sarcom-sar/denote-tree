@@ -96,7 +96,7 @@ and root node of it's tree."
   "Add properties to information from the node according to type.
 
 Function accepts two arguments STR and TYPE.  Choosen string from front-matter
-is propertized according to type from denote-tree-include-from-front-matter."
+is propertized according to type from `denote-tree-node-description'."
   :group 'denote-tree
   :type 'function)
 
@@ -110,15 +110,18 @@ If t traverse all the way, if num, traverse n nodes deep."
   "Elements of front matter to include in node's description.
 
 User can also extend denote's front matter by any arbitrary element, but they
-have to add corresponding regex to `denote-file-types' for `denote-tree' to
-recognize it.  That user variable also supports arbitrary strings.
+have to add corresponding regex and file type to
+`denote-tree-extend-filetype-with' for `denote-tree' to recognize it.  That
+user variable also supports arbitrary strings.
 
 Denote's default front matter elements:
 - title
 - identifier
 - keywords
 - signature
-- date string"
+- date
+- symbol
+- string"
   :group 'denote-tree
   :type '(set (choice (const title)
                       (const identifier)
@@ -140,6 +143,31 @@ If nil fall back thin `denote-rename-file' wrapper."
   :group 'denote-tree
   :type 'boolean)
 
+(defcustom denote-tree-extend-filetype-with
+  '((:identifier-key-regexp
+     (org "^#\\+identifier\\s-*:"
+      markdown-yaml "^identifier\\s-*:"
+      markdown-toml "^identifier\\s-*="
+      text "^identifier\\s-*:"))
+    (:kazoo-key-regexp
+     (org "^#\\+kazoo\\s-*:"))
+    (:signature-key-regexp
+     (org "^#\\+signature\\s-*:"
+      markdown-yaml "^signature\\s-*:"
+      markdown-toml "^signature\\s-*="
+      text "^signature\\s-*:"))
+    (:date-key-regexp
+     (org "^#\\+date\\s-*:"
+      markdown-yaml "^date\\s-*:"
+      markdown-toml "^date\\s-*="
+      text "^date\\s-*:")))
+  "Alist of keys where values are plists of filetype regex value.
+User can extend it in format of (KEY (TYPE VALUE))."
+  :group 'denote-tree
+  :type '(alist :key-type symbol
+                :value-type (plist :key-type symbol
+                                   :value-type string)))
+
 
 ;;;; Vars and consts
 
@@ -158,6 +186,9 @@ If nil fall back thin `denote-rename-file' wrapper."
 `car' of the element of `denote-tree--cyclic-buffers' is denote ID
 that appears cyclically over the buffer.  `cdr' of that variable is
 set to the list of positions at which that denote ID is present.")
+
+(defvar denote-tree--extended-filetype nil
+  "Full filetype alist.")
 
 (defvar-local denote-tree--teleport-stack '()
   "Stack of point positions denoting WHERE-TO jump FROM-WHERE.
@@ -197,6 +228,9 @@ or a BUFFER provided by the user."
   (interactive)
   (unwind-protect
       (progn
+        (setq denote-tree--extended-filetype
+              (denote-tree--build-extended-filetype
+               denote-file-types denote-tree-extend-filetype-with))
         (or buffer (setq buffer
                          (denote-tree--collect-keywords-as-string
                           (current-buffer) '(identifier))))
@@ -431,8 +465,8 @@ that position as denote-tree--child of all the cyclic nodes."
 
 Insert the current line as follows INDENT `denote-tree-node' title of
 the current denote note.  Face of `denote-tree-node' is either
-`denote-tree-circular-node-face' if current NODE-NAME is a member of
-`denote-tree--cyclic-buffers' or `denote-tree-node-face' if it's not.
+`denote-tree-circular-node' if current NODE-NAME is a member of
+`denote-tree--cyclic-buffers' or `denote-tree-node' if it's not.
 Call `denote-tree-node-colorize-function' on title.
 
 Return location of a point where the node starts and the current indent.
@@ -518,37 +552,23 @@ Return as a list sans BUFFER own identifiers."
       ;; first element is /always/ the buffer's id
       (delete buffer-id (nreverse found-ids)))))
 
-(defun denote-tree--build-full-filetype (filetype)
-  "Build extended FILETYPE with additional regexps."
-  (let ((f-type (copy-tree filetype)))
-    (when-let ((type (car filetype))
-               (oldp (not (plist-get (cdr filetype) :date-key-regexp))))
-      (setf (cdr f-type)
-            (append (cdr f-type)
-                    (cond
-                     ((eq type 'org)
-                      (list :date-key-regexp "^#\\+date\\s-*:"
-                            :signature-key-regexp "^#\\+signature\\s-*:"
-                            :identifier-key-regexp "^#\\+identifier\\s-*:"))
-                     ((eq type 'markdown-yaml)
-                      (list :date-key-regexp "^date\\s-*:"
-                            :signature-key-regexp "^signature\\s-*:"
-                            :identifier-key-regexp "^identifier\\s-*:"))
-                     ((eq type 'markdown-toml)
-                      (list :date-key-regexp "^date\\s-*="
-                            :signature-key-regexp "^signature\\s-*="
-                            :identifier-key-regexp "^identifier\\s-*="))
-                     ((eq type 'text)
-                      (list :date-key-regexp "^date\\s-*:"
-                            :signature-key-regexp "^signature\\s-*:"
-                            :identifier-key-regexp "^identifier\\s-*:"))))))
-    f-type))
+(defun denote-tree--build-extended-filetype (gen-from add-this)
+  "Add keys and values from ADD-THIS to GEN-FROM alist."
+  (let ((ext-filetype (copy-tree gen-from)))
+    (dolist (type ext-filetype)
+      (mapc (lambda (key)
+              (unless (plist-member (cdr type) (car key))
+                (setf (cdr type)
+                      (plist-put (cdr type)
+                                 (car key)
+                                 (plist-get (cadr key) (car type))))))
+            add-this))
+    ext-filetype))
 
 (defun denote-tree--collect-keywords (buffer keywords)
   "Return denote propertized KEYWORDS from BUFFER.
 Return \"\" if none are found."
-  (when-let* ((filetype (denote-tree--build-full-filetype
-                         (denote-tree--find-filetype buffer)))
+  (when-let* ((filetype (denote-tree--find-filetype buffer))
               (regexps (denote-tree--get-regexps (cdr filetype))))
     (let (lst type)
       (with-current-buffer buffer
@@ -613,22 +633,21 @@ mangles the SYMBOL like so,
   "Guess the filetype in BUFFER and return it as a symbol.
 
 `denote-tree--find-filetype' works refering only to a buffer by finding any
-regex from `denote-file-types' that matches in the front matter.
+regex from `denote-tree--extended-filetype' that matches in the front matter.
 This can be potentially expensive (worst case scenario is not finding
 a match), but guaranteed to work as long the user set the front-matter."
   (with-current-buffer buffer
     (goto-char (point-min))
     (let ((filetype (seq-find
                      (lambda (type)
-                       (let ((types-plist
-                              (denote-tree--build-full-filetype type)))
+                       (let ((types-plist type))
                          (seq-find
                           (lambda (el)
                             (save-excursion
                               (re-search-forward
                                (plist-get (cdr types-plist) el) nil t)))
                           (nreverse (denote-tree--get-regexps (cdr types-plist))))))
-                     denote-file-types)))
+                     denote-tree--extended-filetype)))
       (unless filetype
         (message "%s not a denote-style buffer" buffer))
       filetype)))

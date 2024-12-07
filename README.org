@@ -57,20 +57,24 @@ redraw entire tree from scratch if anything changes.
   from it's child.  When nil, always move to "real" parent of a node.
 - =denote-tree-node-description=, elements of front matter to include in node's
   description.  User can also extend denote's front matter by any arbitrary
-  element, but they have to add corresponding regex to `denote-file-types' in
-  order for denote-tree to recognize it.  That user variable also supports
-  arbitrary strings.  Denote's default front matter elements: title, identifier,
-  keywords, signature, date.
+  element, but they have to add corresponding regex and type to
+  =denote-tree-extend-filetype-with= in order for denote-tree to recognize it.
+  That user variable also supports arbitrary strings.  Denote's default front
+  matter elements: title, identifier, keywords, signature, date, symbol or
+  arbitrary string.
 - =denote-tree-max-traversal-depth=, maximum traversal depth of =denote-tree=.
   If t traverse all the way, if num, traverse n nodes deep.
 - =denote-tree-title-colorize-function=, Add properties to information from the
   node according to type.  Function accepts two arguments STR and TYPE.  Choosen
-  string from front-matter is propertized according to type
-  =from denote-tree-include-from-front-matter=.
+  string from front-matter is propertized according to type from
+  =denote-tree-node-description=.
 - =denote-tree-buffer-prefix=, every denote tree is built by a custom custom
   prefix, customizable here, and root node of a tree.
 - =denote-tree-fancy-edit=, use fancy propertized edit over thin wrapper around
   =denote-rename-file=.
+- =denote-tree-extend-filetype-with=, extend what kinds of regexps =denote-tree=
+  is aware of in your front matter.  It also provides backwards compatibility
+  with versions od =denote= older than commit 3517ba2.
 
 **** Faces
 
