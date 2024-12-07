@@ -220,13 +220,19 @@ Denote wont ask you to confirm it, this is final."
 
 (defun denote-tree-edit--prop-match (type el)
   "Match prop of TYPE equal to EL in current line.
-If TYPE or EL are not symbols or EL is not in line return nil."
-  (when (or (symbolp el)
-            (symbolp type))
-    (goto-char (line-beginning-position))
+If TYPE is not a symbol or EL is not in line return nil."
+  (when (symbolp type)
     (save-restriction
       (narrow-to-region (line-beginning-position) (line-end-position))
-      (text-property-search-forward type el t))))
+      (when-let ((pos (next-single-property-change
+                       (point) type)))
+        (goto-char (or (next-single-property-change pos type)
+                       pos))
+        (cond ((null el)
+               pos)
+              ((equal (get-text-property pos type) el)
+               pos)
+              (t nil))))))
 
 (defun denote-tree-edit--save-match (start end type)
   "Save match of TYPE from START to END to `denote-tree-edit--current-note'."
@@ -254,9 +260,8 @@ Restrict search of props to the current line.
 FUNC takes two positional arguments START END and ANY, which if not
 set defaults to currently iterated over element of FRONT-MATTER-ELS."
   (dolist (el front-matter-els)
-    (when-let* ((match (denote-tree-edit--prop-match 'denote-tree--type el))
-                (start (prop-match-beginning match))
-                (end (prop-match-end match))
+    (when-let* ((start (denote-tree-edit--prop-match 'denote-tree--type el))
+                (end (next-single-property-change start 'denote-tree--type))
                 (thing (if any any el)))
       (funcall func start end thing))))
 
