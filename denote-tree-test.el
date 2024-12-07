@@ -135,7 +135,7 @@ as one string."
 
 `denote-tree--find-filetype' searches for any regex within the buffer that
 allows to classify the type of front matter denote is dealing with."
-  (let ((denote-file-types denote-tree-test-mock--denote-file-types-1))
+  (let ((denote-tree--extended-filetype denote-tree-test-mock--denote-file-types-1))
     (with-temp-buffer
       (insert "org-title: title")
       (should (equal (car (denote-tree--find-filetype (current-buffer)))
@@ -260,24 +260,43 @@ org-date: fazboo
                                                 '(kazoo))
                  `((kazoo . ,(propertize "PRRT" 'denote-tree--type 'kazoo)))))))))
 
-(ert-deftest denote-tree-test--build-full-filetype ()
-  "Tests for `denote-tree--build-full-filetype'."
-  (let ((type (assq 'org denote-tree-test-mock--denote-file-types-1)))
-    (should (equal (denote-tree--build-full-filetype type)
-                   '(org
-                     :title-key-regexp "org-title:"
-                     :identifier-key-regexp "org-identifier:"
-                     :keywords-key-regexp "org-keywords:"
-                     :signature-key-regexp "org-signature:"
-                     :date-key-regexp "org-date:"))))
-  (let ((type (assq 'org denote-tree-test-mock--denote-file-types-2)))
-    (should (equal (denote-tree--build-full-filetype type)
-                   '(org
-                     :title-key-regexp "org-title:"
-                     :identifier-key-regexp "org-identifier:"
-                     :date-key-regexp "^#\\+date\\s-*:"
-                     :signature-key-regexp "^#\\+signature\\s-*:"
-                     :identifier-key-regexp "^#\\+identifier\\s-*:")))))
+(ert-deftest denote-tree-test--build-extended-filetype ()
+  "Tests for `denote-tree--build-extended-filetype'."
+  (let ((base denote-tree-test-mock--denote-file-types-1)
+        (add '()))
+    (should (equal (assq 'org (denote-tree--build-extended-filetype base add))
+                   '(org :title-key-regexp "org-title:"
+                         :identifier-key-regexp "org-identifier:"
+                         :keywords-key-regexp "org-keywords:"
+                         :signature-key-regexp "org-signature:"
+                         :date-key-regexp "org-date:"))))
+  (let ((base denote-tree-test-mock--denote-file-types-1)
+        (add '((:foo-key-regexp (org "org-foo:")))))
+    (should (equal (assq 'org (denote-tree--build-extended-filetype base add))
+                   '(org :title-key-regexp "org-title:"
+                         :identifier-key-regexp "org-identifier:"
+                         :keywords-key-regexp "org-keywords:"
+                         :signature-key-regexp "org-signature:"
+                         :date-key-regexp "org-date:"
+                         :foo-key-regexp "org-foo:")))
+    (should (equal (assq 'text (denote-tree--build-extended-filetype base add))
+                   '(text :title-key-regexp "text-title:"
+                          :identifier-key-regexp "text-identifier:"
+                          :keywords-key-regexp "text-keywords:"
+                          :signature-key-regexp "text-signature:"
+                          :date-key-regexp "text-date:"
+                          :foo-key-regexp nil))))
+  (let ((base denote-tree-test-mock--denote-file-types-2)
+        (add '((:keywords-key-regexp (org "org-keywords:"))
+               (:signature-key-regexp (org "org-signature:"))
+               (:date-key-regexp (org "org-date:")))))
+    (should (equal (assq 'org (denote-tree--build-extended-filetype base add))
+                   '(org :title-key-regexp "org-title:"
+                         :identifier-key-regexp "org-identifier:"
+                         :keywords-key-regexp "org-keywords:"
+                         :signature-key-regexp "org-signature:"
+                         :date-key-regexp "org-date:")))))
+
 
 (ert-deftest denote-tree-test--collect-links ()
   "Tests for `denote-tree--collect-links'.
