@@ -190,5 +190,48 @@
       (should (equal (buffer-substring-no-properties 5 12)
                      "foo far")))))
 
+(ert-deftest denote-tree-edit-test--dewidgetize-line ()
+  "Tests for `denote-tree-edit--dewidgetize-line'."
+  (with-temp-buffer
+    (let ((inhibit-read-only t)
+          (denote-tree-edit--current-line 1)
+          (denote-tree-edit--current-note '((title . "foo")))
+          (denote-tree-node-description '(title)))
+      (insert "'-"
+              (propertize "* " 'button-data "foo")
+              (propertize "foo" 'denote-tree--type 'title)
+              "\n")
+      (denote-tree-edit--widgetize-line)
+      (denote-tree-edit--dewidgetize-line)
+      (should (not (overlays-in (point-min) (point-max))))))
+  (with-temp-buffer
+    (let ((inhibit-read-only t)
+          (denote-tree-edit--current-line 1)
+          (denote-tree-edit--current-note '((title . "foo")
+                            (tootle . "bar")))
+          (denote-tree-node-description '(title "far" tootle)))
+      (insert "'-"
+              (propertize "* " 'button-data "fooz")
+              (propertize "foo" 'denote-tree--type 'title)
+              " "
+              (propertize "bar" 'denote-tree--type 'tootle)
+              "\n")
+      (denote-tree-edit--widgetize-line)
+      (denote-tree-edit--dewidgetize-line)
+      (should (not (overlays-in (point-min) (point-max))))))
+  (with-temp-buffer
+    (let ((inhibit-read-only t)
+          (denote-tree-edit--current-line 1)
+          (denote-tree-edit--current-note '((title . "foo")
+                                            (tootle . "bar")))
+          (denote-tree-node-description '(title "far")))
+      (insert "'-"
+              (propertize "* " 'button-data "fooz")
+              (propertize "foo" 'denote-tree--type 'barzle)
+              "far\n")
+      (denote-tree-edit--widgetize-line)
+      (denote-tree-edit--dewidgetize-line)
+      (should (not (overlays-in (point-min) (point-max)))))))
+
 (provide 'denote-tree-edit-test)
 ;;; denote-tree-edit-test.el ends here
