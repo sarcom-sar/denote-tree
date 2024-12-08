@@ -96,10 +96,11 @@ Denote wont ask you to confirm it, this is final."
   (unwind-protect
       (progn
         (setq denote-tree-edit--current-note
-              (denote-tree-edit--save-from-widgets
-               denote-tree-edit--current-note denote-tree-edit--current-line))
-        (let ((copy (denote-tree-edit--fix-current-note
-                     (copy-tree denote-tree-edit--current-note)))
+              (nreverse
+               (denote-tree-edit--save-from-widgets
+                denote-tree-edit--current-note denote-tree-edit--current-line)))
+        (let ((copy  (denote-tree-edit--fix-current-note
+                      (copy-tree denote-tree-edit--current-note)))
               (denote-rename-confirmations nil)
               (denote-save-buffers t))
           (apply #'denote-rename-file (mapcar #'cdr copy))))
@@ -246,7 +247,7 @@ If TYPE is not a symbol or EL is not in line return nil."
           (buffer-substring start end)))
 
 (defun denote-tree-edit--fix-current-note (copy)
-  "De-listify keywords alist element in COPY."
+  "Listify keywords value in COPY."
   (let (filetype)
     (with-temp-buffer
       (insert-file-contents (alist-get 'file copy))
@@ -256,7 +257,7 @@ If TYPE is not a symbol or EL is not in line return nil."
       (setcdr (assq 'keywords copy)
               (funcall (plist-get filetype :keywords-value-reverse-function)
                        (cdr (assq 'keywords copy))))))
-  (nreverse copy))
+  copy)
 
 (defun denote-tree-edit--set-from-tree
     (front-matter-els func &optional any)
