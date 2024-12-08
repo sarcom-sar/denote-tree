@@ -208,9 +208,9 @@ Denote wont ask you to confirm it, this is final."
             (value (alist-get (car el) alist))
             props)
         (cond
-         ((and (null (cdr pair))
+         ((and (null pair)
                value)
-          (setq pair (cons (car pair) value)))
+          (setq pair (cons (car el) value)))
          ((and (cdr pair)
                value)
           (setq props (text-properties-at 0 value))
