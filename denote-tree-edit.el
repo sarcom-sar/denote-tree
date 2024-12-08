@@ -1,6 +1,9 @@
 ;;; denote-tree-edit.el --- Edit note with widgets -*- lexical-binding: t -*-
 
 ;; Copyright 2024, Sararin
+;; Version: 0
+;; URL: http://github.com/sarcom-sar/denote-tree.el
+;; Package-Requires: ((emacs "27.1") (denote "3.0.1"))
 
 ;; This file is not part of GNU Emacs.
 
