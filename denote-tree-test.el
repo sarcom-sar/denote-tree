@@ -305,35 +305,38 @@ org-date: fazboo
   (cl-letf (((symbol-function 'denote-tree--open-link-maybe)
              (lambda (buffer)
                buffer)))
-    (with-temp-buffer
-      (insert "#+title: FOO
+    (let ((denote-tree--extended-filetype (denote-tree--build-extended-filetype
+                                denote-file-types
+                                denote-tree-extend-filetype-with)))
+      (with-temp-buffer
+        (insert "#+title: FOO
 20231226T163250 20240119T164551 20240120T164558 20240121T164829 20240121T164914
 20231227T163408 20231228T163736 20231229T164123 20240101T164316 20240117T164506")
-      (goto-char (point-min))
-      (should (equal (denote-tree--collect-links (current-buffer))
-                     '("20231226T163250" "20240119T164551" "20240120T164558"
-                       "20240121T164829" "20240121T164914" "20231227T163408"
-                       "20231228T163736" "20231229T164123" "20240101T164316"
-                       "20240117T164506"))))
-    (with-temp-buffer
-      (insert "#+title: FOO
+        (goto-char (point-min))
+        (should (equal (denote-tree--collect-links (current-buffer))
+                       '("20231226T163250" "20240119T164551" "20240120T164558"
+                         "20240121T164829" "20240121T164914" "20231227T163408"
+                         "20231228T163736" "20231229T164123" "20240101T164316"
+                         "20240117T164506"))))
+      (with-temp-buffer
+        (insert "#+title: FOO
 #+identifier: 20231226T163250
 
 20240119T164551 20240120T164558")
-      (goto-char (point-min))
-      (should (equal (denote-tree--collect-links (current-buffer))
-                     '("20240119T164551" "20240120T164558"))))
-    (with-temp-buffer
-      (insert "#+title: FOO
+        (goto-char (point-min))
+        (should (equal (denote-tree--collect-links (current-buffer))
+                       '("20240119T164551" "20240120T164558"))))
+      (with-temp-buffer
+        (insert "#+title: FOO
 #+identifier: 20231226T163250")
-      (goto-char (point-min))
-      (should (equal (denote-tree--collect-links (current-buffer))
-                     nil)))
-    (with-temp-buffer
-      (insert "#+identifier: 20231226T163250")
-      (goto-char (point-min))
-      (should (equal (denote-tree--collect-links (current-buffer))
-                     nil)))))
+        (goto-char (point-min))
+        (should (equal (denote-tree--collect-links (current-buffer))
+                       nil)))
+      (with-temp-buffer
+        (insert "#+identifier: 20231226T163250")
+        (goto-char (point-min))
+        (should (equal (denote-tree--collect-links (current-buffer))
+                       nil))))))
 
 (ert-deftest denote-tree-test--extract-and-compare-symbols ()
   "Tests for `denote-tree--extract-and-compare-symbols'."
