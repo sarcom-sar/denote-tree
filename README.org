@@ -130,7 +130,8 @@ contributions.
   - [ ] collapsible tree;
 - [X] ability to edit the front matter at point;
 - [X] edit front matter with widgets (as optional denote-tree-edit);
-- [X] multiple denote-tree buffers.
+- [X] multiple denote-tree buffers;
+- [ ] generate a child note from parent.
 
 *** Bare minimum before going public
 
