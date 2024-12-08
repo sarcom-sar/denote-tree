@@ -50,10 +50,9 @@
 ;; `denote-tree-preserve-teleports-p').  As a drawback, it is pretty stupid
 ;; and has to redraw entire thing from scratch, if anything changes.
 ;;
-;; User can customize `denote-tree-node-face' and
-;; `denote-tree-circular-node-face' to make them more visible.  With a bit of
-;; hacking it is also feasible to implement colored node titles via
-;; `denote-tree-node-colorize-function'.
+;; User can customize `denote-tree-node' and `denote-tree-circular-node' to
+;; make them more visible.  With a bit of hacking it is also feasible to
+;; implement colored node titles via `denote-tree-node-colorize-function'.
 ;;
 ;; For performance reasons `denote-tree-max-traversal-depth' can be reduced.
 ;;
@@ -139,7 +138,7 @@ When nil, always move to \"real\" parent of a node."
 
 (defcustom denote-tree-fancy-edit t
   "If t, use fancy editing with widgets.
-If nil fall back thin `denote-rename-file' wrapper."
+If nil fall back to the thin `denote-rename-file' wrapper."
   :group 'denote-tree
   :type 'boolean)
 
@@ -223,7 +222,7 @@ open it.
 (defun denote-tree (&optional buffer)
   "Draw hierarchy between denote files as a tree.
 
-The function uses either the current buffer, if called from a function
+The function uses either the current buffer, if called interactively
 or a BUFFER provided by the user."
   (interactive)
   (unwind-protect
@@ -348,8 +347,9 @@ If ARG is omitted, nil or zero, move once."
   (denote-tree-next-node (- arg)))
 
 (defun denote-tree-edit-node ()
-  "Edit node's front matter.  What is editable is dependent on `denote-prompts'.
-If `denote-tree-edit-mode' is loaded, use it's UI."
+  "Edit node's front matter.
+What is editable is dependent on `denote-prompts'.  If `denote-tree-edit-mode'
+is loaded and `denote-tree-fancy-edit' is set to t, use it's UI."
   (interactive)
   (if denote-tree-fancy-edit
       (progn
@@ -501,8 +501,8 @@ Argument LASTP is the current node last child of parent."
 (defun denote-tree--add-props-to-children (node-children parent)
   "Iterate over NODE-CHILDREN to set node's props.  Keep node's PARENT.
 
-Every node contains props denote-tree--next, denote-tree--prev and
-denote-tree--parent which contain point's position to go to get to
+Every node contains props \\='denote-tree--next, \\='denote-tree--prev and
+\\='denote-tree--parent which contain point's position to go to get to
 previous/next sibling node or a parent."
   (when (and parent node-children)
     (save-excursion
@@ -539,7 +539,7 @@ previous/next sibling node or a parent."
 
 (defun denote-tree--collect-links (buffer)
   "Collect all denote style identifiers in BUFFER.
-Return as a list sans BUFFER own identifiers."
+Return as a list sans BUFFER's own identifier."
   (setq buffer (denote-tree--open-link-maybe buffer))
   (let ((buffer-id (cdar (denote-tree--collect-keywords buffer '(identifier))))
         found-ids)
