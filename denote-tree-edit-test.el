@@ -308,5 +308,40 @@
                      (bar)
                      (foo . "bar"))))))
 
+(ert-deftest denote-tree-edit-test--fix-current-note ()
+  "Tests for `denote-tree-edit--fix-current-note'."
+  (cl-letf (((symbol-function 'insert-file-contents)
+             (lambda (_)
+               nil))
+            ((symbol-function 'denote-tree--find-filetype)
+             (lambda (_)
+               (assq 'org denote-file-types))))
+    (should (equal
+             (denote-tree-edit--fix-current-note '((keywords . ":d:e:f:")))
+             '((keywords "d" "e" "f")))))
+  (cl-letf (((symbol-function 'insert-file-contents)
+             (lambda (_)
+               nil))
+            ((symbol-function 'denote-tree--find-filetype)
+             (lambda (_)
+               (assq 'org denote-file-types))))
+    (should (equal
+             (denote-tree-edit--fix-current-note '((title . "foo")
+                                   (keywords . ":d:e:f:")))
+             '((title . "foo")
+               (keywords "d" "e" "f")))))
+  (cl-letf (((symbol-function 'insert-file-contents)
+             (lambda (_)
+               nil))
+            ((symbol-function 'denote-tree--find-filetype)
+             (lambda (_)
+               (assq 'org denote-file-types))))
+    (should (equal
+             (denote-tree-edit--fix-current-note '((title . "foo")
+                                   (keywords)))
+             '((title . "foo")
+               (keywords))))))
+
+
 (provide 'denote-tree-edit-test)
 ;;; denote-tree-edit-test.el ends here
