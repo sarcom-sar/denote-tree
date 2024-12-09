@@ -204,21 +204,19 @@ Denote wont ask you to confirm it, this is final."
   (let ((type-widget-alist (denote-tree-edit--construct-type-widget-alist loc))
         new-alist)
     (dolist (el alist new-alist)
-      (let ((pair (assq (car el) type-widget-alist))
-            (value (alist-get (car el) alist))
+      (let ((new-pair (assq (car el) type-widget-alist))
+            (old-pair (assq (car el) alist))
             props)
         (cond
-         ((and (null pair)
-               value)
-          (setq pair (cons (car el) value)))
-         ((and (cdr pair)
-               value)
-          (setq props (text-properties-at 0 value))
-          (set-text-properties 0 (length (cdr pair)) props (cdr pair)))
-         (t nil))
-        (if pair
-            (push pair new-alist)
-          (push el new-alist))))))
+         ;; if new pair doesn't have a value, push a hybrid
+         ;; of key and old element
+         ((and (null (cdr new-pair))
+               (cdr old-pair))
+          (push (cons (car el) (cdr old-pair)) new-alist))
+         ;; if new-pair has both value and key, push it
+         (new-pair (push new-pair new-alist))
+         ;; push old-pair if none of the above is true
+         (t (push el new-alist)))))))
 
 ;;;; Helpers
 
