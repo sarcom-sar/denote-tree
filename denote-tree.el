@@ -136,8 +136,8 @@ When nil, always move to \"real\" parent of a node."
   :group 'denote-tree
   :type 'boolean)
 
-(defcustom denote-tree-fancy-edit t
-  "If t, use fancy editing with widgets.
+(defcustom denote-tree-fancy-edit nil
+  "If t, use fancy editing with widgets (experimental).
 If nil fall back to the thin `denote-rename-file' wrapper."
   :group 'denote-tree
   :type 'boolean)
