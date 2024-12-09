@@ -191,7 +191,7 @@ Denote wont ask you to confirm it, this is final."
 
 (defun denote-tree-edit--construct-type-widget-alist (loc)
   "Construct an alist of (type . widget) starting from LOC."
-  (let ((possible-widgets (denote-tree-edit--widgets-in-line loc))
+  (let ((possible-widgets (nreverse (denote-tree-edit--widgets-in-line loc)))
         (front-matter denote-tree-node-description)
         new-alist)
     (dolist (el front-matter new-alist)
