@@ -822,5 +822,54 @@ Argument LST-OF-LINKS - list of links the `denote-tree--walk-links' will
     (should (equal denote-tree--teleport-stack
                    nil))))
 
+(ert-deftest denote-tree-parent-node ()
+  "Tests for `denote-tree-parent-node'."
+  (with-temp-buffer
+    (insert "*"
+            (propertize "A" 'denote-tree--child 6 'button-data "foo")
+            "\n"
+            (propertize "**B" 'denote-tree--parent 2))
+    (goto-char 6)
+    (should (equal (denote-tree-parent-node 1)
+                   2))
+    (should (equal denote-tree--teleport-stack
+                   nil)))
+  ;; *A
+  ;; **B
+  ;; ***C
+  ;; the point got teleported from C to B
+  ;; if one wants go one lever back one should
+  ;; arrive at C
+  (with-temp-buffer
+    (let ((denote-tree--teleport-stack '((11 6))))
+      (insert "*"
+              (propertize "A" 'denote-tree--parent nil
+                          'denote-tree--child 6
+                          'button-data "foo")
+              "\n"
+              "**"
+              (propertize "B" 'denote-tree--parent 2
+                          'denote-tree--child 11
+                          'button-data "bar")
+              "\n"
+              "***"
+              (propertize "C" 'denote-tree--child 6 'button-data "baz")
+              "\n")
+      (goto-char 6)
+      (should (equal (denote-tree-parent-node 1)
+                     11))
+      (should (equal denote-tree--teleport-stack
+                     nil))))
+  (with-temp-buffer
+    (insert "*"
+            (propertize "A" 'denote-tree--child 6 'button-data "foo")
+            "\n"
+            (propertize "**B"))
+    (goto-char 2)
+    (should (equal (denote-tree-parent-node -1)
+                   6))
+    (should (equal denote-tree--teleport-stack
+                   nil))))
+
 (provide 'denote-tree-test)
 ;;; denote-tree-test.el ends here
