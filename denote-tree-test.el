@@ -776,5 +776,51 @@ Argument LST-OF-LINKS - list of links the `denote-tree--walk-links' will
       (should (equal (get-text-property 57 'face)
                      'denote-tree-circular-node)))))
 
+(ert-deftest denote-tree-child-node ()
+  "Tests for `denote-tree-child-node'."
+  (with-temp-buffer
+    (insert "*"
+            (propertize "A" 'denote-tree--child 6 'button-data "foo")
+            "\n"
+            (propertize "**B"))
+    (goto-char 2)
+    (should (equal (denote-tree-child-node 1)
+                   6))
+    (should (equal denote-tree--teleport-stack
+                   nil)))
+  (with-temp-buffer
+    (insert "*"
+            (propertize "A" 'denote-tree--child 6 'button-data "foo")
+            "\n"
+            "**"
+            (propertize "B" 'denote-tree--child 2 'button-data "bar"))
+    (goto-char 6)
+    (should (equal (denote-tree-child-node 1)
+                   2))
+    (should (equal denote-tree--teleport-stack
+                   (list (list (set-marker (make-marker) 6)
+                               2)))))
+  (with-temp-buffer
+    (insert "*"
+            (propertize "A" 'denote-tree--child 6 'button-data "foo")
+            "\n"
+            (propertize "**B" 'denote-tree--parent 2))
+    (goto-char 6)
+    (should (equal (denote-tree-child-node -1)
+                   2))
+    (should (equal denote-tree--teleport-stack
+                   nil)))
+  (with-temp-buffer
+    (insert "*"
+            (propertize "A" 'denote-tree--child 6 'button-data "foo")
+            "\n"
+            "**"
+            (propertize "B" 'denote-tree--child 2 'button-data "bar"))
+    (goto-char 6)
+    (should (equal (denote-tree-child-node '(4))
+                   2))
+    (should (equal denote-tree--teleport-stack
+                   nil))))
+
 (provide 'denote-tree-test)
 ;;; denote-tree-test.el ends here
