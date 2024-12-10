@@ -284,23 +284,24 @@ If `denote-tree-preserve-teleports-p' is set to t, preserve
 the parent node position for future backtracking."
   (interactive "P")
   (or arg (setq arg 1))
-  (let ((preserve-teleport-p denote-tree-preserve-teleports-p))
+  (let ((preserve-teleport-p denote-tree-preserve-teleports-p)
+        next-point curr-point)
     (when (equal arg '(4))
       (setq preserve-teleport-p (not denote-tree-preserve-teleports-p))
       (setq arg 1))
     (if (< arg 0)
         (denote-tree-parent-node (- arg))
-      (dotimes (_ arg)
-        (when-let ((next-point
-                    (get-text-property (point) 'denote-tree--child))
-                   (curr-point
-                    (next-single-property-change
-                     (line-beginning-position) 'button-data)))
-          (when (and preserve-teleport-p
-                     (> (point) next-point))
-            (push (list curr-point next-point)
-                  denote-tree--teleport-stack))
-          (goto-char next-point))))))
+      (dotimes (_ arg next-point)
+        (and (setq next-point (get-text-property
+                               (point) 'denote-tree--child))
+             (setq curr-point (next-single-property-change
+                               (line-beginning-position) 'button-data))
+             (goto-char next-point)
+             preserve-teleport-p
+             (> curr-point next-point)
+             (push (list (set-marker (make-marker) curr-point)
+                         next-point)
+                   denote-tree--teleport-stack))))))
 
 (defun denote-tree-parent-node (&optional arg)
   "Move the point to the parent of a node ARG times.
