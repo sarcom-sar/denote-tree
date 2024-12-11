@@ -871,5 +871,43 @@ Argument LST-OF-LINKS - list of links the `denote-tree--walk-links' will
     (should (equal denote-tree--teleport-stack
                    nil))))
 
+(ert-deftest denote-tree-test--next-node ()
+  "Tests for `denote-tree-next-node'.
+
+No need to test `denote-tree-prev-node', because it calls
+`denote-tree-next-node'."
+  (with-temp-buffer
+    (insert "*"
+            (propertize "A" 'denote-tree--next 5
+                            'denote-tree--prev 5)
+            "\n"
+            "*"
+            (propertize "B" 'denote-tree--next 2
+                            'denote-tree--prev 2))
+    (goto-char 2)
+    (should (equal (denote-tree-next-node 1)
+                   5))
+    (should (equal (denote-tree-next-node -1)
+                   2)))
+  (with-temp-buffer
+    (insert "*"
+            (propertize "A" 'denote-tree--next 5
+                            'denote-tree--prev 5)
+            "\n"
+            "*"
+            (propertize "B" 'denote-tree--next 8
+                            'denote-tree--prev 2)
+            "\n"
+            "*"
+            (propertize "C" 'denote-tree--next 2
+                            'denote-tree--prev 5))
+    (goto-char 5)
+    (should (equal (denote-tree-next-node 1)
+                   8))
+    (should (equal (denote-tree-next-node 2)
+                   5))
+    (should (equal (denote-tree-next-node -2)
+                   5))))
+
 (provide 'denote-tree-test)
 ;;; denote-tree-test.el ends here
