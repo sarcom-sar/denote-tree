@@ -909,5 +909,24 @@ No need to test `denote-tree-prev-node', because it calls
     (should (equal (denote-tree-next-node -2)
                    5))))
 
+(ert-deftest denote-tree-test--enter-node ()
+  "Tests for `denote-tree-enter-node'."
+  (cl-letf (((symbol-function 'find-file-other-window)
+             (lambda (x)
+               x))
+            ((symbol-function 'denote-get-path-by-id)
+             (lambda (x)
+               x)))
+    (with-temp-buffer
+      (insert "*"
+              (propertize "A")
+              "\n")
+      (make-text-button 2 3 'action #'denote-tree-enter-node 'button-data "foo")
+      (goto-char 2)
+      (should (equal (push-button)
+                     t))
+      (should (equal (denote-tree-enter-node "foo")
+                     "foo")))))
+
 (provide 'denote-tree-test)
 ;;; denote-tree-test.el ends here
