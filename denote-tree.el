@@ -333,11 +333,12 @@ If ARG is omitted, nil or zero, move once."
   (interactive "p")
   (or arg (setq arg 1))
   (let ((direction (if (<= arg 0) 'denote-tree--prev 'denote-tree--next))
-        (arg (abs arg)))
-    (dotimes (_ arg)
-      (when-let ((next-point
-                  (get-text-property (point) direction)))
-        (goto-char next-point)))))
+        (arg (abs arg))
+        next-point)
+    (dotimes (_ arg next-point)
+      (and (setq next-point (get-text-property
+                             (point) direction))
+           (goto-char next-point)))))
 
 (defun denote-tree-prev-node (&optional arg)
   "Move the point to the prev sibling node ARG times.
