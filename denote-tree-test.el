@@ -929,7 +929,7 @@ No need to test `denote-tree-prev-node', because it calls
                      "foo")))))
 
 (ert-deftest denote-tree-test--redraw-node ()
-  "Tests for `denote-tree-edit-node'."
+  "Tests for `denote-tree-redraw-node'."
   (cl-letf (((symbol-function 'denote-tree--collect-keywords-as-string)
              (lambda (x y)
                "FOO baz bar")))

@@ -364,6 +364,7 @@ is loaded and `denote-tree-fancy-edit' is set to t, use it's UI."
            (buffer (denote-tree--edit-node (denote-get-path-by-id identifier))))
       (save-excursion
         (goto-char (point-min))
+        ;; edit all occurences of that buffer
         (while (text-property-search-forward
                 'button-data identifier t)
           (denote-tree--redraw-node buffer (point)))))))
