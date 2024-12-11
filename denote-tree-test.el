@@ -928,5 +928,27 @@ No need to test `denote-tree-prev-node', because it calls
       (should (equal (denote-tree-enter-node "foo")
                      "foo")))))
 
+(ert-deftest denote-tree-test--redraw-node ()
+  "Tests for `denote-tree-edit-node'."
+  (cl-letf (((symbol-function 'denote-tree--collect-keywords-as-string)
+             (lambda (x y)
+               "FOO baz bar")))
+    (with-temp-buffer
+      (insert "* FOO bar baz")
+      (denote-tree--redraw-node "foo" 3)
+      (should (equal (buffer-substring-no-properties 3 (line-end-position))
+                     "FOO baz bar")))
+    (with-temp-buffer
+      (insert "* "
+              (propertize "FOO" 'a 'b)
+              " "
+              (propertize "bar" 'a 'b)
+              " "
+              (propertize "baz" 'a 'b))
+      (denote-tree--redraw-node "foo" 3)
+      (should (equal (buffer-substring 3 (line-end-position))
+                     (concat (propertize "FOO baz bar"
+                                         'a 'b)))))))
+
 (provide 'denote-tree-test)
 ;;; denote-tree-test.el ends here
