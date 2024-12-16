@@ -273,7 +273,7 @@ org-date: fazboo
                          :signature-key-regexp "org-signature:"
                          :date-key-regexp "org-date:"))))
   (let ((base denote-tree-test-mock--denote-file-types-1)
-        (add '((:foo-key-regexp (org "org-foo:")))))
+        (add '((:foo-key-regexp org "org-foo:"))))
     (should (equal (assq 'org (denote-tree--build-extended-filetype base add))
                    '(org :title-key-regexp "org-title:"
                          :identifier-key-regexp "org-identifier:"
@@ -289,9 +289,9 @@ org-date: fazboo
                           :date-key-regexp "text-date:"
                           :foo-key-regexp nil))))
   (let ((base denote-tree-test-mock--denote-file-types-2)
-        (add '((:keywords-key-regexp (org "org-keywords:"))
-               (:signature-key-regexp (org "org-signature:"))
-               (:date-key-regexp (org "org-date:")))))
+        (add '((:keywords-key-regexp org "org-keywords:")
+               (:signature-key-regexp org "org-signature:")
+               (:date-key-regexp org "org-date:"))))
     (should (equal (assq 'org (denote-tree--build-extended-filetype base add))
                    '(org :title-key-regexp "org-title:"
                          :identifier-key-regexp "org-identifier:"
