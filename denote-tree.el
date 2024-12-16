@@ -144,22 +144,22 @@ If nil fall back to the thin `denote-rename-file' wrapper."
 
 (defcustom denote-tree-extend-filetype-with
   '((:identifier-key-regexp
-     (org "^#\\+identifier\\s-*:"
-      markdown-yaml "^identifier\\s-*:"
-      markdown-toml "^identifier\\s-*="
-      text "^identifier\\s-*:"))
+     org "^#\\+identifier\\s-*:"
+     markdown-yaml "^identifier\\s-*:"
+     markdown-toml "^identifier\\s-*="
+     text "^identifier\\s-*:")
     (:signature-key-regexp
-     (org "^#\\+signature\\s-*:"
-      markdown-yaml "^signature\\s-*:"
-      markdown-toml "^signature\\s-*="
-      text "^signature\\s-*:"))
+     org "^#\\+signature\\s-*:"
+     markdown-yaml "^signature\\s-*:"
+     markdown-toml "^signature\\s-*="
+     text "^signature\\s-*:")
     (:date-key-regexp
-     (org "^#\\+date\\s-*:"
-      markdown-yaml "^date\\s-*:"
-      markdown-toml "^date\\s-*="
-      text "^date\\s-*:")))
+     org "^#\\+date\\s-*:"
+     markdown-yaml "^date\\s-*:"
+     markdown-toml "^date\\s-*="
+     text "^date\\s-*:"))
   "Alist of keys where values are plists of filetype regex value.
-User can extend it in format of (KEY (TYPE VALUE))."
+User can extend it in format of (KEY TYPE VALUE)."
   :group 'denote-tree
   :type '(alist :key-type symbol
                 :value-type (plist :key-type symbol
@@ -562,7 +562,7 @@ Return as a list sans BUFFER's own identifier."
                 (setf (cdr type)
                       (plist-put (cdr type)
                                  (car key)
-                                 (plist-get (cadr key) (car type))))))
+                                 (plist-get (cdr key) (car type))))))
             add-this))
     ext-filetype))
 
