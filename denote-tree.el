@@ -148,8 +148,6 @@ If nil fall back to the thin `denote-rename-file' wrapper."
       markdown-yaml "^identifier\\s-*:"
       markdown-toml "^identifier\\s-*="
       text "^identifier\\s-*:"))
-    (:kazoo-key-regexp
-     (org "^#\\+kazoo\\s-*:"))
     (:signature-key-regexp
      (org "^#\\+signature\\s-*:"
       markdown-yaml "^signature\\s-*:"
