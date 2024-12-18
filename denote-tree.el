@@ -228,18 +228,18 @@ or a BUFFER provided by the user."
         (setq denote-tree--extended-filetype
               (denote-tree--build-extended-filetype
                denote-file-types denote-tree-extend-filetype-with))
-        (or buffer (setq buffer
-                         (denote-tree--collect-keywords-as-string
-                          (current-buffer) '(identifier))))
+        (setq buffer (denote-retrieve-filename-identifier-with-error
+                      (or (and (bufferp buffer)
+                               (buffer-file-name buffer))
+                          buffer
+                          (buffer-file-name))))
         (denote-tree--open-link-maybe buffer)
         (setq denote-tree--buffer-name
               (concat
                "*"
                denote-tree-buffer-prefix
                " "
-               (if (bufferp buffer)
-                   (buffer-name buffer)
-                 buffer)
+               buffer
                "*"))
         (let ((inhibit-read-only t))
           (with-current-buffer (get-buffer-create denote-tree--buffer-name)
@@ -542,7 +542,9 @@ previous/next sibling node or a parent."
   "Collect all denote style identifiers in BUFFER.
 Return as a list sans BUFFER's own identifier."
   (setq buffer (denote-tree--open-link-maybe buffer))
-  (let ((buffer-id (cdar (denote-tree--collect-keywords buffer '(identifier))))
+  (let ((buffer-id (or (denote-retrieve-filename-identifier buffer)
+                       (denote-tree--collect-keywords-as-string
+                        buffer '(identifier))))
         found-ids)
     (with-current-buffer buffer
       (goto-char (point-min))
@@ -550,7 +552,6 @@ Return as a list sans BUFFER's own identifier."
         (push (concat (match-string-no-properties 1)
                       (match-string-no-properties 2))
               found-ids))
-      ;; first element is /always/ the buffer's id
       (delete buffer-id (nreverse found-ids)))))
 
 (defun denote-tree--build-extended-filetype (gen-from add-this)
