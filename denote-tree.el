@@ -572,8 +572,8 @@ Return as a list sans BUFFER's own identifier."
   (when-let* ((filetype (denote-tree--find-filetype buffer))
               (regexps (denote-tree--get-regexps (cdr filetype))))
     (with-current-buffer buffer
-      (mapcar #'(lambda (el)
-                  (denote-tree--collect-keywords-helper el regexps filetype))
+      (mapcar (lambda (el)
+                (denote-tree--collect-keywords-helper el regexps filetype))
               keywords))))
 
 (defun denote-tree--collect-keywords-helper (el regexps filetype)
