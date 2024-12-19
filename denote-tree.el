@@ -599,13 +599,13 @@ Return \"\" if none are found."
 
 (defun denote-tree--get-regexps (plist)
   "Return list of all symbols ending in -regexp in PLIST."
-  (let ((lst))
+  (let (lst)
     (dolist (el plist lst)
-      (when-let* (((symbolp el))
-                  ((string-suffix-p
-                    "-regexp" (symbol-name el)))
-                  ((stringp (plist-get plist el))))
-        (push el lst)))))
+      (and (symbolp el)
+           (string-suffix-p
+            "-regexp" (symbol-name el))
+           (stringp (plist-get plist el))
+           (push el lst)))))
 
 (defun denote-tree--extract-and-compare-symbols
     (symbol element &optional extractor-regexp)
