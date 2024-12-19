@@ -223,7 +223,7 @@ Denote wont ask you to confirm it, this is final."
 (defun denote-tree-edit--after-button (pos)
   "Return position of prop \\='button-data in line POS or nil."
   (goto-char pos)
-  (when-let ((prop-pos (denote-tree-edit--prop-match 'button-data nil)))
+  (when-let* ((prop-pos (denote-tree-edit--prop-match 'button-data nil)))
     (+ prop-pos (length denote-tree-node))))
 
 (defun denote-tree-edit--prop-match (type el)
