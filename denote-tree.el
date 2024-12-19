@@ -670,8 +670,10 @@ Add ELEMENT to `denote-tree--visited-buffers' to delete it after
 (defun denote-tree--clean-up ()
   "Clean up buffers created during the tree walk."
   (dolist (el denote-tree--visited-buffers)
-    (when (get-buffer el)
-      (kill-buffer el)))
+    ;; silence all kill-buffer errors
+    (condition-case nil
+        (kill-buffer el)
+      (error nil)))
   (setq denote-tree--visited-buffers nil)
   (setq denote-tree--cyclic-buffers nil))
 
