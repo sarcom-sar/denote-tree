@@ -572,30 +572,33 @@ Return as a list sans BUFFER's own identifier."
 Return \"\" if none are found."
   (when-let* ((filetype (denote-tree--find-filetype buffer))
               (regexps (denote-tree--get-regexps (cdr filetype))))
-    (let (lst type)
+    (let (lst)
       (with-current-buffer buffer
-        (dolist (el keywords)
-          (when-let* ((matching-regexp
-                       (plist-get
-                        (cdr filetype) (seq-find
-                                        (lambda (reg)
-                                          (denote-tree--extract-and-compare-symbols reg el))
-                                        regexps)))
-                      ((goto-char (point-min)))
-                      ((re-search-forward matching-regexp nil t)))
-            (setq type el)
-            (setq el (denote-trim-whitespace
-                      (buffer-substring-no-properties
-                       (point) (line-end-position)))))
+        (dolist (el keywords lst)
+          (goto-char (point-min))
           (cond
+           ;; if it's a string, just push it
            ((stringp el)
-            (push (cons type
+            (push (cons 'str el) lst))
+           ;; if it's in regexps, covert to str and push
+           ((re-search-forward
+             (plist-get (cdr filetype)
+                        (seq-find
+                         (lambda (reg)
+                           (denote-tree--extract-and-compare-symbols reg el))
+                         regexps))
+             nil t)
+            (push (cons el
                         (funcall
-                         denote-tree-node-colorize-function el type))
+                         denote-tree-node-colorize-function
+                         (denote-trim-whitespace
+                          (buffer-substring-no-properties
+                           (point) (line-end-position)))
+                         el))
                   lst))
+           ;; symbol with no associated str
            ((symbolp el)
-            (push (list el) lst)))))
-      lst)))
+            (push (list el) lst))))))))
 
 (defun denote-tree--get-regexps (plist)
   "Return list of all symbols ending in -regexp in PLIST."
