@@ -102,21 +102,19 @@ AFTER-BUFS. The VISITED buffers are the ones to disappear."
 Collect arbitrary number of keywords and return them
 as one string."
   (cl-letf (((symbol-function 'denote-tree--collect-keywords)
-             ;; real functions returns in reverse
-             ;; and attaches props
              (lambda (_ _)
                '((a . "a")
                  (b . "b")
                  (c . "c")))))
     (should (equal (denote-tree--collect-keywords-as-string '_ '_)
-                   "c b a")))
+                   "a b c")))
   (cl-letf (((symbol-function 'denote-tree--collect-keywords)
              (lambda (_ _)
                '((a . "a")
                  (b)
                  (c . "c")))))
     (should (equal (denote-tree--collect-keywords-as-string '_ '_)
-                   "c a")))
+                   "a c")))
   (cl-letf (((symbol-function 'denote-tree--collect-keywords)
              (lambda (_ _)
                '((a)

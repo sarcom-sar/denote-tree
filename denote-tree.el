@@ -633,8 +633,10 @@ mangles the SYMBOL like so,
 
 (defun denote-tree--collect-keywords-as-string (buffer keywords)
   "Return KEYWORDS as a joint string from BUFFER."
-  (let ((lst (seq-filter #'identity (mapcar #'cdr (denote-tree--collect-keywords buffer keywords)))))
-    (string-join (nreverse lst) " ")))
+  (string-join
+   (seq-filter #'identity (mapcar #'cdr (denote-tree--collect-keywords
+                                         buffer keywords)))
+   " "))
 
 (defun denote-tree--find-filetype (buffer)
   "Guess the filetype in BUFFER and return it as a symbol.
