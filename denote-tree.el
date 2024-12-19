@@ -568,37 +568,39 @@ Return as a list sans BUFFER's own identifier."
     ext-filetype))
 
 (defun denote-tree--collect-keywords (buffer keywords)
-  "Return denote propertized KEYWORDS from BUFFER.
-Return \"\" if none are found."
+  "Return denote propertized KEYWORDS from BUFFER."
   (when-let* ((filetype (denote-tree--find-filetype buffer))
               (regexps (denote-tree--get-regexps (cdr filetype))))
-    (let (lst)
-      (with-current-buffer buffer
-        (dolist (el keywords lst)
-          (goto-char (point-min))
-          (cond
-           ;; if it's a string, just push it
-           ((stringp el)
-            (push (cons 'str el) lst))
-           ;; if it's in regexps, covert to str and push
-           ((re-search-forward
-             (plist-get (cdr filetype)
-                        (seq-find
-                         (lambda (reg)
-                           (denote-tree--extract-and-compare-symbols reg el))
-                         regexps))
-             nil t)
-            (push (cons el
-                        (funcall
-                         denote-tree-node-colorize-function
-                         (denote-trim-whitespace
-                          (buffer-substring-no-properties
-                           (point) (line-end-position)))
-                         el))
-                  lst))
-           ;; symbol with no associated str
-           ((symbolp el)
-            (push (list el) lst))))))))
+    (with-current-buffer buffer
+      (mapcar #'(lambda (el)
+                  (denote-tree--collect-keywords-helper el regexps filetype))
+              keywords))))
+
+(defun denote-tree--collect-keywords-helper (el regexps filetype)
+  "Turn EL into cons according to REGEXPS and FILETYPE"
+  (goto-char (point-min))
+  (cond
+   ;; if it's a string, just push it
+   ((stringp el)
+    (cons 'str el))
+   ;; if it's in regexps, covert to str and push
+   ((re-search-forward
+     (plist-get (cdr filetype)
+                (seq-find
+                 (lambda (reg)
+                   (denote-tree--extract-and-compare-symbols reg el))
+                 regexps))
+     nil t)
+    (cons el
+          (funcall
+           denote-tree-node-colorize-function
+           (denote-trim-whitespace
+            (buffer-substring-no-properties
+             (point) (line-end-position)))
+           el)))
+   ;; symbol with no associated str
+   ((symbolp el)
+    (list el))))
 
 (defun denote-tree--get-regexps (plist)
   "Return list of all symbols ending in -regexp in PLIST."

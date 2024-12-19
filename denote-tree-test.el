@@ -222,11 +222,11 @@ org-date: fazboo
                                                 keywords
                                                 signature
                                                 date))
-               `((date . ,(propertize "fazboo" 'denote-tree--type 'date))
-                 (signature . ,(propertize "foz" 'denote-tree--type 'signature))
-                 (keywords . ,(propertize "baz" 'denote-tree--type 'keywords))
+               `((title . ,(propertize "foo" 'denote-tree--type 'title))
                  (identifier . ,(propertize "bar" 'denote-tree--type 'identifier))
-                 (title . ,(propertize "foo" 'denote-tree--type 'title))))))
+                 (keywords . ,(propertize "baz" 'denote-tree--type 'keywords))
+                 (signature . ,(propertize "foz" 'denote-tree--type 'signature))
+                 (date . ,(propertize "fazboo" 'denote-tree--type 'date))))))
     (with-temp-buffer
       (insert "org-title: foo
 org-identifier: bar
@@ -240,11 +240,11 @@ org-date: fazboo
                                                 keywords
                                                 signature
                                                 date))
-               `((date . ,(propertize "fazboo" 'denote-tree--type 'date))
-                 (signature . ,(propertize "foz" 'denote-tree--type 'signature))
-                 (keywords)
+               `((title . ,(propertize "foo" 'denote-tree--type 'title))
                  (identifier . ,(propertize "bar" 'denote-tree--type 'identifier))
-                 (title . ,(propertize "foo" 'denote-tree--type 'title))))))
+                 (keywords)
+                 (signature . ,(propertize "foz" 'denote-tree--type 'signature))
+                 (date . ,(propertize "fazboo" 'denote-tree--type 'date))))))
     (with-temp-buffer
       (should (equal-including-properties
                (denote-tree--collect-keywords (current-buffer)
