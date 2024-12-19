@@ -655,7 +655,7 @@ a match), but guaranteed to work as long the user set the front-matter."
                             (save-excursion
                               (re-search-forward
                                (plist-get (cdr types-plist) el) nil t)))
-                          (nreverse (denote-tree--get-regexps (cdr types-plist))))))
+                          (denote-tree--get-regexps (cdr types-plist)))))
                      denote-tree--extended-filetype)))
       (unless filetype
         (user-error "%s not a denote-style buffer" buffer))
