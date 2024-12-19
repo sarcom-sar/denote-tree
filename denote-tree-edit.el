@@ -234,6 +234,9 @@ If TYPE is not a symbol or EL is not in line return nil."
       (narrow-to-region (line-beginning-position) (line-end-position))
       (when-let ((pos (next-single-property-change
                        (point) type)))
+        ;; skip over prop of type, because otherwise -edit--set-from-tree
+        ;; will run into same prop over and over
+        ;; fall back on just pos if that prop is the last one in line
         (goto-char (or (next-single-property-change pos type)
                        pos))
         (cond ((null el)
