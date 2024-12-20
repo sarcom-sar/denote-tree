@@ -408,35 +408,40 @@ Argument DEPTH  - maximum depth of the traversal."
   ;; draw node in buffer,
   ;; extract position of point at node
   ;; carry over the indent
-  (let ((links-in-buffer (denote-tree--collect-links buffer))
-        (cyclical-node (assoc buffer denote-tree--cyclic-buffers #'string=))
-        (depth (cond
-                ((symbolp depth) depth)
-                ((and (numberp depth) (< 0 (1- depth))) (1- depth))
-                ((and (numberp depth) (= 0 (1- depth))) nil)
-                (t t)))
-        node-children pos)
-    (seq-setq (pos indent) (denote-tree--draw-node buffer indent lastp))
-    ;; traverse the buffer structure
-    ;; if current buffer is in denote-tree--cyclic-buffers
-    ;; do not go deeper, because you enter a cycle
-    (cond
-     (cyclical-node
-      (setcdr cyclical-node (append (cdr cyclical-node) (list pos))))
-     (t
-      (dolist (el links-in-buffer)
-        (when (get-buffer el)
-          (add-to-list 'denote-tree--cyclic-buffers (list el)
-                       nil
-                       (lambda (a b) (string= (car a) (car b)))))
-        (when depth
-          (push (denote-tree--walk-links
-                 el indent (eq el (car (last links-in-buffer))) depth)
-                node-children)))))
-    ;; add props to current node and it's children
-    (denote-tree--set-button pos buffer)
-    (denote-tree--add-props-to-children (nreverse node-children) pos)
-    pos))
+  (if-let* ((buffer (denote-tree--open-link-maybe buffer)))
+      (progn
+        (let ((links-in-buffer (denote-tree--collect-links buffer))
+              (cyclical-node (assoc buffer denote-tree--cyclic-buffers #'string=))
+              (depth (cond
+                      ((symbolp depth) depth)
+                      ((and (numberp depth) (< 0 (1- depth))) (1- depth))
+                      ((and (numberp depth) (= 0 (1- depth))) nil)
+                      (t t)))
+              node-children pos)
+          (seq-setq (pos indent) (denote-tree--draw-node buffer indent lastp))
+          ;; traverse the buffer structure
+          ;; if current buffer is in denote-tree--cyclic-buffers
+          ;; do not go deeper, because you enter a cycle
+          (cond
+           (cyclical-node
+            (setcdr cyclical-node (append (cdr cyclical-node) (list pos))))
+           (t
+            (dolist (el links-in-buffer)
+              (when (get-buffer el)
+                (add-to-list 'denote-tree--cyclic-buffers (list el)
+                             nil
+                             (lambda (a b) (string= (car a) (car b)))))
+              (when depth
+                (push (denote-tree--walk-links
+                       el indent (eq el (car (last links-in-buffer))) depth)
+                      node-children)))))
+          ;; add props to current node and it's children
+          (denote-tree--set-button pos buffer)
+          (when (seq-find (lambda (x) (not (null (get-buffer x))))
+                          links-in-buffer)
+            (denote-tree--add-props-to-children (nreverse node-children) pos))
+          pos))
+    (point)))
 
 (defun denote-tree--add-props-to-cycles ()
   "Add denote-tree--child prop to elements of `denote-tree--cyclic-buffers'.
@@ -529,18 +534,17 @@ previous/next sibling node or a parent."
 (defun denote-tree--collect-links (buffer)
   "Collect all denote style identifiers in BUFFER.
 Return as a list sans BUFFER's own identifier."
-  (when-let* ((buffer (denote-tree--open-link-maybe buffer)))
-    (let ((buffer-id
-           (or (denote-retrieve-filename-identifier buffer)
-               (denote-tree--collect-keywords-as-string buffer '(identifier))))
-          found-ids)
-      (with-current-buffer buffer
-        (goto-char (point-min))
-        (while (search-forward-regexp denote-id-regexp nil t)
-          (push (concat (match-string-no-properties 1)
-                        (match-string-no-properties 2))
-                found-ids))
-        (delete buffer-id (nreverse found-ids))))))
+  (let ((buffer-id
+         (or (denote-retrieve-filename-identifier buffer)
+             (denote-tree--collect-keywords-as-string buffer '(identifier))))
+        found-ids)
+    (with-current-buffer buffer
+      (goto-char (point-min))
+      (while (search-forward-regexp denote-id-regexp nil t)
+        (push (concat (match-string-no-properties 1)
+                      (match-string-no-properties 2))
+              found-ids))
+      (delete buffer-id (nreverse found-ids)))))
 
 (defun denote-tree--build-extended-filetype (gen-from add-this)
   "Add keys and values from ADD-THIS to GEN-FROM alist."
@@ -653,11 +657,11 @@ Add ELEMENT to `denote-tree--visited-buffers' to delete it after
 `denote-tree' initialization."
   (unless (get-buffer element)
     (add-to-list 'denote-tree--visited-buffers element)
-    (with-current-buffer (get-buffer-create element)
-      (if-let* ((file-contents (denote-get-path-by-id element)))
-          (insert-file-contents file-contents)
-        (warn "%s was not found" element)
-        (setq element nil))))
+    (if-let* ((file-path (denote-get-path-by-id element)))
+        (with-current-buffer (get-buffer-create element)
+          (insert-file-contents file-path))
+      (warn "%s was not found" element)
+      (setq element nil)))
   element)
 
 
