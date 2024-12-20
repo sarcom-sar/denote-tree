@@ -529,18 +529,18 @@ previous/next sibling node or a parent."
 (defun denote-tree--collect-links (buffer)
   "Collect all denote style identifiers in BUFFER.
 Return as a list sans BUFFER's own identifier."
-  (setq buffer (denote-tree--open-link-maybe buffer))
-  (let ((buffer-id
-         (or (denote-retrieve-filename-identifier buffer)
-             (denote-tree--collect-keywords-as-string buffer '(identifier))))
-        found-ids)
-    (with-current-buffer buffer
-      (goto-char (point-min))
-      (while (search-forward-regexp denote-id-regexp nil t)
-        (push (concat (match-string-no-properties 1)
-                      (match-string-no-properties 2))
-              found-ids))
-      (delete buffer-id (nreverse found-ids)))))
+  (when-let* ((buffer (denote-tree--open-link-maybe buffer)))
+    (let ((buffer-id
+           (or (denote-retrieve-filename-identifier buffer)
+               (denote-tree--collect-keywords-as-string buffer '(identifier))))
+          found-ids)
+      (with-current-buffer buffer
+        (goto-char (point-min))
+        (while (search-forward-regexp denote-id-regexp nil t)
+          (push (concat (match-string-no-properties 1)
+                        (match-string-no-properties 2))
+                found-ids))
+        (delete buffer-id (nreverse found-ids))))))
 
 (defun denote-tree--build-extended-filetype (gen-from add-this)
   "Add keys and values from ADD-THIS to GEN-FROM alist."
@@ -654,7 +654,10 @@ Add ELEMENT to `denote-tree--visited-buffers' to delete it after
   (unless (get-buffer element)
     (add-to-list 'denote-tree--visited-buffers element)
     (with-current-buffer (get-buffer-create element)
-      (insert-file-contents (denote-get-path-by-id element))))
+      (if-let* ((file-contents (denote-get-path-by-id element)))
+          (insert-file-contents file-contents)
+        (warn "%s was not found" element)
+        (setq element nil))))
   element)
 
 
