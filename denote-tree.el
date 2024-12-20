@@ -5,7 +5,7 @@
 ;; Version: 0.8.1
 ;; Keywords: convenience
 ;; URL: http://github.com/sarcom-sar/denote-tree.el
-;; Package-Requires: ((emacs "27.1") (denote "3.0.1"))
+;; Package-Requires: ((emacs "28.1") (denote "3.0.1"))
 
 ;; This file is not part of GNU Emacs.
 
