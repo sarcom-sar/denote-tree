@@ -656,10 +656,10 @@ a match), but guaranteed to work as long the user set the front-matter."
 Add ELEMENT to `denote-tree--visited-buffers' to delete it after
 `denote-tree' initialization."
   (unless (get-buffer element)
-    (add-to-list 'denote-tree--visited-buffers element)
     (if-let* ((file-path (denote-get-path-by-id element)))
         (with-current-buffer (get-buffer-create element)
-          (insert-file-contents file-path))
+          (insert-file-contents file-path)
+          (add-to-list 'denote-tree--visited-buffers element))
       (warn "%s was not found" element)
       (setq element nil)))
   element)
