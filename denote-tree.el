@@ -439,8 +439,8 @@ Argument DEPTH  - maximum depth of the traversal."
                        nil
                        (lambda (a b) (string= (car a) (car b)))))
         (when depth
-          (setq lastp (eq el (car (last links-in-buffer))))
-          (push (denote-tree--walk-links el indent lastp depth)
+          (push (denote-tree--walk-links
+                 el indent (eq el (car (last links-in-buffer))) depth)
                 node-children)))))
     ;; add props to current node and it's children
     (denote-tree--set-button pos buffer)
