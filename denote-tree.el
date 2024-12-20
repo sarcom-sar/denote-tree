@@ -644,7 +644,7 @@ a match), but guaranteed to work as long the user set the front-matter."
                  (denote-tree--get-regexps (cdr types-plist)))))
             denote-tree--extended-filetype)))
       (unless filetype
-        (user-error "%s not a denote-style buffer" buffer))
+        (warn "%s not a denote-style buffer" buffer))
       filetype)))
 
 (defun denote-tree--open-link-maybe (element)
