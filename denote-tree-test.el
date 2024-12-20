@@ -517,22 +517,19 @@ C
       nil
     (let ((ret-val (denote-tree--draw-node "name" "" nil)))
       (goto-char 3)
-      (should (equal ret-val
-                     (cons (point-marker) "| ")))))
+      (should (equal ret-val (list (point-marker) "| ")))))
   (denote-tree-test-mock--draw-node-macro
       ((propertize "A" 'denote-tree--type 'a))
       nil
     (let ((ret-val (denote-tree--draw-node "name" "| | |" nil)))
       (goto-char 8)
-      (should (equal ret-val
-                     (cons (point-marker) "| | || ")))))
+      (should (equal ret-val (list (point-marker) "| | || ")))))
   (denote-tree-test-mock--draw-node-macro
       ((propertize "A" 'denote-tree--type 'a))
       nil
     (let ((ret-val (denote-tree--draw-node "name" "" t)))
       (goto-char 3)
-      (should (equal ret-val
-                     (cons (point-marker) "  "))))))
+      (should (equal ret-val (list (point-marker) "  "))))))
 
 (ert-deftest denote-tree-test--add-props-to-cycles ()
   "Tests for `denote-tree--add-props-to-children'.

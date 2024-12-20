@@ -414,17 +414,15 @@ Argument DEPTH  - maximum depth of the traversal."
   ;; draw node in buffer,
   ;; extract position of point at node
   ;; carry over the indent
-  (let* ((links-in-buffer (denote-tree--collect-links buffer))
-         (pos-and-indent (denote-tree--draw-node buffer indent lastp))
-         (pos (car pos-and-indent))
-         (indent (cdr pos-and-indent))
-         (cyclical-node (assoc buffer denote-tree--cyclic-buffers #'string=))
-         (depth (cond
-                 ((symbolp depth) depth)
-                 ((and (numberp depth) (< 0 (1- depth))) (1- depth))
-                 ((and (numberp depth) (= 0 (1- depth))) nil)
-                 (t t)))
-         node-children)
+  (let ((links-in-buffer (denote-tree--collect-links buffer))
+        (cyclical-node (assoc buffer denote-tree--cyclic-buffers #'string=))
+        (depth (cond
+                ((symbolp depth) depth)
+                ((and (numberp depth) (< 0 (1- depth))) (1- depth))
+                ((and (numberp depth) (= 0 (1- depth))) nil)
+                (t t)))
+        node-children pos)
+    (seq-setq (pos indent) (denote-tree--draw-node buffer indent lastp))
     ;; traverse the buffer structure
     ;; if current buffer is in denote-tree--cyclic-buffers
     ;; do not go deeper, because you enter a cycle
@@ -494,7 +492,7 @@ Argument LASTP is the current node last child of parent."
                                 'denote-tree-node))
             (denote-tree--collect-keywords-as-string node-name keywords)
             "\n")
-    (cons point-star-loc indent)))
+    (list point-star-loc indent)))
 
 (defun denote-tree--set-button (position buffer)
   "Add button to visit BUFFER at POSITION."
