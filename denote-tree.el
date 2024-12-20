@@ -161,9 +161,10 @@ If nil fall back to the thin `denote-rename-file' wrapper."
   "Alist of keys where values are plists of filetype regex value.
 User can extend it in format of (KEY TYPE VALUE)."
   :group 'denote-tree
-  :type '(alist :key-type symbol
-                :value-type (plist :key-type symbol
-                                   :value-type string)))
+  :type
+  '(alist
+    :key-type symbol
+    :value-type (plist :key-type symbol :value-type string)))
 
 
 ;;;; Vars and consts
@@ -228,19 +229,14 @@ or a BUFFER provided by the user."
         (setq denote-tree--extended-filetype
               (denote-tree--build-extended-filetype
                denote-file-types denote-tree-extend-filetype-with))
-        (setq buffer (denote-retrieve-filename-identifier-with-error
-                      (or (and (bufferp buffer)
-                               (buffer-file-name buffer))
-                          buffer
-                          (buffer-file-name))))
+        (setq buffer
+              (denote-retrieve-filename-identifier-with-error
+               (or (and (bufferp buffer) (buffer-file-name buffer))
+                   buffer
+                   (buffer-file-name))))
         (denote-tree--open-link-maybe buffer)
         (setq denote-tree--buffer-name
-              (concat
-               "*"
-               denote-tree-buffer-prefix
-               " "
-               buffer
-               "*"))
+              (concat "*" denote-tree-buffer-prefix " " buffer "*"))
         (let ((inhibit-read-only t))
           (with-current-buffer (get-buffer-create denote-tree--buffer-name)
             (erase-buffer)
@@ -290,15 +286,14 @@ the parent node position for future backtracking."
     (if (< arg 0)
         (denote-tree-parent-node (- arg))
       (dotimes (_ arg next-point)
-        (and (setq next-point (get-text-property
-                               (point) 'denote-tree--child))
-             (setq curr-point (next-single-property-change
-                               (line-beginning-position) 'button-data))
+        (and (setq next-point (get-text-property (point) 'denote-tree--child))
+             (setq curr-point
+                   (next-single-property-change
+                    (line-beginning-position) 'button-data))
              (goto-char next-point)
              preserve-teleport-p
              (> curr-point next-point)
-             (push (list (set-marker (make-marker) curr-point)
-                         next-point)
+             (push (list (set-marker (make-marker) curr-point) next-point)
                    denote-tree--teleport-stack))))))
 
 (defun denote-tree-parent-node (&optional arg)
@@ -314,10 +309,9 @@ the parent the point came from."
     (if (< arg 0)
         (denote-tree-child-node (- arg))
       (dotimes (_ arg next-point)
-        (and (setq next-point (get-text-property
-                               (point) 'denote-tree--parent))
-             (setq canon-point (get-text-property
-                                next-point 'denote-tree--child))
+        (and (setq next-point (get-text-property (point) 'denote-tree--parent))
+             (setq canon-point
+                   (get-text-property next-point 'denote-tree--child))
              (goto-char next-point)
              (setq current-teleport (car denote-tree--teleport-stack))
              (equal canon-point (cadr current-teleport))
@@ -334,8 +328,7 @@ If ARG is omitted, nil or zero, move once."
         (arg (abs arg))
         next-point)
     (dotimes (_ arg next-point)
-      (and (setq next-point (get-text-property
-                             (point) direction))
+      (and (setq next-point (get-text-property (point) direction))
            (goto-char next-point)))))
 
 (defun denote-tree-prev-node (&optional arg)
@@ -355,10 +348,11 @@ is loaded and `denote-tree-fancy-edit' is set to t, use it's UI."
       (progn
         (require 'denote-tree-edit)
         (denote-tree-edit-mode))
-    (let* ((identifier (get-text-property
-                        (next-single-property-change
-                         (line-beginning-position) 'button-data)
-                        'button-data))
+    (let* ((identifier
+            (get-text-property
+             (next-single-property-change
+              (line-beginning-position) 'button-data)
+             'button-data))
            (buffer (denote-tree--edit-node (denote-get-path-by-id identifier))))
       (save-excursion
         (goto-char (point-min))
@@ -432,8 +426,7 @@ Argument DEPTH  - maximum depth of the traversal."
      (t
       (dolist (el links-in-buffer)
         (when (get-buffer el)
-          (add-to-list 'denote-tree--cyclic-buffers
-                       (list el)
+          (add-to-list 'denote-tree--cyclic-buffers (list el)
                        nil
                        (lambda (a b) (string= (car a) (car b)))))
         (when depth
@@ -458,10 +451,9 @@ that position as denote-tree--child of all the cyclic nodes."
     (let ((child-prop (get-text-property (point) 'denote-tree--child)))
       (dolist (node-pos (cdr node-id-and-pos))
         (goto-char node-pos)
-        (add-text-properties (line-beginning-position)
-                             (line-end-position)
-                             (list 'denote-tree--child (set-marker (make-marker)
-                                                                   child-prop)))))))
+        (add-text-properties
+         (line-beginning-position) (line-end-position)
+         (list 'denote-tree--child (set-marker (make-marker) child-prop)))))))
 
 (defun denote-tree--draw-node (node-name indent lastp)
   "Draw NODE-NAME according to INDENT in current buffer.
@@ -486,18 +478,18 @@ Argument LASTP is the current node last child of parent."
       (setq indent (concat indent denote-tree-pipe))
       (insert denote-tree-tee)))
     (setq point-star-loc (point-marker))
-    (insert (propertize denote-tree-node
-                        'face (if circularp
-                                  'denote-tree-circular-node
-                                'denote-tree-node))
-            (denote-tree--collect-keywords-as-string node-name keywords)
-            "\n")
+    (insert
+     (propertize denote-tree-node
+                 'face
+                 (if circularp
+                     'denote-tree-circular-node
+                   'denote-tree-node))
+     (denote-tree--collect-keywords-as-string node-name keywords) "\n")
     (list point-star-loc indent)))
 
 (defun denote-tree--set-button (position buffer)
   "Add button to visit BUFFER at POSITION."
-  (make-text-button position
-                    (+ position (length denote-tree-node))
+  (make-text-button position (+ position (length denote-tree-node))
                     'action #'denote-tree-enter-node
                     'button-data buffer))
 
@@ -510,31 +502,25 @@ previous/next sibling node or a parent."
   (when (and parent node-children)
     (save-excursion
       (goto-char parent)
-      (add-text-properties (line-beginning-position)
-                           (line-end-position)
-                           (list 'denote-tree--child (set-marker
-                                                      (make-marker)
-                                                      (car node-children))))))
+      (add-text-properties
+       (line-beginning-position) (line-end-position)
+       (list
+        'denote-tree--child (set-marker (make-marker) (car node-children))))))
   (let ((prev (car (last node-children)))
         (tail node-children))
     (dolist (el node-children)
       (setq tail (cdr tail))
       ;; if tail is null, then we are at last element,
       ;; fetch start of child nodes
-      (let ((next (if (null (car tail)) (car node-children) (car tail))))
+      (let ((next (or (car tail) (car node-children))))
         (save-excursion
           (goto-char el)
-          (add-text-properties (line-beginning-position)
-                               (line-end-position)
-                               (list 'denote-tree--next (set-marker
-                                                         (make-marker)
-                                                         next)
-                                     'denote-tree--prev (set-marker
-                                                         (make-marker)
-                                                         prev)
-                                     'denote-tree--parent (set-marker
-                                                           (make-marker)
-                                                           parent)))))
+          (add-text-properties
+           (line-beginning-position) (line-end-position)
+           (list
+            'denote-tree--next (set-marker (make-marker) next)
+            'denote-tree--prev (set-marker (make-marker) prev)
+            'denote-tree--parent (set-marker (make-marker) parent)))))
       (setq prev el))))
 
 
@@ -544,9 +530,9 @@ previous/next sibling node or a parent."
   "Collect all denote style identifiers in BUFFER.
 Return as a list sans BUFFER's own identifier."
   (setq buffer (denote-tree--open-link-maybe buffer))
-  (let ((buffer-id (or (denote-retrieve-filename-identifier buffer)
-                       (denote-tree--collect-keywords-as-string
-                        buffer '(identifier))))
+  (let ((buffer-id
+         (or (denote-retrieve-filename-identifier buffer)
+             (denote-tree--collect-keywords-as-string buffer '(identifier))))
         found-ids)
     (with-current-buffer buffer
       (goto-char (point-min))
@@ -560,13 +546,13 @@ Return as a list sans BUFFER's own identifier."
   "Add keys and values from ADD-THIS to GEN-FROM alist."
   (let ((ext-filetype (copy-tree gen-from)))
     (dolist (type ext-filetype)
-      (mapc (lambda (key)
-              (unless (plist-member (cdr type) (car key))
-                (setf (cdr type)
-                      (plist-put (cdr type)
-                                 (car key)
-                                 (plist-get (cdr key) (car type))))))
-            add-this))
+      (mapc
+       (lambda (key)
+         (unless (plist-member (cdr type) (car key))
+           (setf (cdr type)
+                 (plist-put
+                  (cdr type) (car key) (plist-get (cdr key) (car type))))))
+       add-this))
     ext-filetype))
 
 (defun denote-tree--collect-keywords (buffer keywords)
@@ -586,20 +572,18 @@ Return as a list sans BUFFER's own identifier."
    ((stringp el)
     (cons 'str el))
    ;; if it's in regexps, covert to str and push
-   ((re-search-forward
-     (plist-get (cdr filetype)
-                (seq-find
-                 (lambda (reg)
-                   (denote-tree--extract-and-compare-symbols reg el))
-                 regexps))
-     nil t)
+   ((re-search-forward (plist-get
+                        (cdr filetype)
+                        (seq-find
+                         (lambda (reg)
+                           (denote-tree--extract-and-compare-symbols reg el))
+                         regexps))
+                       nil t)
     (cons el
-          (funcall
-           denote-tree-node-colorize-function
-           (denote-trim-whitespace
-            (buffer-substring-no-properties
-             (point) (line-end-position)))
-           el)))
+          (funcall denote-tree-node-colorize-function
+                   (denote-trim-whitespace
+                    (buffer-substring-no-properties (point) (line-end-position)))
+                   el)))
    ;; symbol with no associated str
    ((symbolp el)
     (list el))))
@@ -625,8 +609,7 @@ mangles the SYMBOL like so,
 :key-value-regexp      -> key
 :foo-bar-regexp        -> foo
 :identifier-val-regexp -> identifier"
-  (setq extractor-regexp (or extractor-regexp
-                             ":\\(.+?\\)-\\(?:.*?\\)regexp"))
+  (setq extractor-regexp (or extractor-regexp ":\\(.+?\\)-\\(?:.*?\\)regexp"))
   (and (eq (intern
             (replace-regexp-in-string
              extractor-regexp "\\1" (symbol-name symbol)))
@@ -635,10 +618,10 @@ mangles the SYMBOL like so,
 
 (defun denote-tree--collect-keywords-as-string (buffer keywords)
   "Return KEYWORDS as a joint string from BUFFER."
-  (string-join
-   (seq-filter #'identity (mapcar #'cdr (denote-tree--collect-keywords
-                                         buffer keywords)))
-   " "))
+  (string-join (seq-filter
+                #'identity
+                (mapcar #'cdr (denote-tree--collect-keywords buffer keywords)))
+               " "))
 
 (defun denote-tree--find-filetype (buffer)
   "Guess the filetype in BUFFER and return it as a symbol.
@@ -649,16 +632,17 @@ This can be potentially expensive (worst case scenario is not finding
 a match), but guaranteed to work as long the user set the front-matter."
   (with-current-buffer buffer
     (goto-char (point-min))
-    (let ((filetype (seq-find
-                     (lambda (type)
-                       (let ((types-plist type))
-                         (seq-find
-                          (lambda (el)
-                            (save-excursion
-                              (re-search-forward
-                               (plist-get (cdr types-plist) el) nil t)))
-                          (denote-tree--get-regexps (cdr types-plist)))))
-                     denote-tree--extended-filetype)))
+    (let ((filetype
+           (seq-find
+            (lambda (type)
+              (let ((types-plist type))
+                (seq-find
+                 (lambda (el)
+                   (save-excursion
+                     (re-search-forward (plist-get (cdr types-plist) el)
+                                        nil t)))
+                 (denote-tree--get-regexps (cdr types-plist)))))
+            denote-tree--extended-filetype)))
       (unless filetype
         (user-error "%s not a denote-style buffer" buffer))
       filetype)))

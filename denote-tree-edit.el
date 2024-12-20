@@ -36,11 +36,8 @@
 
 ;;;; Variables
 
-(defvar-local denote-tree-edit--current-note '((file)
-                                               (title)
-                                               (keywords)
-                                               (signature)
-                                               (date))
+(defvar-local denote-tree-edit--current-note
+    '((file) (title) (keywords) (signature) (date))
   "Alist of a current note elements.")
 
 (defvar-local denote-tree-edit--current-line nil
@@ -77,19 +74,15 @@ Everything else is still read-only.  All newlines will be dropped.
         (insert-file-contents (alist-get 'file denote-tree-edit--current-note))
         (goto-char (point-min))
         (let ((keywords-pairs
-               (denote-tree--collect-keywords (current-buffer)
-                                              '(title
-                                                keywords
-                                                signature
-                                                date))))
+               (denote-tree--collect-keywords
+                (current-buffer) '(title keywords signature date))))
           (dolist (el keywords-pairs)
             (let ((pair (assq (car el) denote-tree-edit--current-note)))
               (when (cdr el)
                 (setcdr pair (cdr el)))))))
       ;; add info about neighbors
       (denote-tree-edit--set-from-tree
-       denote-tree-node-description
-       #'denote-tree-edit--save-match)
+       denote-tree-node-description #'denote-tree-edit--save-match)
       (denote-tree-edit--widgetize-line))))
 
 (defun denote-tree-edit-commit-changes ()
@@ -102,8 +95,8 @@ Denote wont ask you to confirm it, this is final."
               (nreverse
                (denote-tree-edit--save-from-widgets
                 denote-tree-edit--current-note denote-tree-edit--current-line)))
-        (let ((copy  (denote-tree-edit--fix-current-note
-                      (copy-tree denote-tree-edit--current-note)))
+        (let ((copy (denote-tree-edit--fix-current-note
+                     (copy-tree denote-tree-edit--current-note)))
               (denote-rename-confirmations nil)
               (denote-save-buffers t))
           (apply #'denote-rename-file (mapcar #'cdr copy))))
@@ -129,8 +122,8 @@ Denote wont ask you to confirm it, this is final."
 
 (defun denote-tree-edit--restore-line ()
   "Restore edited note to previous state."
-  (let ((front-pos (denote-tree-edit--after-button
-                    denote-tree-edit--current-line)))
+  (let ((front-pos
+         (denote-tree-edit--after-button denote-tree-edit--current-line)))
     (goto-char front-pos)
     (dolist (el denote-tree-node-description)
       (if (symbolp el)
@@ -210,8 +203,7 @@ Denote wont ask you to confirm it, this is final."
         (cond
          ;; if new pair doesn't have a value, push a hybrid
          ;; of key and old element
-         ((and (null (cdr new-pair))
-               (cdr old-pair))
+         ((and (null (cdr new-pair)) (cdr old-pair))
           (push (cons (car el) (cdr old-pair)) new-alist))
          ;; if new-pair has both value and key, push it
          (new-pair (push new-pair new-alist))
@@ -232,18 +224,15 @@ If TYPE is not a symbol or EL is empty return nil."
   (when (symbolp type)
     (save-restriction
       (narrow-to-region (line-beginning-position) (line-end-position))
-      (when-let ((pos (next-single-property-change
-                       (point) type)))
+      (when-let ((pos (next-single-property-change (point) type)))
         ;; skip over prop of type, because otherwise -edit--set-from-tree
         ;; will run into same prop over and over
         ;; fall back on just pos if that prop is the last one in line
-        (goto-char (or (next-single-property-change pos type)
-                       pos))
-        (cond ((null el)
-               pos)
-              ((equal (get-text-property pos type) el)
-               pos)
-              (t nil))))))
+        (goto-char (or (next-single-property-change pos type) pos))
+        (cond
+         ((null el) pos)
+         ((equal (get-text-property pos type) el) pos)
+         (t nil))))))
 
 (defun denote-tree-edit--save-match (start end type)
   "Save match of TYPE from START to END to `denote-tree-edit--current-note'."
@@ -263,8 +252,7 @@ If TYPE is not a symbol or EL is empty return nil."
                        (cdr (assq 'keywords copy))))))
   copy)
 
-(defun denote-tree-edit--set-from-tree
-    (front-matter-els func &optional any)
+(defun denote-tree-edit--set-from-tree (front-matter-els func &optional any)
   "Iterate over FRONT-MATTER-ELS applying FUNC to it.
 Restrict search of props to the current line.
 
@@ -273,7 +261,7 @@ set defaults to currently iterated over element of FRONT-MATTER-ELS."
   (dolist (el front-matter-els)
     (when-let* ((start (denote-tree-edit--prop-match 'denote-tree--type el))
                 (end (next-single-property-change start 'denote-tree--type))
-                (thing (if any any el)))
+                (thing (or any el)))
       (funcall func start end thing))))
 
 (provide 'denote-tree-edit)
