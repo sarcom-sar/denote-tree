@@ -419,7 +419,11 @@ Argument DEPTH  - maximum depth of the traversal."
          (pos (car pos-and-indent))
          (indent (cdr pos-and-indent))
          (cyclical-node (assoc buffer denote-tree--cyclic-buffers #'string=))
-         (depth (if (symbolp depth) depth (if (= (1- depth) 0) nil (1- depth))))
+         (depth (cond
+                 ((symbolp depth) depth)
+                 ((and (numberp depth) (< 0 (1- depth))) (1- depth))
+                 ((and (numberp depth) (= 0 (1- depth))) nil)
+                 (t t)))
          node-children)
     ;; traverse the buffer structure
     ;; if current buffer is in denote-tree--cyclic-buffers
