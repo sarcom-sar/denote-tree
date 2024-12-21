@@ -437,11 +437,10 @@ Argument DEPTH  - maximum depth of the traversal."
                       node-children)))))
           ;; add props to current node and it's children
           (denote-tree--set-button pos buffer)
-          (when (seq-find (lambda (x) (not (null (get-buffer x))))
-                          links-in-buffer)
-            (denote-tree--add-props-to-children (nreverse node-children) pos))
+          (denote-tree--add-props-to-children
+           (nreverse (seq-filter #'markerp node-children)) pos)
           pos))
-    (point)))
+    'notvalid))
 
 (defun denote-tree--add-props-to-cycles ()
   "Add denote-tree--child prop to elements of `denote-tree--cyclic-buffers'.
