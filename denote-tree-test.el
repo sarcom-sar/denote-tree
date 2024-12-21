@@ -754,7 +754,7 @@ Argument LST-OF-LINKS - list of links the `denote-tree--walk-links' will
      "*" (propertize "A" 'denote-tree--child 6 'button-data "foo") "\n"
      (propertize "**B" 'denote-tree--parent 2))
     (goto-char 6)
-    (should (equal (denote-tree-child-node -1) 2))
+    (should (equal (denote-tree-child-node '-) 2))
     (should (equal denote-tree--teleport-stack nil)))
   (with-temp-buffer
     (insert
@@ -762,6 +762,13 @@ Argument LST-OF-LINKS - list of links the `denote-tree--walk-links' will
      "**" (propertize "B" 'denote-tree--child 2 'button-data "bar"))
     (goto-char 6)
     (should (equal (denote-tree-child-node '(4)) 2))
+    (should (equal denote-tree--teleport-stack nil)))
+  (with-temp-buffer
+    (insert
+     "*" (propertize "A" 'denote-tree--child 6 'button-data "foo") "\n"
+     "**" (propertize "B" 'denote-tree--child 2 'button-data "bar"))
+    (goto-char 6)
+    (should (equal (denote-tree-child-node '(16)) 2))
     (should (equal denote-tree--teleport-stack nil))))
 
 (ert-deftest denote-tree-parent-node ()

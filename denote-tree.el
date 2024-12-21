@@ -280,9 +280,12 @@ the parent node position for future backtracking."
   (or arg (setq arg 1))
   (let ((preserve-teleport-p denote-tree-preserve-teleports-p)
         next-point curr-point)
-    (when (equal arg '(4))
+    (cond
+     ((listp arg)
       (setq preserve-teleport-p (not denote-tree-preserve-teleports-p))
       (setq arg 1))
+     ((eq arg '-)
+      (setq arg -1)))
     (if (< arg 0)
         (denote-tree-parent-node (- arg))
       (dotimes (_ arg next-point)
