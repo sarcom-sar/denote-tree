@@ -684,5 +684,16 @@ Add ELEMENT to `denote-tree--visited-buffers' to delete it after
 One props returned has to be denote-tree--type."
   (propertize str 'denote-tree--type type))
 
+(defun denote-tree--get-prop (prop &optional at-pos)
+  "Get PROP at current line or starting from AT-POS.
+Return nil if prop not found.
+
+This function will move the point, if AT-POS is a position."
+  (and at-pos (goto-char at-pos))
+  (get-text-property
+   (next-single-property-change
+    (line-beginning-position) prop)
+   prop))
+
 (provide 'denote-tree)
 ;;; denote-tree.el ends here
