@@ -163,24 +163,18 @@ allows to classify the type of front matter denote is dealing with."
                      'text)))
     (with-temp-buffer
       (insert "p-title: title")
-      (should-error
-       (denote-tree--find-filetype (current-buffer))
-       :type 'user-error))
+      (should-not (denote-tree--find-filetype (current-buffer))))
     (with-temp-buffer
       (insert "p-identifier: identifier")
-      (should-error
-       (denote-tree--find-filetype (current-buffer))
-       :type 'user-error))
+      (should-not
+       (denote-tree--find-filetype (current-buffer))))
     (with-temp-buffer
       (insert "p-keywords: keywords")
-      (should-error
-       (denote-tree--find-filetype (current-buffer))
-       :type 'user-error))
+      (should-not
+       (denote-tree--find-filetype (current-buffer))))
     (with-temp-buffer
       (insert "")
-      (should-error
-       (denote-tree--find-filetype (current-buffer))
-       :type 'user-error))))
+      (should-not (denote-tree--find-filetype (current-buffer))))))
 
 (ert-deftest denote-tree-test--collect-keywords ()
   "Tests for `denote-tree--collect-keywords'."
