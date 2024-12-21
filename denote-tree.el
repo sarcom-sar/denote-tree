@@ -60,6 +60,7 @@
 ;;; Code:
 
 (require 'denote)
+(require 'seq)
 (require 'cl-lib)
 
 (declare-function #'denote-tree-edit-mode "./denote-tree-edit.el")
