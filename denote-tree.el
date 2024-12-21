@@ -262,12 +262,11 @@ With ARG set to \\[universal-argument], redraw from node at point."
   (interactive "P")
   (unless (equal arg '(4))
     (goto-char (point-min)))
-  (when-let ((current-node
-              (get-text-property
-               (next-single-property-change
-                (line-beginning-position) 'button-data)
-               'button-data)))
-    (denote-tree current-node)))
+  (denote-tree
+   (get-text-property
+    (next-single-property-change
+     (line-beginning-position) 'button-data)
+    'button-data)))
 
 (defun denote-tree-child-node (&optional arg)
   "Move the point to the child of a node ARG times.
