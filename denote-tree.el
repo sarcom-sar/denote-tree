@@ -404,37 +404,36 @@ Argument DEPTH  - maximum depth of the traversal."
   ;; extract position of point at node
   ;; carry over the indent
   (if-let* ((buffer (denote-tree--open-link-maybe buffer)))
-      (progn
-        (let ((links-in-buffer (denote-tree--collect-links buffer))
-              (cyclical-node (assoc buffer denote-tree--cyclic-buffers #'string=))
-              (depth (cond
-                      ((symbolp depth) depth)
-                      ((and (numberp depth) (< 0 (1- depth))) (1- depth))
-                      ((and (numberp depth) (= 0 (1- depth))) nil)
-                      (t t)))
-              node-children pos)
-          (seq-setq (pos indent) (denote-tree--draw-node buffer indent lastp))
-          ;; traverse the buffer structure
-          ;; if current buffer is in denote-tree--cyclic-buffers
-          ;; do not go deeper, because you enter a cycle
-          (cond
-           (cyclical-node
-            (setcdr cyclical-node (append (cdr cyclical-node) (list pos))))
-           (t
-            (dolist (el links-in-buffer)
-              (when (get-buffer el)
-                (add-to-list 'denote-tree--cyclic-buffers (list el)
-                             nil
-                             (lambda (a b) (string= (car a) (car b)))))
-              (when depth
-                (push (denote-tree--walk-links
-                       el indent (eq el (car (last links-in-buffer))) depth)
-                      node-children)))))
-          ;; add props to current node and it's children
-          (denote-tree--set-button pos buffer)
-          (denote-tree--add-props-to-children
-           (nreverse (seq-filter #'markerp node-children)) pos)
-          pos))
+      (let ((links-in-buffer (denote-tree--collect-links buffer))
+            (cyclical-node (assoc buffer denote-tree--cyclic-buffers #'string=))
+            (depth (cond
+                    ((symbolp depth) depth)
+                    ((and (numberp depth) (< 0 (1- depth))) (1- depth))
+                    ((and (numberp depth) (= 0 (1- depth))) nil)
+                    (t t)))
+            node-children pos)
+        (seq-setq (pos indent) (denote-tree--draw-node buffer indent lastp))
+        ;; traverse the buffer structure
+        ;; if current buffer is in denote-tree--cyclic-buffers
+        ;; do not go deeper, because you enter a cycle
+        (cond
+         (cyclical-node
+          (setcdr cyclical-node (append (cdr cyclical-node) (list pos))))
+         (t
+          (dolist (el links-in-buffer)
+            (when (get-buffer el)
+              (add-to-list 'denote-tree--cyclic-buffers (list el)
+                           nil
+                           (lambda (a b) (string= (car a) (car b)))))
+            (when depth
+              (push (denote-tree--walk-links
+                     el indent (eq el (car (last links-in-buffer))) depth)
+                    node-children)))))
+        ;; add props to current node and it's children
+        (denote-tree--set-button pos buffer)
+        (denote-tree--add-props-to-children
+         (nreverse (seq-filter #'markerp node-children)) pos)
+        pos)
     'notvalid))
 
 (defun denote-tree--add-props-to-cycles ()
