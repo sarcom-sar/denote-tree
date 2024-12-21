@@ -32,6 +32,7 @@
 
 (declare-function #'denote-tree-mode "./denote-tree.el")
 (declare-function #'denote-tree--find-filetype "./denote-tree.el")
+(declare-function #'denote-tree--get-prop "./denote-tree.el")
 
 
 ;;;; Variables
@@ -62,11 +63,7 @@ Everything else is still read-only.  All newlines will be dropped.
   (setq buffer-read-only nil)
   (setq denote-tree-edit--current-line (line-beginning-position))
   (setcdr (assq 'file denote-tree-edit--current-note)
-          (denote-get-path-by-id
-           (get-text-property
-            (next-single-property-change
-             (line-beginning-position) 'button-data)
-            'button-data)))
+          (denote-get-path-by-id (denote-tree--get-prop 'button-data)))
   (save-excursion
     (let ((inhibit-read-only t))
       ;; save to denote-tree-edit--current-note from front-matter

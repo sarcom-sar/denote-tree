@@ -262,11 +262,7 @@ With ARG set to \\[universal-argument], redraw from node at point."
   (interactive "P")
   (unless (equal arg '(4))
     (goto-char (point-min)))
-  (denote-tree
-   (get-text-property
-    (next-single-property-change
-     (line-beginning-position) 'button-data)
-    'button-data)))
+  (denote-tree (denote-tree--get-prop 'button-data)))
 
 (defun denote-tree-child-node (&optional arg)
   "Move the point to the child of a node ARG times.
@@ -351,11 +347,7 @@ is loaded and `denote-tree-fancy-edit' is set to t, use it's UI."
       (progn
         (require 'denote-tree-edit)
         (denote-tree-edit-mode))
-    (let* ((identifier
-            (get-text-property
-             (next-single-property-change
-              (line-beginning-position) 'button-data)
-             'button-data))
+    (let* ((identifier (denote-tree--get-prop 'button-data))
            (buffer (denote-tree--edit-node (denote-get-path-by-id identifier))))
       (save-excursion
         (goto-char (point-min))
