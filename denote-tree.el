@@ -685,10 +685,12 @@ Return nil if prop not found.
 
 This function will move the point, if AT-POS is a position."
   (and at-pos (goto-char at-pos))
-  (get-text-property
-   (next-single-property-change
-    (line-beginning-position) prop)
-   prop))
+  (condition-case nil
+      (get-text-property
+       (next-single-property-change
+        (line-beginning-position) prop)
+       prop)
+    (error nil)))
 
 (provide 'denote-tree)
 ;;; denote-tree.el ends here
