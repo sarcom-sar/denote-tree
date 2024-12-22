@@ -212,11 +212,11 @@ Denote wont ask you to confirm it, this is final."
 (defun denote-tree-edit--after-button (pos)
   "Return position of prop \\='button-data in line POS or nil."
   (goto-char pos)
-  (when-let* ((prop-pos (denote-tree-edit--prop-match 'button-data nil)))
+  (when-let* ((prop-pos (denote-tree-edit--next-prop-match 'button-data)))
     (+ prop-pos (length denote-tree-node))))
 
-(defun denote-tree-edit--prop-match (type el)
-  "Match prop of TYPE equal to EL in current line and return it's position.
+(defun denote-tree-edit--next-prop-match (type &optional el)
+  "Match prop of TYPE in current line and return it's position.
 If TYPE is not a symbol or EL is empty return nil."
   (when (symbolp type)
     (save-restriction
@@ -256,7 +256,7 @@ Restrict search of props to the current line.
 FUNC takes two positional arguments START END and ANY, which if not
 set defaults to currently iterated over element of FRONT-MATTER-ELS."
   (dolist (el front-matter-els)
-    (when-let* ((start (denote-tree-edit--prop-match 'denote-tree--type el))
+    (when-let* ((start (denote-tree-edit--next-prop-match 'denote-tree--type el))
                 (end (next-single-property-change start 'denote-tree--type))
                 (thing (or any el)))
       (funcall func start end thing))))
