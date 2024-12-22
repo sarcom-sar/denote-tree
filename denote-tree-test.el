@@ -886,5 +886,16 @@ No need to test `denote-tree-prev-node', because it calls
        (equal (buffer-substring 3 (line-end-position))
               (concat (propertize "FOO baz bar" 'a 'b)))))))
 
+(ert-deftest denote-tree-test--get-prop ()
+  "Tests for `denote-tree--get-prop'."
+  (with-temp-buffer
+    (insert
+     " " (propertize "A" 'a "foo") "\n"
+     "foo bar baz\n")
+    (should (denote-tree--get-prop 'a 2))
+    (should (denote-tree--get-prop 'a))
+    (should-not (denote-tree--get-prop 'b 2))
+    (should-not (denote-tree--get-prop 'a 4))))
+
 (provide 'denote-tree-test)
 ;;; denote-tree-test.el ends here
