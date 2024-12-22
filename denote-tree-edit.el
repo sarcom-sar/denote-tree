@@ -216,8 +216,10 @@ Denote wont ask you to confirm it, this is final."
     (+ prop-pos (length denote-tree-node))))
 
 (defun denote-tree-edit--next-prop-match (type &optional el)
-  "Match prop of TYPE in current line and return it's position.
-If TYPE is not a symbol or EL is empty return nil."
+  "Match next prop of TYPE in current line and return it's position.
+
+EL defaults to nil.  If TYPE is not in current line, or it doesn't match
+EL, return nil."
   (when (symbolp type)
     (save-restriction
       (narrow-to-region (line-beginning-position) (line-end-position))

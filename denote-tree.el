@@ -254,6 +254,8 @@ BUTTON is pased as node's ID."
   (interactive)
   (when button
     (find-file-other-window
+     ;; no need to file-check, since if it's drawn
+     ;; then it's good to show
      (denote-get-path-by-id button))))
 
 (defun denote-tree-redraw (&optional arg)
@@ -394,8 +396,9 @@ Preserve properties."
 
 Draw the current buffer as a node in `denote-tree--buffer-name'.  Set it's
 properties.  Collect all the links and call `denote-tree--walk-links' on
-them recursively.  If one of the buffers was already visited do not iterate
-over it.
+them recursively.  If BUFFER was already visited do not iterate
+over it.  If BUFFER doesn't have a file, skip over and return a
+symbol \\='notvalid.
 
 Argument INDENT - state of INDENT between traversals.
 Argument LASTP  - is the node the last child of parent node?
