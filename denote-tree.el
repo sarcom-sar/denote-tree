@@ -260,12 +260,19 @@ BUTTON is pased as node's ID."
      (denote-get-path-by-id button))))
 
 (defun denote-tree-redraw (&optional arg)
-  "Redraw the entire tree.
-With ARG set to \\[universal-argument], redraw from node at point."
+  "Redraw some part of a tree.
+
+Without \\[universal-argument], redraw the current node deepening it.
+With \\[universal-argument] draw current node in a new window.
+With \\[universal-argument] \\[universal-argument], redraw the entire tree."
   (interactive "P")
-  (unless (equal arg '(4))
-    (goto-char (point-min)))
-  (denote-tree (denote-tree--get-prop 'button-data)))
+  (cond
+   ((eq arg '(4))
+    (denote-tree (denote-tree--get-prop 'button-data)))
+   ((or (eq arg '(16)) (not (null arg)))
+    (denote-tree (denote-tree--get-prop 'button-data 1)))
+   (t
+    (denote-tree--deepen-traversal))))
 
 (defun denote-tree-child-node (&optional arg)
   "Move the point to the child of a node ARG times.
