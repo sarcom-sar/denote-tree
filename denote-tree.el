@@ -527,6 +527,12 @@ previous/next sibling node or a parent."
             'denote-tree--parent (set-marker (make-marker) parent)))))
       (setq prev el))))
 
+(defun denote-tree--deepen-traversal ()
+  "Retraverse current node under point.
+
+Especially useful, if `denote-tree-max-traversal-depth' is set to very
+low value.")
+
 
 ;;;; Helpers for Links and Buffers
 
