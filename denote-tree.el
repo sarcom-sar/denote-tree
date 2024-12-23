@@ -560,7 +560,18 @@ low value."
     (set-marker
      (get-text-property prev-marker 'denote-tree--next) nil nil)
     (set-marker
-     (get-text-property next-marker 'denote-tree--prev) nil nil)))
+     (get-text-property next-marker 'denote-tree--prev) nil nil)
+    ;; consider only this node
+    (save-restriction
+      (narrow-to-region prev-line next-line)
+      (goto-char (point-min))
+      ;; nuke props and region
+      (while (= (forward-line) 0)
+        (mapc (lambda (x)
+                (and (markerp x)
+                     (set-marker x nil nil)))
+              (text-properties-at (point))))
+      (delete-region (point-min) (point-max)))))
 
 
 ;;;; Helpers for Links and Buffers
