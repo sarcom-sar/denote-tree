@@ -538,7 +538,28 @@ previous/next sibling node or a parent."
   "Retraverse current node under point.
 
 Especially useful, if `denote-tree-max-traversal-depth' is set to very
-low value.")
+low value."
+  (let* ((prev-marker
+          ;; we copy the markers, because later they get nuked
+          (copy-marker
+           (get-text-property (line-beginning-position) 'denote-tree--prev)))
+         (prev-line (line-beginning-position))
+         ;; we copy the markers, because later they get nuked
+         (next-marker
+          (copy-marker
+           (get-text-property (line-beginning-position) 'denote-tree--next)))
+         (next-line
+          (1- (previous-single-property-change
+               next-marker 'denote-tree--parent)))
+         ;; we copy the markers, because later they get nuked
+         (parent-marker (copy-marker
+                         (denote-tree--get-prop 'denote-tree--parent)))
+         (id (denote-tree--get-prop 'button-data)))
+    ;; zero the markers of siblings
+    (set-marker
+     (get-text-property prev-marker 'denote-tree--next) nil nil)
+    (set-marker
+     (get-text-property next-marker 'denote-tree--prev) nil nil)))
 
 
 ;;;; Helpers for Links and Buffers
