@@ -584,7 +584,14 @@ low value."
                 (and (markerp x)
                      (set-marker x nil nil)))
               (text-properties-at (point))))
-      (delete-region (point-min) (point-max)))))
+      (delete-region (point-min) (point-max))
+      (unwind-protect
+          (progn
+            (denote-tree--walk-links
+             id indent lastp denote-tree-max-traversal-depth)
+            (denote-tree--add-props-to-cycles)
+            (goto-char (point-max)))
+        (denote-tree--clean-up)))))
 
 
 ;;;; Helpers for Links and Buffers
