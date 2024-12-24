@@ -389,6 +389,7 @@ Preserve properties."
 (defun denote-tree--draw-tree (buffer)
   "Draw and propertize a tree in current buffer starting with BUFFER."
   (denote-tree--walk-links buffer "" t denote-tree-max-traversal-depth)
+  (delete-region (1- (point-max)) (point-max))
   (denote-tree--add-props-to-cycles))
 
 (defun denote-tree--walk-links (buffer indent lastp depth)
