@@ -688,7 +688,7 @@ This function will move the point, if AT-POS is a position."
   (condition-case nil
       (get-text-property
        (next-single-property-change
-        (line-beginning-position) prop)
+        (line-beginning-position) prop nil (line-end-position))
        prop)
     (error nil)))
 
