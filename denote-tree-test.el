@@ -107,6 +107,9 @@ as one string."
     (should (equal (denote-tree--collect-keywords-as-string '_ '_) "c")))
   (cl-letf (((symbol-function 'denote-tree--collect-keywords)
              (lambda (_ _) '((a) (b) (c)))))
+    (should (equal (denote-tree--collect-keywords-as-string '_ '_) "")))
+  (cl-letf (((symbol-function 'denote-tree--collect-keywords)
+             (lambda (_ _) nil)))
     (should (equal (denote-tree--collect-keywords-as-string '_ '_) ""))))
 
 (ert-deftest denote-tree-test--find-filetype ()
@@ -166,14 +169,11 @@ allows to classify the type of front matter denote is dealing with."
       (should-not (denote-tree--find-filetype (current-buffer))))
     (with-temp-buffer
       (insert "p-identifier: identifier")
-      (should-not
-       (denote-tree--find-filetype (current-buffer))))
+      (should-not (denote-tree--find-filetype (current-buffer))))
     (with-temp-buffer
       (insert "p-keywords: keywords")
-      (should-not
-       (denote-tree--find-filetype (current-buffer))))
+      (should-not (denote-tree--find-filetype (current-buffer))))
     (with-temp-buffer
-      (insert "")
       (should-not (denote-tree--find-filetype (current-buffer))))))
 
 (ert-deftest denote-tree-test--collect-keywords ()
@@ -183,12 +183,11 @@ allows to classify the type of front matter denote is dealing with."
                (assq 'org denote-tree-test-mock--denote-file-types-1))))
     (with-temp-buffer
       (insert
-       "org-title: foo
-org-identifier: bar
-org-keywords: baz
-org-signature: foz
-org-date: fazboo
-")
+       "org-title: foo\n"
+       "org-identifier: bar\n"
+       "org-keywords: baz\n"
+       "org-signature: foz\n"
+       "org-date: fazboo")
       (should
        (equal-including-properties
         (denote-tree--collect-keywords
@@ -200,11 +199,10 @@ org-date: fazboo
           (date . ,(propertize "fazboo" 'denote-tree--type 'date))))))
     (with-temp-buffer
       (insert
-       "org-title: foo
-org-identifier: bar
-org-signature: foz
-org-date: fazboo
-")
+       "org-title: foo\n"
+       "org-identifier: bar\n"
+       "org-signature: foz\n"
+       "org-date: fazboo")
       (should
        (equal-including-properties
         (denote-tree--collect-keywords
@@ -215,9 +213,13 @@ org-date: fazboo
           (signature . ,(propertize "foz" 'denote-tree--type 'signature))
           (date . ,(propertize "fazboo" 'denote-tree--type 'date))))))
     (with-temp-buffer
+      (should-not (denote-tree--collect-keywords (current-buffer) '())))
+    (with-temp-buffer
       (should
-       (equal-including-properties
-        (denote-tree--collect-keywords (current-buffer) '()) nil)))
+       (equal
+        (denote-tree--collect-keywords
+         (current-buffer) '(title identifier))
+        '((title) (identifier)))))
     ;; possible extension point for future keywords
     (let ((denote-tree-test-mock--denote-file-types-1
            (copy-tree denote-tree-test-mock--denote-file-types-2)))
@@ -286,9 +288,11 @@ org-date: fazboo
             denote-file-types denote-tree-extend-filetype-with)))
       (with-temp-buffer
         (insert
-         "#+title: FOO
-20231226T163250 20240119T164551 20240120T164558 20240121T164829 20240121T164914
-20231227T163408 20231228T163736 20231229T164123 20240101T164316 20240117T164506")
+         "#+title: FOO\n"
+         "20231226T163250 20240119T164551 20240120T164558\n"
+         "20240121T164829 20240121T164914 20231227T163408\n"
+         "20231228T163736 20231229T164123 20240101T164316\n"
+         "20240117T164506")
         (goto-char (point-min))
         (should
          (equal (denote-tree--collect-links (buffer-name (current-buffer)))
@@ -304,24 +308,37 @@ org-date: fazboo
                   "20240117T164506"))))
       (with-temp-buffer
         (insert
-         "#+title: FOO
-#+identifier: 20231226T163250
-
-20240119T164551 20240120T164558")
+         "#+title: FOO\n"
+         "#+identifier: 20231226T163250\n"
+         "20240119T164551 20240120T164558")
         (goto-char (point-min))
         (should
          (equal (denote-tree--collect-links (buffer-name (current-buffer)))
                 '("20240119T164551" "20240120T164558"))))
       (with-temp-buffer
         (insert
-         "#+title: FOO
-#+identifier: 20231226T163250")
+         "#+title: FOO\n"
+         "#+identifier: 20231226T163250")
         (goto-char (point-min))
         (should
          (equal (denote-tree--collect-links (buffer-name (current-buffer)))
                 nil)))
       (with-temp-buffer
         (insert "#+identifier: 20231226T163250")
+        (goto-char (point-min))
+        (should
+         (equal (denote-tree--collect-links (buffer-name (current-buffer)))
+                nil)))
+      (with-temp-buffer
+        (insert
+         "#+identifier: 20231226T163666 #+title: FOO")
+        (goto-char (point-min))
+        (should
+         (equal (denote-tree--collect-links (buffer-name (current-buffer)))
+                nil)))
+      (with-temp-buffer
+        (insert
+         "#+title: FOO #+identifier: 20231226T163667")
         (goto-char (point-min))
         (should
          (equal (denote-tree--collect-links (buffer-name (current-buffer)))
@@ -342,16 +359,18 @@ org-date: fazboo
   (should
    (eq (denote-tree--extract-and-compare-symbols :foobar-regexp 'foobar)
        :foobar-regexp))
-  (should (eq (denote-tree--extract-and-compare-symbols :foo-regexp nil) nil))
-  (should (eq (denote-tree--extract-and-compare-symbols nil 'bar) nil)))
+  (should-not (denote-tree--extract-and-compare-symbols :foo-regexp nil))
+  (should-not (denote-tree--extract-and-compare-symbols nil 'bar)))
 
 (ert-deftest denote-tree-test--get-regexps ()
   "Tests for `denote-tree--get-regexps'.
 
 `denote-tree--get-regexps' returns a symbol if and only if it ends with -regexp
 and it's value in plist is a string."
-  (should (equal (denote-tree--get-regexps '()) '()))
-  (should (equal (denote-tree--get-regexps '("foor" "baz")) '()))
+  (should-not (denote-tree--get-regexps '()))
+  (should-not (denote-tree--get-regexps '("foor" "baz")))
+  (should-not (denote-tree--get-regexps '(:regexp "foor")))
+  (should-not (denote-tree--get-regexps '(:-regexp "foor")))
   (should
    (equal (denote-tree--get-regexps '(:foo-regexp "foor" :bar-regexp bar))
           '(:foo-regexp)))
@@ -391,11 +410,11 @@ and it's value in plist is a string."
               props))))
   (with-temp-buffer
     (insert
-     "A
- B
- B
- B
- B")
+     "A\n"
+     " B\n"
+     " B\n"
+     " B\n"
+     " B\n")
     (goto-char (point-min))
     (denote-tree--add-props-to-children '(4 7 10 13) 1)
     (let ((props (text-properties-at 1)))
@@ -412,11 +431,11 @@ and it's value in plist is a string."
               props))))
   (with-temp-buffer
     (insert
-     " A
- B
-C
- B
- B")
+     " B\n"
+     " B\n"
+     "A\n"
+     " B\n"
+     " B\n")
     (goto-char (point-min))
     (denote-tree--add-props-to-children '(2 4 10 13) 7)
     (let ((props (text-properties-at 7)))
@@ -431,8 +450,7 @@ C
       (should
        (equal '(denote-tree--parent 7 denote-tree--prev 13 denote-tree--next 4)
               props))))
-  (should (equal (denote-tree--add-props-to-children '(4 5 6) nil)
-                 nil)))
+  (should-not (denote-tree--add-props-to-children '(4 5 6) nil)))
 
 (defmacro denote-tree-test-mock--draw-node-macro (properties cyclic &rest body)
   "Execute BODY with `denote-tree--cyclic-buffers' set to CYCLIC and
@@ -666,7 +684,7 @@ Argument LST-OF-LINKS - list of links the `denote-tree--walk-links' will
         (concat "'-* " (buffer-name (current-buffer)) "\n" "  '-* a\n"))))))
 
 (ert-deftest denote-tree-test-props--walk-links ()
-  "Tests for how `denote-tree--walk-links' draws."
+  "Tests for how `denote-tree--walk-links' adds props."
   (with-temp-buffer
     (denote-tree-test-mock--walk-links-macro nil nil
       (denote-tree--walk-links "FOO" "" t t)
