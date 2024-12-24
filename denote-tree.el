@@ -225,6 +225,7 @@ open it.
 The function uses either the current buffer, if called interactively
 or a BUFFER provided by the user."
   (interactive)
+  (message "Building denote-tree buffer...")
   (unwind-protect
       (progn
         (setq denote-tree--extended-filetype
