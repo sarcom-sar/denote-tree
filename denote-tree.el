@@ -539,7 +539,8 @@ previous/next sibling node or a parent."
 
 Especially useful, if `denote-tree-max-traversal-depth' is set to very
 low value."
-  (let* ((prev-marker
+  (let* ((inhibit-read-only t)
+         (prev-marker
           ;; we copy the markers, because later they get nuked
           (copy-marker
            (get-text-property (line-beginning-position) 'denote-tree--prev)))
