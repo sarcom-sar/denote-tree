@@ -7,23 +7,23 @@
 
 ;;; Code:
 
-(ert-deftest denote-tree-edit-test--prop-match ()
-  "Tests for `denote-tree-edit--prop-match'."
+(ert-deftest denote-tree-edit-test--next-prop-match ()
+  "Tests for `denote-tree-edit--next-prop-match'."
   (with-temp-buffer
     (insert "'- " (propertize "* " 'foo 'bar) "A\n" "foos")
-    (should (equal (denote-tree-edit--prop-match 'foo 'bar) nil))
+    (should (equal (denote-tree-edit--next-prop-match 'foo 'bar) nil))
     (goto-char 0)
     (should (equal (denote-tree-edit--prop-match 'foo 'bar) 4)))
-  (should (equal (denote-tree-edit--prop-match "foo" 'bar) nil))
+  (should-not (denote-tree-edit--prop-match "foo" 'bar))
   (with-temp-buffer
     (insert "'-" (propertize "* A " 'foo "title") "A TITLE" "\n")
     (goto-char 1)
-    (should (equal (denote-tree-edit--prop-match 'foo 'bar) nil)))
+    (should-not (denote-tree-edit--prop-match 'foo 'bar)))
   (with-temp-buffer
     (insert "'-" (propertize "* A " 'foo 'bar) "A TITLE" "\n")
     ;; after propertized bit
     (goto-char 8)
-    (should (equal (denote-tree-edit--prop-match 'foo 'bar) nil))))
+    (should-not (denote-tree-edit--prop-match 'foo 'bar))))
 
 (ert-deftest denote-tree-edit-test--after-button ()
   "Tests for `denote-tree-edit--after-button'."
