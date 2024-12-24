@@ -431,7 +431,7 @@ Argument DEPTH  - maximum depth of the traversal."
                            (lambda (a b) (string= (car a) (car b)))))
             (when depth
               (push (denote-tree--walk-links
-                     el indent (eq el (car (last links-in-buffer))) depth)
+                     el indent (string= el (car (last links-in-buffer))) depth)
                     node-children)))))
         ;; add props to current node and it's children
         (denote-tree--set-button pos buffer)
