@@ -591,7 +591,19 @@ low value."
              id indent lastp denote-tree-max-traversal-depth)
             (denote-tree--add-props-to-cycles)
             (goto-char (point-max)))
-        (denote-tree--clean-up)))))
+        (denote-tree--clean-up))
+      (goto-char (point-min))
+      ;; regenerate prev/next/parent props
+      (add-text-properties (line-beginning-position)
+                           (line-end-position)
+                           (list
+                            'denote-tree--prev prev-marker
+                            'denote-tree--next next-marker
+                            'denote-tree--parent parent-marker)))
+    (set-marker (get-text-property prev-marker 'denote-tree--next)
+                node)
+    (set-marker (get-text-property next-marker 'denote-tree--prev)
+                node)))
 
 
 ;;;; Helpers for Links and Buffers
