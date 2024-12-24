@@ -554,8 +554,10 @@ low value."
           (copy-marker
            (get-text-property (line-beginning-position) 'denote-tree--next)))
          (next-line
-          (1- (previous-single-property-change
-               next-marker 'denote-tree--parent)))
+          (save-excursion
+            (goto-char next-marker)
+            (forward-line -1)
+            (line-end-position)))
          ;; we copy the markers, because later they get nuked
          (parent-marker
           (copy-marker
