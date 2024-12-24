@@ -548,11 +548,16 @@ low value."
           ;; we copy the markers, because later they get nuked
           (copy-marker
            (get-text-property (line-beginning-position) 'denote-tree--prev)))
-         (prev-line (line-beginning-position))
-         ;; we copy the markers, because later they get nuked
          (next-marker
           (copy-marker
            (get-text-property (line-beginning-position) 'denote-tree--next)))
+         (parent-marker
+          (copy-marker
+           (get-text-property (line-beginning-position) 'denote-tree--parent)))
+         (same-child-p (= (get-text-property
+                           parent-marker 'denote-tree--child)
+                          node))
+         (prev-line (line-beginning-position))
          (next-line
           (cond
            ((< node next-marker)
@@ -572,13 +577,6 @@ low value."
                 (forward-line -1)
                 (line-end-position))))
            (t (error "Denote tree buffer is malformed"))))
-         ;; we copy the markers, because later they get nuked
-         (parent-marker
-          (copy-marker
-           (get-text-property (line-beginning-position) 'denote-tree--parent)))
-         (same-child-p (= (get-text-property
-                           parent-marker 'denote-tree--child)
-                          node))
          (id (denote-tree--get-prop 'button-data))
          (indent (buffer-substring-no-properties
                   (line-beginning-position)
