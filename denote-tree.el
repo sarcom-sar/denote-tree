@@ -574,6 +574,9 @@ low value."
      (get-text-property prev-marker 'denote-tree--next) nil nil)
     (set-marker
      (get-text-property next-marker 'denote-tree--prev) nil nil)
+    (when same-child-p
+      (set-marker
+       (get-text-property parent-marker 'denote-tree--child) nil nil))
     ;; consider only this node
     (save-restriction
       (narrow-to-region prev-line next-line)
@@ -603,7 +606,11 @@ low value."
     (set-marker (get-text-property prev-marker 'denote-tree--next)
                 node)
     (set-marker (get-text-property next-marker 'denote-tree--prev)
-                node)))
+                node)
+    (when same-child-p
+      (set-marker (get-text-property parent-marker 'denote-tree--child)
+                  node))
+    (goto-char node)))
 
 
 ;;;; Helpers for Links and Buffers
