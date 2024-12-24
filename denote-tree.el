@@ -554,10 +554,24 @@ low value."
           (copy-marker
            (get-text-property (line-beginning-position) 'denote-tree--next)))
          (next-line
-          (save-excursion
-            (goto-char next-marker)
-            (forward-line -1)
-            (line-end-position)))
+          (cond
+           ((< node next-marker)
+            (save-excursion
+              (goto-char next-marker)
+              (forward-line -1)
+              (line-end-position)))
+           ((>= node next-marker)
+            (save-excursion
+              (goto-char parent-marker)
+              (while-let ((next (get-text-property (point) 'denote-tree--next))
+                          ((> node next)))
+                (goto-char (get-text-property (point) 'denote-tree--parent)))
+              (if (> node (or (get-text-property (point) 'denote-tree--next) 1))
+                  (point-max)
+                (goto-char (get-text-property (point) 'denote-tree--next))
+                (forward-line -1)
+                (line-end-position))))
+           (t (error "Denote tree buffer is malformed"))))
          ;; we copy the markers, because later they get nuked
          (parent-marker
           (copy-marker
