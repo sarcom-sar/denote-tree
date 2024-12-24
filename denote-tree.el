@@ -540,6 +540,10 @@ previous/next sibling node or a parent."
 Especially useful, if `denote-tree-max-traversal-depth' is set to very
 low value."
   (let* ((inhibit-read-only t)
+         ;; pos of current node
+         (node
+          (next-single-property-change
+           (line-beginning-position) 'button-data))
          (prev-marker
           ;; we copy the markers, because later they get nuked
           (copy-marker
