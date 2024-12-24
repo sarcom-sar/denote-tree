@@ -597,7 +597,11 @@ low value."
             (denote-tree--walk-links
              id indent lastp denote-tree-max-traversal-depth)
             (denote-tree--add-props-to-cycles)
-            (goto-char (point-max)))
+            (goto-char (point-max))
+            (forward-line -1)
+            (goto-char (line-end-position))
+            (when (looking-at "\n")
+              (delete-char 1)))
         (denote-tree--clean-up))
       (goto-char (point-min))
       ;; regenerate prev/next/parent props
