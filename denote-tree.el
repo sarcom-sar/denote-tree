@@ -553,9 +553,22 @@ low value."
           (1- (previous-single-property-change
                next-marker 'denote-tree--parent)))
          ;; we copy the markers, because later they get nuked
-         (parent-marker (copy-marker
-                         (denote-tree--get-prop 'denote-tree--parent)))
-         (id (denote-tree--get-prop 'button-data)))
+         (parent-marker
+          (copy-marker
+           (get-text-property (line-beginning-position) 'denote-tree--parent)))
+         (same-child-p (= (get-text-property
+                           parent-marker 'denote-tree--child)
+                          node))
+         (id (denote-tree--get-prop 'button-data))
+         (indent (buffer-substring-no-properties
+                  (line-beginning-position)
+                  (- (next-single-property-change
+                      (line-beginning-position) 'button-data)
+                     (length denote-tree-node))))
+         (lastp (save-excursion
+                  (goto-char (line-beginning-position))
+                  (search-forward
+                   denote-tree-lower-knee (line-end-position) t))))
     ;; zero the markers of siblings
     (set-marker
      (get-text-property prev-marker 'denote-tree--next) nil nil)
