@@ -10,15 +10,26 @@ Just clone this very repository, add it to your load path and enable the
 package:
 
 #+begin_src emacs-lisp
- (require 'denote-tree)
+  (add-to-list 'load-path "~/path/to/repo")
+  (require 'denote-tree)
 #+end_src
 
-The entry point function is ~denote-tree~, which acts on current buffer
+If you have GNU Emacs>=29.1, then feel free to get it from here:
+
+#+begin_src emacs-lisp
+  (package-vc-install
+   '(denote-tree
+     :url "https://github.com/sarcom-sar/denote-tree"
+     :vc-backend Git))
+#+end_src
+
+The entry point function is =denote-tree=, which acts on current buffer
 searching for any denote identifiers within it.
 
 It is able to handle cyclical notes and provides a mechanism to move between
-those cyclical nodes by default.  As a drawback, it is pretty dumb and has to
-redraw entire tree from scratch if anything changes.
+those cyclical nodes by default.  The initial cost of drawing a full tree is
+paid once, at initialization.  It does not draw the tree lazily.  After that,
+=denote-tree= is able to redraw parts of a tree at point.
 
 *** Keybindings for =*denote-tree*= buffer
 
@@ -63,7 +74,9 @@ redraw entire tree from scratch if anything changes.
   matter elements: title, identifier, keywords, signature, date, symbol or
   arbitrary string.
 - =denote-tree-max-traversal-depth=, maximum traversal depth of =denote-tree=.
-  If t traverse all the way, if num, traverse n nodes deep.
+  If t traverse all the way, if num, traverse n nodes deep.  If user feels that
+  deeper probe is necessary, then the depth of a node can be extended with
+  =denote-tree-redraw=.
 - =denote-tree-title-colorize-function=, Add properties to information from the
   node according to type.  Function accepts two arguments STR and TYPE.  Choosen
   string from front-matter is propertized according to type from
@@ -106,11 +119,12 @@ redraw entire tree from scratch if anything changes.
   time.  If =denote-tree-preserve-teleports-p= is set to t, preserve the parent
   node position for future backtracking.
 - =denote-tree-redraw= (&optional arg)
-  Redraw the entire tree.  With =universal-argument=, redraw from node at
-  point.
+  Redraw some part of a tree.  Without =C-u=, redraw the current node deepening
+  it.  With =C-u= draw current node in a new window.  With =C-u C-u=, redraw the
+  entire tree."
 - =denote-tree-edit-node= ()
-  Edit current note.  If =denote-tree-edit= is loaded, do it fancy style,
-  otherwise default to denote's =denote-rename-file=.
+  Edit current note.  If =denote-tree-edit= is loaded, do it fancy
+  (experimental) style, otherwise default to denote's =denote-rename-file=.
 - =denote-tree-enter-node= (&optional button)
   Enter node at point in other window.  BUTTON is pased as node's ID.
 
@@ -126,17 +140,11 @@ contributions.
 - [X] Make it major mode agnostic;
 - [X] give the user the ability to colorize node titles;
 - [X] unite traversal functions;
-- [ ] smarter redrawing of a tree (with hierarchy.el),
-  - [ ] collapsible tree;
+- [-] smarter redrawing of a tree,
+  - [ ] collapsible tree  (with hierarchy.el);
+  - [X] redraw parts of a buffer;
+  - [ ] handle cyclical nodes while redrawing;
 - [X] ability to edit the front matter at point;
 - [X] edit front matter with widgets (as optional denote-tree-edit);
 - [X] multiple denote-tree buffers;
-- [ ] generate a child note from parent.
-
-*** Bare minimum before going public
-
-- [X] Keep the position of the point in parent node when ascending, descending;
-- [X] implement /teleportations/ when encountering the node that cycles up in
-  the tree;
-- [X] handle the movement with teleportations;
-- [X] customization of /look and feel/ of the tree.
+- [ ] generate a child note from parent;
