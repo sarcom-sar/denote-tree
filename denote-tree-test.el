@@ -1082,7 +1082,29 @@ No need to test `denote-tree-prev-node', because it calls
       ;; how marker changed
       (should (= prev (get-text-property (point) 'denote-tree--prev)))
       (should (= next (get-text-property (point) 'denote-tree--next)))
-      (should (= parent (get-text-property (point) 'denote-tree--parent))))))
+      (should (= parent (get-text-property (point) 'denote-tree--parent)))))
+  ;; "the usual" case, deeply nested node
+  ;; '-* temp
+  ;;   +-* a
+  ;;   | '-* aa
+  ;;   |   '-* aaa
+  ;;   |     +-* aaab
+  ;;   |     '-* aaac
+  ;;   +-* b
+  (let (buffer-string)
+    (with-temp-buffer
+      (denote-tree-test-mock--walk-links-macro nil '(("a" "b") ("aa") ("aaa") ("aaab" "aaac"))
+        (denote-tree--walk-links
+         (buffer-name (current-buffer)) "" t t)
+        ;; go to "temp"
+        (goto-line 1)
+        (setq buffer-string
+              (buffer-substring-no-properties (point-min) (1- (point-max)))))
+      (denote-tree-test-mock--walk-links-macro nil '(("a" "b") ("aa") ("aaa") ("aaab" "aaac"))
+        (denote-tree-redraw))
+      (should
+       (equal (buffer-substring-no-properties (point-min) (point-max))
+              buffer-string)))))
 
 (provide 'denote-tree-test)
 ;;; denote-tree-test.el ends here
