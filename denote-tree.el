@@ -642,6 +642,7 @@ low value."
       (set-marker (get-text-property parent-marker 'denote-tree--child)
                   node))
     (goto-char node)))
+
 (defun denote-tree--determine-node-bounds (node-pos marker-alist)
   "Determine bounds of current node at NODE-POS.
 
@@ -681,6 +682,31 @@ last node is your target.  If nothing matches, signal an error."
            (line-end-position))))
       (t (error "Denote tree buffer is malformed"))))))
 
+(defun denote-tree--set-markers
+    (marker-alist value &optional node-pos same-child-p)
+  "Set markers in MARKER-ALIST to VALUE.
+
+Optionally supply NODE-POS, if one of markers should point to it.
+If it's not supplied set it's default value to VALUE."
+  (or node-pos (setq node-pos value))
+  (dolist (el marker-alist)
+    (let* ((key (car el))
+           (marker (cadr el))
+           (prop (caddr el))
+           (dad-marker (when (marker-position marker)
+                         (get-text-property marker prop))))
+      (cond
+       ((and dad-marker
+             (not (eq key 'denote-tree--parent)))
+        (set-marker dad-marker value))
+       ((and dad-marker
+             (eq key 'denote-tree--parent)
+             (or same-child-p
+                 (= dad-marker node-pos)))
+        (set-marker dad-marker value)
+        (setq same-child-p t))
+       (t nil))))
+  same-child-p)
 
 
 ;;;; Helpers for Links and Buffers
