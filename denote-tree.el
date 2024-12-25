@@ -61,6 +61,7 @@
 
 (require 'denote)
 (require 'seq)
+(require 'let-alist)
 (require 'cl-lib)
 
 (declare-function #'denote-tree-edit-mode "./denote-tree-edit.el")
@@ -641,6 +642,45 @@ low value."
       (set-marker (get-text-property parent-marker 'denote-tree--child)
                   node))
     (goto-char node)))
+(defun denote-tree--determine-node-bounds (node-pos marker-alist)
+  "Determine bounds of current node at NODE-POS.
+
+NEXT-MARKER is initial position of next node. Return cons of node
+start and node end.
+
+If NEXT-MARKER doesn't exist, the situation is trivial.  If
+NEXT-MARKER is further along the buffer than NODE-POS, then
+just jump to it and return EoL of previous line.  If NODE-POS
+and NEXT-MARKER are one and the same or NEXT-MARKER precedes the
+NODE-POS, then we can have arbitrary \"deepness\", iterate until
+you find parent node which next node is grater than node to be
+redrawn.  If you ran out of nodes to check, you are at the top and the
+last node is your target.  If nothing matches, signal an error."
+  (let-alist marker-alist
+    (list
+     (line-beginning-position)
+     (cond
+      ((not (marker-position (car .denote-tree--next)))
+       (point-max))
+      ((< node-pos (car .denote-tree--next))
+       (save-excursion
+         (goto-char (car .denote-tree--next))
+         (forward-line -1)
+         (line-end-position)))
+      ((>= node-pos (car .denote-tree--next))
+       (save-excursion
+         (goto-char (car .denote-tree--parent))
+         (let (next)
+           (while (and (setq next (get-text-property (point) 'denote-tree--next))
+                       (> node-pos next))
+             (goto-char (get-text-property (point) 'denote-tree--parent))))
+         (if (> node-pos (or (get-text-property (point) 'denote-tree--next) 1))
+             (point-max)
+           (goto-char (get-text-property (point) 'denote-tree--next))
+           (forward-line -1)
+           (line-end-position))))
+      (t (error "Denote tree buffer is malformed"))))))
+
 
 
 ;;;; Helpers for Links and Buffers
