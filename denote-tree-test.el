@@ -901,8 +901,11 @@ No need to test `denote-tree-prev-node', because it calls
         (denote-tree-redraw))
       ;; how marker changed
       (should (= prev (get-text-property (point) 'denote-tree--prev)))
+      (should (= (get-text-property prev 'denote-tree--next) (point)))
       (should (= next (get-text-property (point) 'denote-tree--next)))
-      (should (= parent (get-text-property (point) 'denote-tree--parent)))))
+      (should (= (get-text-property next 'denote-tree--prev) (point)))
+      (should (= parent (get-text-property (point) 'denote-tree--parent)))
+      (should (= (get-text-property parent 'denote-tree--child) (point)))))
   ;; simple case, node to be redrawn has both prev and next nodes
   ;; '-* temp
   ;;   +-* a
@@ -925,8 +928,9 @@ No need to test `denote-tree-prev-node', because it calls
         (denote-tree-redraw))
       ;; how marker changed
       (should (= prev (get-text-property (point) 'denote-tree--prev)))
+      (should (= (get-text-property prev 'denote-tree--next) (point)))
       (should (= next (get-text-property (point) 'denote-tree--next)))
-      (should (= parent (get-text-property (point) 'denote-tree--parent)))))
+      (should (= (get-text-property next 'denote-tree--prev) (point)))))
   ;; simple case, next is behind prev
   ;; '-* test
   ;;   +-* a
@@ -949,7 +953,9 @@ No need to test `denote-tree-prev-node', because it calls
         (denote-tree-redraw))
       ;; how marker changed
       (should (= prev (get-text-property (point) 'denote-tree--prev)))
+      (should (= (get-text-property prev 'denote-tree--next) (point)))
       (should (= next (get-text-property (point) 'denote-tree--next)))
+      (should (= (get-text-property next 'denote-tree--prev) (point)))
       (should (= parent (get-text-property (point) 'denote-tree--parent)))))
   ;; harder case, node is first
   ;; '-* temp
@@ -975,8 +981,11 @@ No need to test `denote-tree-prev-node', because it calls
         (denote-tree-redraw))
       ;; how marker changed
       (should (= prev (get-text-property (point) 'denote-tree--prev)))
+      (should (= (get-text-property prev 'denote-tree--next) (point)))
       (should (= next (get-text-property (point) 'denote-tree--next)))
-      (should (= parent (get-text-property (point) 'denote-tree--parent)))))
+      (should (= (get-text-property next 'denote-tree--prev) (point)))
+      (should (= parent (get-text-property (point) 'denote-tree--parent)))
+      (should (= (get-text-property parent 'denote-tree--child) (point)))))
   ;; harder case, node to be redrawn has both prev and next nodes
   ;; '-* temp
   ;;   +-* a
@@ -1001,7 +1010,9 @@ No need to test `denote-tree-prev-node', because it calls
         (denote-tree-redraw))
       ;; how marker changed
       (should (= prev (get-text-property (point) 'denote-tree--prev)))
+      (should (= (get-text-property prev 'denote-tree--next) (point)))
       (should (= next (get-text-property (point) 'denote-tree--next)))
+      (should (= (get-text-property next 'denote-tree--prev) (point)))
       (should (= parent (get-text-property (point) 'denote-tree--parent)))))
   ;; harder case, node to be redrawn is last
   ;; '-* temp
@@ -1027,7 +1038,9 @@ No need to test `denote-tree-prev-node', because it calls
         (denote-tree-redraw))
       ;; how marker changed
       (should (= prev (get-text-property (point) 'denote-tree--prev)))
+      (should (= (get-text-property prev 'denote-tree--next) (point)))
       (should (= next (get-text-property (point) 'denote-tree--next)))
+      (should (= (get-text-property next 'denote-tree--prev) (point)))
       (should (= parent (get-text-property (point) 'denote-tree--parent)))))
   ;; "the usual" case, deeply nested node
   ;; '-* temp
@@ -1054,7 +1067,9 @@ No need to test `denote-tree-prev-node', because it calls
         (denote-tree-redraw))
       ;; how marker changed
       (should (= prev (get-text-property (point) 'denote-tree--prev)))
+      (should (= (get-text-property prev 'denote-tree--next) (point)))
       (should (= next (get-text-property (point) 'denote-tree--next)))
+      (should (= (get-text-property next 'denote-tree--prev) (point)))
       (should (= parent (get-text-property (point) 'denote-tree--parent)))))
   ;; "the usual" case, deeply nested node
   ;; '-* temp
@@ -1081,9 +1096,12 @@ No need to test `denote-tree-prev-node', because it calls
         (denote-tree-redraw))
       ;; how marker changed
       (should (= prev (get-text-property (point) 'denote-tree--prev)))
+      (should (= (get-text-property prev 'denote-tree--next) (point)))
       (should (= next (get-text-property (point) 'denote-tree--next)))
-      (should (= parent (get-text-property (point) 'denote-tree--parent)))))
-  ;; "the usual" case, deeply nested node
+      (should (= (get-text-property next 'denote-tree--prev) (point)))
+      (should (= parent (get-text-property (point) 'denote-tree--parent)))
+      (should (= (get-text-property parent 'denote-tree--child) (point)))))
+  ;; redraw entire tree from root
   ;; '-* temp
   ;;   +-* a
   ;;   | '-* aa
