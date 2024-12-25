@@ -881,7 +881,7 @@ No need to test `denote-tree-prev-node', because it calls
 
 (ert-deftest denote-tree-test--deepen-traversal ()
   "Tests for `denote-tree--deepen-traversal'."
-    ;; simplest case, lone node
+  ;; simplest case, lone node
   ;; '-* test
   ;;   '-* a
   (let (prev next parent)
@@ -889,6 +889,7 @@ No need to test `denote-tree-prev-node', because it calls
       (denote-tree-test-mock--walk-links-macro nil '(("a"))
         (denote-tree--walk-links
          (buffer-name (current-buffer)) "" t t)
+        ;; go to "a"
         (goto-line 2)
         (setq prev (marker-position
                     (get-text-property (point) 'denote-tree--prev)))
@@ -912,6 +913,7 @@ No need to test `denote-tree-prev-node', because it calls
       (denote-tree-test-mock--walk-links-macro nil '(("a" "b" "c"))
         (denote-tree--walk-links
          (buffer-name (current-buffer)) "" t t)
+        ;; go to "b"
         (goto-line 3)
         (setq prev (marker-position
                     (get-text-property (point) 'denote-tree--prev)))
@@ -935,6 +937,7 @@ No need to test `denote-tree-prev-node', because it calls
       (denote-tree-test-mock--walk-links-macro nil '(("a" "b" "c"))
         (denote-tree--walk-links
          (buffer-name (current-buffer)) "" t t)
+        ;; go to "c"
         (goto-line 4)
         (setq prev (marker-position
                     (get-text-property (point) 'denote-tree--prev)))
@@ -960,6 +963,7 @@ No need to test `denote-tree-prev-node', because it calls
       (denote-tree-test-mock--walk-links-macro nil '(("a" "b" "c") ("ab" "ac"))
         (denote-tree--walk-links
          (buffer-name (current-buffer)) "" t t)
+        ;; go to "a"
         (goto-line 2)
         (setq prev (marker-position
                     (get-text-property (point) 'denote-tree--prev)))
@@ -985,6 +989,7 @@ No need to test `denote-tree-prev-node', because it calls
       (denote-tree-test-mock--walk-links-macro nil '(("a" "b" "c") nil ("ba" "bc"))
         (denote-tree--walk-links
          (buffer-name (current-buffer)) "" t t)
+        ;; go to "b"
         (goto-line 3)
         (setq prev (marker-position
                     (get-text-property (point) 'denote-tree--prev)))
@@ -998,7 +1003,7 @@ No need to test `denote-tree-prev-node', because it calls
       (should (= prev (get-text-property (point) 'denote-tree--prev)))
       (should (= next (get-text-property (point) 'denote-tree--next)))
       (should (= parent (get-text-property (point) 'denote-tree--parent)))))
-  ;; harder case, node to be redrawn has both prev and next nodes
+  ;; harder case, node to be redrawn is last
   ;; '-* temp
   ;;   +-* a
   ;;   +-* b
@@ -1010,6 +1015,7 @@ No need to test `denote-tree-prev-node', because it calls
       (denote-tree-test-mock--walk-links-macro nil '(("a" "b" "c") nil nil ("ca" "cb"))
         (denote-tree--walk-links
          (buffer-name (current-buffer)) "" t t)
+        ;; go to "c"
         (goto-line 4)
         (setq prev (marker-position
                     (get-text-property (point) 'denote-tree--prev)))
