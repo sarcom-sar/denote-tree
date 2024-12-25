@@ -542,46 +542,10 @@ Especially useful, if `denote-tree-max-traversal-depth' is set to very
 low value."
   (let* ((inhibit-read-only t)
          ;; pos of current node
-         (node
+         (node-pos
           (next-single-property-change
            (line-beginning-position) 'button-data))
-         (prev-marker
-          ;; we copy the markers, because later they get nuked
-          (copy-marker
-           (get-text-property (line-beginning-position) 'denote-tree--prev)))
-         (next-marker
-          (copy-marker
-           (get-text-property (line-beginning-position) 'denote-tree--next)))
-         (parent-marker
-          (copy-marker
-           (get-text-property (line-beginning-position) 'denote-tree--parent)))
-         (same-child-p (and
-                        (marker-position parent-marker)
-                        (= (get-text-property
-                            parent-marker 'denote-tree--child)
-                           node)))
-         (prev-line (line-beginning-position))
-         (next-line
-          (cond
-           ((not (marker-position next-marker))
-            (point-max))
-           ((< node next-marker)
-            (save-excursion
-              (goto-char next-marker)
-              (forward-line -1)
-              (line-end-position)))
-           ((>= node next-marker)
-            (save-excursion
-              (goto-char parent-marker)
-              (while-let ((next (get-text-property (point) 'denote-tree--next))
-                          ((> node next)))
-                (goto-char (get-text-property (point) 'denote-tree--parent)))
-              (if (> node (or (get-text-property (point) 'denote-tree--next) 1))
-                  (point-max)
-                (goto-char (get-text-property (point) 'denote-tree--next))
-                (forward-line -1)
-                (line-end-position))))
-           (t (error "Denote tree buffer is malformed"))))
+         (marker-alist (denote-tree--build-marker-alist node-pos))
          (id (denote-tree--get-prop 'button-data))
          (indent (buffer-substring-no-properties
                   (line-beginning-position)
@@ -591,20 +555,15 @@ low value."
          (lastp (save-excursion
                   (goto-char (line-beginning-position))
                   (search-forward
-                   denote-tree-lower-knee (line-end-position) t))))
+                   denote-tree-lower-knee (line-end-position) t)))
+         same-child-p)
     ;; zero the markers of siblings
-    (when (marker-position prev-marker)
-      (set-marker
-       (get-text-property prev-marker 'denote-tree--next) nil nil))
-    (when (marker-position next-marker)
-      (set-marker
-       (get-text-property next-marker 'denote-tree--prev) nil nil))
-    (when (and same-child-p (marker-position parent-marker))
-      (set-marker
-       (get-text-property parent-marker 'denote-tree--child) nil nil))
+    (setq same-child-p (denote-tree--set-markers
+                        marker-alist nil node-pos same-child-p))
     ;; consider only this node
     (save-restriction
-      (narrow-to-region prev-line next-line)
+      (apply #'narrow-to-region (denote-tree--determine-node-bounds
+                                 node-pos marker-alist))
       (goto-char (point-min))
       ;; nuke props and region
       (while (= (forward-line) 0)
@@ -626,22 +585,16 @@ low value."
         (denote-tree--clean-up))
       (goto-char (point-min))
       ;; regenerate prev/next/parent props
-      (add-text-properties (line-beginning-position)
-                           (line-end-position)
-                           (list
-                            'denote-tree--prev prev-marker
-                            'denote-tree--next next-marker
-                            'denote-tree--parent parent-marker)))
-    (when (marker-position prev-marker)
-      (set-marker (get-text-property prev-marker 'denote-tree--next)
-                  node))
-    (when (marker-position next-marker)
-      (set-marker (get-text-property next-marker 'denote-tree--prev)
-                  node))
-    (when (and same-child-p (marker-position parent-marker))
-      (set-marker (get-text-property parent-marker 'denote-tree--child)
-                  node))
-    (goto-char node)))
+      (let-alist marker-alist
+        (add-text-properties (line-beginning-position)
+                             (line-end-position)
+                             (list
+                              'denote-tree--prev (car .denote-tree--prev)
+                              'denote-tree--next (car .denote-tree--next)
+                              'denote-tree--parent (car .denote-tree--parent)))))
+    ;; restore
+    (denote-tree--set-markers marker-alist node-pos node-pos same-child-p)
+    (goto-char node-pos)))
 
 (defun denote-tree--determine-node-bounds (node-pos marker-alist)
   "Determine bounds of current node at NODE-POS.
