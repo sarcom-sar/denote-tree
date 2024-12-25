@@ -554,12 +554,16 @@ low value."
          (parent-marker
           (copy-marker
            (get-text-property (line-beginning-position) 'denote-tree--parent)))
-         (same-child-p (= (get-text-property
-                           parent-marker 'denote-tree--child)
-                          node))
+         (same-child-p (and
+                        (marker-position parent-marker)
+                        (= (get-text-property
+                            parent-marker 'denote-tree--child)
+                           node)))
          (prev-line (line-beginning-position))
          (next-line
           (cond
+           ((not (marker-position next-marker))
+            (point-max))
            ((< node next-marker)
             (save-excursion
               (goto-char next-marker)
@@ -588,11 +592,13 @@ low value."
                   (search-forward
                    denote-tree-lower-knee (line-end-position) t))))
     ;; zero the markers of siblings
-    (set-marker
-     (get-text-property prev-marker 'denote-tree--next) nil nil)
-    (set-marker
-     (get-text-property next-marker 'denote-tree--prev) nil nil)
-    (when same-child-p
+    (when (marker-position prev-marker)
+      (set-marker
+       (get-text-property prev-marker 'denote-tree--next) nil nil))
+    (when (marker-position next-marker)
+      (set-marker
+       (get-text-property next-marker 'denote-tree--prev) nil nil))
+    (when (and same-child-p (marker-position parent-marker))
       (set-marker
        (get-text-property parent-marker 'denote-tree--child) nil nil))
     ;; consider only this node
@@ -625,11 +631,13 @@ low value."
                             'denote-tree--prev prev-marker
                             'denote-tree--next next-marker
                             'denote-tree--parent parent-marker)))
-    (set-marker (get-text-property prev-marker 'denote-tree--next)
-                node)
-    (set-marker (get-text-property next-marker 'denote-tree--prev)
-                node)
-    (when same-child-p
+    (when (marker-position prev-marker)
+      (set-marker (get-text-property prev-marker 'denote-tree--next)
+                  node))
+    (when (marker-position next-marker)
+      (set-marker (get-text-property next-marker 'denote-tree--prev)
+                  node))
+    (when (and same-child-p (marker-position parent-marker))
       (set-marker (get-text-property parent-marker 'denote-tree--child)
                   node))
     (goto-char node)))
