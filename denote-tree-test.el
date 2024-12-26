@@ -897,5 +897,250 @@ No need to test `denote-tree-prev-node', because it calls
     (should-not (denote-tree--get-prop 'b 2))
     (should-not (denote-tree--get-prop 'a 4))))
 
+(ert-deftest denote-tree-test--deepen-traversal ()
+  "Tests for `denote-tree--deepen-traversal'."
+  ;; simplest case, lone node
+  ;; '-* test
+  ;;   '-* a
+  (let (prev next parent)
+    (with-temp-buffer
+      (denote-tree-test-mock--walk-links-macro nil '(("a"))
+        (denote-tree--walk-links
+         (buffer-name (current-buffer)) "" t t)
+        ;; go to "a"
+        (goto-line 2)
+        (setq prev (marker-position
+                    (get-text-property (point) 'denote-tree--prev)))
+        (setq next (marker-position
+                    (get-text-property (point) 'denote-tree--next)))
+        (setq parent (marker-position
+                      (get-text-property (point) 'denote-tree--parent))))
+      (denote-tree-test-mock--walk-links-macro nil nil
+        (denote-tree-redraw))
+      ;; how marker changed
+      (should (= prev (get-text-property (point) 'denote-tree--prev)))
+      (should (= (get-text-property prev 'denote-tree--next) (point)))
+      (should (= next (get-text-property (point) 'denote-tree--next)))
+      (should (= (get-text-property next 'denote-tree--prev) (point)))
+      (should (= parent (get-text-property (point) 'denote-tree--parent)))
+      (should (= (get-text-property parent 'denote-tree--child) (point)))))
+  ;; simple case, node to be redrawn has both prev and next nodes
+  ;; '-* temp
+  ;;   +-* a
+  ;;   +-* b
+  ;;   '-* c
+  (let (prev next parent)
+    (with-temp-buffer
+      (denote-tree-test-mock--walk-links-macro nil '(("a" "b" "c"))
+        (denote-tree--walk-links
+         (buffer-name (current-buffer)) "" t t)
+        ;; go to "b"
+        (goto-line 3)
+        (setq prev (marker-position
+                    (get-text-property (point) 'denote-tree--prev)))
+        (setq next (marker-position
+                    (get-text-property (point) 'denote-tree--next)))
+        (setq parent (marker-position
+                      (get-text-property (point) 'denote-tree--parent))))
+      (denote-tree-test-mock--walk-links-macro nil nil
+        (denote-tree-redraw))
+      ;; how marker changed
+      (should (= prev (get-text-property (point) 'denote-tree--prev)))
+      (should (= (get-text-property prev 'denote-tree--next) (point)))
+      (should (= next (get-text-property (point) 'denote-tree--next)))
+      (should (= (get-text-property next 'denote-tree--prev) (point)))))
+  ;; simple case, next is behind prev
+  ;; '-* test
+  ;;   +-* a
+  ;;   +-* b
+  ;;   '-* c
+  (let (prev next parent)
+    (with-temp-buffer
+      (denote-tree-test-mock--walk-links-macro nil '(("a" "b" "c"))
+        (denote-tree--walk-links
+         (buffer-name (current-buffer)) "" t t)
+        ;; go to "c"
+        (goto-line 4)
+        (setq prev (marker-position
+                    (get-text-property (point) 'denote-tree--prev)))
+        (setq next (marker-position
+                    (get-text-property (point) 'denote-tree--next)))
+        (setq parent (marker-position
+                      (get-text-property (point) 'denote-tree--parent))))
+      (denote-tree-test-mock--walk-links-macro nil nil
+        (denote-tree-redraw))
+      ;; how marker changed
+      (should (= prev (get-text-property (point) 'denote-tree--prev)))
+      (should (= (get-text-property prev 'denote-tree--next) (point)))
+      (should (= next (get-text-property (point) 'denote-tree--next)))
+      (should (= (get-text-property next 'denote-tree--prev) (point)))
+      (should (= parent (get-text-property (point) 'denote-tree--parent)))))
+  ;; harder case, node is first
+  ;; '-* temp
+  ;;   +-* a
+  ;;     +-* ab
+  ;;     '-* ac
+  ;;   +-* b
+  ;;   '-* c
+  (let (prev next parent)
+    (with-temp-buffer
+      (denote-tree-test-mock--walk-links-macro nil '(("a" "b" "c") ("ab" "ac"))
+        (denote-tree--walk-links
+         (buffer-name (current-buffer)) "" t t)
+        ;; go to "a"
+        (goto-line 2)
+        (setq prev (marker-position
+                    (get-text-property (point) 'denote-tree--prev)))
+        (setq next (marker-position
+                    (get-text-property (point) 'denote-tree--next)))
+        (setq parent (marker-position
+                      (get-text-property (point) 'denote-tree--parent))))
+      (denote-tree-test-mock--walk-links-macro nil '(("ab" "ab"))
+        (denote-tree-redraw))
+      ;; how marker changed
+      (should (= prev (get-text-property (point) 'denote-tree--prev)))
+      (should (= (get-text-property prev 'denote-tree--next) (point)))
+      (should (= next (get-text-property (point) 'denote-tree--next)))
+      (should (= (get-text-property next 'denote-tree--prev) (point)))
+      (should (= parent (get-text-property (point) 'denote-tree--parent)))
+      (should (= (get-text-property parent 'denote-tree--child) (point)))))
+  ;; harder case, node to be redrawn has both prev and next nodes
+  ;; '-* temp
+  ;;   +-* a
+  ;;   +-* b
+  ;;     +-* ba
+  ;;     '-* bc
+  ;;   '-* c
+  (let (prev next parent)
+    (with-temp-buffer
+      (denote-tree-test-mock--walk-links-macro nil '(("a" "b" "c") nil ("ba" "bc"))
+        (denote-tree--walk-links
+         (buffer-name (current-buffer)) "" t t)
+        ;; go to "b"
+        (goto-line 3)
+        (setq prev (marker-position
+                    (get-text-property (point) 'denote-tree--prev)))
+        (setq next (marker-position
+                    (get-text-property (point) 'denote-tree--next)))
+        (setq parent (marker-position
+                      (get-text-property (point) 'denote-tree--parent))))
+      (denote-tree-test-mock--walk-links-macro nil '(("ba" "bc"))
+        (denote-tree-redraw))
+      ;; how marker changed
+      (should (= prev (get-text-property (point) 'denote-tree--prev)))
+      (should (= (get-text-property prev 'denote-tree--next) (point)))
+      (should (= next (get-text-property (point) 'denote-tree--next)))
+      (should (= (get-text-property next 'denote-tree--prev) (point)))
+      (should (= parent (get-text-property (point) 'denote-tree--parent)))))
+  ;; harder case, node to be redrawn is last
+  ;; '-* temp
+  ;;   +-* a
+  ;;   +-* b
+  ;;   '-* c
+  ;;     +-* ca
+  ;;     '-* cb
+  (let (prev next parent)
+    (with-temp-buffer
+      (denote-tree-test-mock--walk-links-macro nil '(("a" "b" "c") nil nil ("ca" "cb"))
+        (denote-tree--walk-links
+         (buffer-name (current-buffer)) "" t t)
+        ;; go to "c"
+        (goto-line 4)
+        (setq prev (marker-position
+                    (get-text-property (point) 'denote-tree--prev)))
+        (setq next (marker-position
+                    (get-text-property (point) 'denote-tree--next)))
+        (setq parent (marker-position
+                      (get-text-property (point) 'denote-tree--parent))))
+      (denote-tree-test-mock--walk-links-macro nil '(("ca" "cb"))
+        (denote-tree-redraw))
+      ;; how marker changed
+      (should (= prev (get-text-property (point) 'denote-tree--prev)))
+      (should (= (get-text-property prev 'denote-tree--next) (point)))
+      (should (= next (get-text-property (point) 'denote-tree--next)))
+      (should (= (get-text-property next 'denote-tree--prev) (point)))
+      (should (= parent (get-text-property (point) 'denote-tree--parent)))))
+  ;; "the usual" case, deeply nested node
+  ;; '-* temp
+  ;;   +-* a
+  ;;   | '-* aa
+  ;;   |   '-* aaa
+  ;;   |     +-* aaab
+  ;;   |     '-* aaac
+  ;;   +-* b
+  (let (prev next parent)
+    (with-temp-buffer
+      (denote-tree-test-mock--walk-links-macro nil '(("a" "b") ("aa") ("aaa") ("aaab" "aaac"))
+        (denote-tree--walk-links
+         (buffer-name (current-buffer)) "" t t)
+        ;; go to "aaac"
+        (goto-line 6)
+        (setq prev (marker-position
+                    (get-text-property (point) 'denote-tree--prev)))
+        (setq next (marker-position
+                    (get-text-property (point) 'denote-tree--next)))
+        (setq parent (marker-position
+                      (get-text-property (point) 'denote-tree--parent))))
+      (denote-tree-test-mock--walk-links-macro nil nil
+        (denote-tree-redraw))
+      ;; how marker changed
+      (should (= prev (get-text-property (point) 'denote-tree--prev)))
+      (should (= (get-text-property prev 'denote-tree--next) (point)))
+      (should (= next (get-text-property (point) 'denote-tree--next)))
+      (should (= (get-text-property next 'denote-tree--prev) (point)))
+      (should (= parent (get-text-property (point) 'denote-tree--parent)))))
+  ;; "the usual" case, deeply nested node
+  ;; '-* temp
+  ;;   +-* a
+  ;;   | '-* aa
+  ;;   |   '-* aaa
+  ;;   |     +-* aaab
+  ;;   |     '-* aaac
+  ;;   +-* b
+  (let (prev next parent)
+    (with-temp-buffer
+      (denote-tree-test-mock--walk-links-macro nil '(("a" "b") ("aa") ("aaa") ("aaab" "aaac"))
+        (denote-tree--walk-links
+         (buffer-name (current-buffer)) "" t t)
+        ;; go to "aaab"
+        (goto-line 5)
+        (setq prev (marker-position
+                    (get-text-property (point) 'denote-tree--prev)))
+        (setq next (marker-position
+                    (get-text-property (point) 'denote-tree--next)))
+        (setq parent (marker-position
+                      (get-text-property (point) 'denote-tree--parent))))
+      (denote-tree-test-mock--walk-links-macro nil nil
+        (denote-tree-redraw))
+      ;; how marker changed
+      (should (= prev (get-text-property (point) 'denote-tree--prev)))
+      (should (= (get-text-property prev 'denote-tree--next) (point)))
+      (should (= next (get-text-property (point) 'denote-tree--next)))
+      (should (= (get-text-property next 'denote-tree--prev) (point)))
+      (should (= parent (get-text-property (point) 'denote-tree--parent)))
+      (should (= (get-text-property parent 'denote-tree--child) (point)))))
+  ;; redraw entire tree from root
+  ;; '-* temp
+  ;;   +-* a
+  ;;   | '-* aa
+  ;;   |   '-* aaa
+  ;;   |     +-* aaab
+  ;;   |     '-* aaac
+  ;;   +-* b
+  (let (buffer-string)
+    (with-temp-buffer
+      (denote-tree-test-mock--walk-links-macro nil '(("a" "b") ("aa") ("aaa") ("aaab" "aaac"))
+        (denote-tree--walk-links
+         (buffer-name (current-buffer)) "" t t)
+        ;; go to "temp"
+        (goto-line 1)
+        (setq buffer-string
+              (buffer-substring-no-properties (point-min) (1- (point-max)))))
+      (denote-tree-test-mock--walk-links-macro nil '(("a" "b") ("aa") ("aaa") ("aaab" "aaac"))
+        (denote-tree-redraw))
+      (should
+       (equal (buffer-substring-no-properties (point-min) (point-max))
+              buffer-string)))))
+
 (provide 'denote-tree-test)
 ;;; denote-tree-test.el ends here
