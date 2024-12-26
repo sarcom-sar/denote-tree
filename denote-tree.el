@@ -227,28 +227,29 @@ The function uses either the current buffer, if called interactively
 or a BUFFER provided by the user."
   (interactive)
   (message "Building denote-tree buffer...")
-  (unwind-protect
-      (progn
-        (setq denote-tree--extended-filetype
-              (denote-tree--build-extended-filetype
-               denote-file-types denote-tree-extend-filetype-with))
-        (setq buffer
-              (denote-retrieve-filename-identifier-with-error
-               (or (and (bufferp buffer) (buffer-file-name buffer))
-                   buffer
-                   (buffer-file-name))))
-        (denote-tree--open-link-maybe buffer)
-        (setq denote-tree--buffer-name
-              (concat "*" denote-tree-buffer-prefix " " buffer "*"))
-        (let ((inhibit-read-only t))
-          (with-current-buffer (get-buffer-create denote-tree--buffer-name)
-            (erase-buffer)
-            (denote-tree-mode)
-            (denote-tree--draw-tree buffer)
-            (setq denote-tree--buffer-name (buffer-name))))
-        (pop-to-buffer denote-tree--buffer-name)
-        (goto-char (1+ (length denote-tree-lower-knee))))
-    (denote-tree--clean-up)))
+  (let (buffer-name)
+    (unwind-protect
+        (progn
+          (setq denote-tree--extended-filetype
+                (denote-tree--build-extended-filetype
+                 denote-file-types denote-tree-extend-filetype-with))
+          (setq buffer
+                (denote-retrieve-filename-identifier-with-error
+                 (or (and (bufferp buffer) (buffer-file-name buffer))
+                     buffer
+                     (buffer-file-name))))
+          (denote-tree--open-link-maybe buffer)
+          (setq buffer-name
+                (concat "*" denote-tree-buffer-prefix " " buffer "*"))
+          (let ((inhibit-read-only t))
+            (with-current-buffer (get-buffer-create buffer-name)
+              (erase-buffer)
+              (denote-tree-mode)
+              (denote-tree--draw-tree buffer)
+              (setq denote-tree--buffer-name buffer-name)))
+          (pop-to-buffer buffer-name)
+          (goto-char (1+ (length denote-tree-lower-knee))))
+      (denote-tree--clean-up))))
 
 (defun denote-tree-enter-node (&optional button)
   "Enter node at point in other window.
