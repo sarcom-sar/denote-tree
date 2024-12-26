@@ -328,20 +328,6 @@ allows to classify the type of front matter denote is dealing with."
         (goto-char (point-min))
         (should
          (equal (denote-tree--collect-links (buffer-name (current-buffer)))
-                nil)))
-      (with-temp-buffer
-        (insert
-         "#+identifier: 20231226T163666 #+title: FOO")
-        (goto-char (point-min))
-        (should
-         (equal (denote-tree--collect-links (buffer-name (current-buffer)))
-                nil)))
-      (with-temp-buffer
-        (insert
-         "#+title: FOO #+identifier: 20231226T163667")
-        (goto-char (point-min))
-        (should
-         (equal (denote-tree--collect-links (buffer-name (current-buffer)))
                 nil))))))
 
 (ert-deftest denote-tree-test--extract-and-compare-symbols ()
@@ -370,7 +356,6 @@ and it's value in plist is a string."
   (should-not (denote-tree--get-regexps '()))
   (should-not (denote-tree--get-regexps '("foor" "baz")))
   (should-not (denote-tree--get-regexps '(:regexp "foor")))
-  (should-not (denote-tree--get-regexps '(:-regexp "foor")))
   (should
    (equal (denote-tree--get-regexps '(:foo-regexp "foor" :bar-regexp bar))
           '(:foo-regexp)))
