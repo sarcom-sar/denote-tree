@@ -567,11 +567,6 @@ low value."
                                  node-pos marker-alist))
       (goto-char (point-min))
       ;; nuke props and region
-      (while (= (forward-line) 0)
-        (mapc (lambda (x)
-                (and (markerp x)
-                     (set-marker x nil nil)))
-              (text-properties-at (point))))
       (delete-region (point-min) (point-max))
       (unwind-protect
           (progn
