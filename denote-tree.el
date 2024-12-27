@@ -177,10 +177,10 @@ User can extend it in format of (KEY TYPE VALUE)."
 (defconst denote-tree-pipe "| ")
 (defconst denote-tree-node "* ")
 
-(defvar denote-tree--visited-buffers '()
+(defvar-local denote-tree--visited-buffers '()
   "List of already created buffers.  Used for clean up.")
 
-(defvar denote-tree--cyclic-buffers '()
+(defvar-local denote-tree--cyclic-buffers '()
   "List of buffers that are cyclic nodes.
 
 `car' of the element of `denote-tree--cyclic-buffers' is denote ID
@@ -238,13 +238,13 @@ or a BUFFER provided by the user."
                  (or (and (bufferp buffer) (buffer-file-name buffer))
                      buffer
                      (buffer-file-name))))
-          (denote-tree--open-link-maybe buffer)
           (setq buffer-name
                 (concat "*" denote-tree-buffer-prefix " " buffer "*"))
           (let ((inhibit-read-only t))
             (with-current-buffer (get-buffer-create buffer-name)
               (erase-buffer)
               (denote-tree-mode)
+              (denote-tree--open-link-maybe buffer)
               (denote-tree--draw-tree buffer)
               (setq denote-tree--buffer-name buffer-name)))
           (pop-to-buffer buffer-name)
@@ -811,8 +811,9 @@ Add ELEMENT to `denote-tree--visited-buffers' to delete it after
 `denote-tree' initialization."
   (unless (get-buffer element)
     (if-let* ((file-path (denote-get-path-by-id element)))
-        (with-current-buffer (get-buffer-create element)
-          (insert-file-contents file-path)
+        (progn
+          (with-current-buffer (get-buffer-create element)
+            (insert-file-contents file-path))
           (add-to-list 'denote-tree--visited-buffers element))
       (warn "%s was not found" element)
       (setq element nil)))
@@ -827,9 +828,7 @@ Add ELEMENT to `denote-tree--visited-buffers' to delete it after
     ;; silence all kill-buffer errors
     (condition-case nil
         (kill-buffer el)
-      (error nil)))
-  (setq denote-tree--visited-buffers nil)
-  (setq denote-tree--cyclic-buffers nil))
+      (error nil))))
 
 (defun denote-tree--default-props (str type)
   "Default function returning STR of TYPE with properties.
