@@ -435,10 +435,10 @@ Argument DEPTH  - maximum depth of the traversal."
           (setcdr cyclical-node (append (cdr cyclical-node) (list pos))))
          (t
           (dolist (el links-in-buffer)
-            (when (get-buffer el)
-              (add-to-list 'denote-tree--cyclic-buffers (list el)
-                           nil
-                           (lambda (a b) (string= (car a) (car b)))))
+            (when (and (get-buffer el)
+                       (not (member
+                             el (mapcar #'car denote-tree--cyclic-buffers))))
+              (push (list el) denote-tree--cyclic-buffers))
             (when depth
               (push (denote-tree--walk-links
                      el indent (string= el (car (last links-in-buffer))) depth)
