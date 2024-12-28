@@ -561,60 +561,71 @@ low value."
                   (search-forward
                    denote-tree-lower-knee (line-end-position) t)))
          same-child-p
-         non-cyclical
          to-fix
          reg-beg
          reg-end)
     ;; zero the markers of siblings
     (setq same-child-p (denote-tree--set-markers
                         marker-alist nil node-pos same-child-p))
-    ;; consider only this node
+    (seq-setq (reg-beg reg-end)
+              (denote-tree--determine-node-bounds node-pos marker-alist))
+    ;; nuke props and region
+    (denote-tree--nuke-props-in-region reg-beg reg-end)
     (save-restriction
-      (apply #'narrow-to-region (denote-tree--determine-node-bounds
-                                 node-pos marker-alist))
-      (goto-char (point-min))
-      ;; nuke props and region
-      (let ((zero 0))
-        (while (= zero 0)
-          (let* ((pos (next-single-property-change
-                       (line-beginning-position)
-                       'button-data))
-                 (data-prop (get-text-property pos 'button-data))
-                 (face-prop (get-text-property pos 'face)))
-            (when (eq face-prop 'denote-tree-node)
-              (push data-prop non-cyclical))
+      (narrow-to-region reg-beg reg-end)
+      (unwind-protect
+          (progn
+            (denote-tree--walk-links
+             id indent lastp denote-tree-max-traversal-depth)
+            (goto-char (point-max))
+            (forward-line -1)
             (goto-char (line-end-position))
-            (setq zero (forward-line)))))
+            (when (looking-at "\n")
+              (delete-char 1))
+            (denote-tree--add-props-to-cycles))
+        (denote-tree--clean-up))
+      (goto-char (point-min)))
+    ;; regenerate prev/next/parent props
+    (let-alist marker-alist
+      (add-text-properties (line-beginning-position)
+                           (line-end-position)
+                           (list
+                            'denote-tree--prev (car .denote-tree--prev)
+                            'denote-tree--next (car .denote-tree--next)
+                            'denote-tree--parent (car .denote-tree--parent))))
+    ;; restore
+    (denote-tree--set-markers marker-alist node-pos node-pos same-child-p)
+    (goto-char node-pos)))
+
+(defun denote-tree--nuke-props-in-region (beg end)
+  "For region BEG END remove all props and it's record.
+
+Non cyclical nodes are removed from `denote-tree--visited-buffers'
+and `denote-tree--cyclic-buffers."
+  (save-restriction
+    (narrow-to-region beg end)
+    (goto-char (point-min))
+    (let ((zero 0)
+          (non-cyclical '()))
+      (while (= zero 0)
+        (let* ((pos (next-single-property-change
+                     (line-beginning-position)
+                     'button-data))
+               (data-prop (and pos (get-text-property pos 'button-data)))
+               (face-prop (and pos (get-text-property pos 'face))))
+          (when (eq face-prop 'denote-tree-node)
+            (push data-prop non-cyclical))
+          (goto-char (line-end-position))
+          (set-text-properties (line-beginning-position) (point) nil)
+          (setq zero (forward-line))))
       (setq denote-tree--visited-buffers
             (seq-difference denote-tree--visited-buffers
                             non-cyclical))
       (dolist (el non-cyclical)
         (setq denote-tree--cyclic-buffers
               (remove (assoc el denote-tree--cyclic-buffers)
-                      denote-tree--cyclic-buffers)))
-      (unwind-protect
-          (progn
-            (denote-tree--walk-links
-             id indent lastp denote-tree-max-traversal-depth)
-            (denote-tree--add-props-to-cycles)
-            (goto-char (point-max))
-            (forward-line -1)
-            (goto-char (line-end-position))
-            (when (looking-at "\n")
-              (delete-char 1)))
-        (denote-tree--clean-up))
-      (goto-char (point-min))
-      ;; regenerate prev/next/parent props
-      (let-alist marker-alist
-        (add-text-properties (line-beginning-position)
-                             (line-end-position)
-                             (list
-                              'denote-tree--prev (car .denote-tree--prev)
-                              'denote-tree--next (car .denote-tree--next)
-                              'denote-tree--parent (car .denote-tree--parent)))))
-    ;; restore
-    (denote-tree--set-markers marker-alist node-pos node-pos same-child-p)
-    (goto-char node-pos)))
+                      denote-tree--cyclic-buffers))))
+    (delete-region (point-min) (point-max))))
 
 (defun denote-tree--determine-node-bounds (node-pos marker-alist)
   "Determine bounds of current node at NODE-POS.
