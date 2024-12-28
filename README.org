@@ -29,7 +29,10 @@ searching for any denote identifiers within it.
 It is able to handle cyclical notes and provides a mechanism to move between
 those cyclical nodes by default.  The initial cost of drawing a full tree is
 paid once, at initialization.  It does not draw the tree lazily.  After that,
-=denote-tree= is able to redraw parts of a tree at point.
+=denote-tree= is able to redraw parts of a tree at point.  Important to note, it
+still does not consider neither which buffers /were/ visited nor which buffers
+are cyclic.  It works naively.  The support for proper lazy redraw is being
+worked on.
 
 *** Keybindings for =*denote-tree*= buffer
 
