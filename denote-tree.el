@@ -581,6 +581,13 @@ low value."
               (push data-prop non-cyclical))
             (goto-char (line-end-position))
             (setq zero (forward-line)))))
+      (setq denote-tree--visited-buffers
+            (seq-difference denote-tree--visited-buffers
+                            non-cyclical))
+      (dolist (el non-cyclical)
+        (setq denote-tree--cyclic-buffers
+              (remove (assoc el denote-tree--cyclic-buffers)
+                      denote-tree--cyclic-buffers)))
       (delete-region (point-min) (point-max))
       (unwind-protect
           (progn
