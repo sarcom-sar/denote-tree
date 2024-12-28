@@ -570,6 +570,17 @@ low value."
                                  node-pos marker-alist))
       (goto-char (point-min))
       ;; nuke props and region
+      (let ((zero 0))
+        (while (= zero 0)
+          (let* ((pos (next-single-property-change
+                       (line-beginning-position)
+                       'button-data))
+                 (data-prop (get-text-property pos 'button-data))
+                 (face-prop (get-text-property pos 'face)))
+            (when (eq face-prop 'denote-tree-node)
+              (push data-prop non-cyclical))
+            (goto-char (line-end-position))
+            (setq zero (forward-line)))))
       (delete-region (point-min) (point-max))
       (unwind-protect
           (progn
