@@ -464,9 +464,11 @@ that position as denote-tree--child of all the cyclic nodes."
            (marker (set-marker (make-marker) prop)))
       (dolist (node-pos (cdr node-id-and-pos))
         (goto-char node-pos)
-        (add-text-properties
-         (line-beginning-position) (line-end-position)
-         (list 'denote-tree--child marker))))))
+        ;; is valid point
+        (when (get-text-property node-pos 'button-data)
+          (add-text-properties
+           (line-beginning-position) (line-end-position)
+           (list 'denote-tree--child marker)))))))
 
 (defun denote-tree--draw-node (node-name indent lastp)
   "Draw NODE-NAME according to INDENT in current buffer.
