@@ -268,9 +268,9 @@ With \\[universal-argument] draw current node in a new window.
 With \\[universal-argument] \\[universal-argument], redraw the entire tree."
   (interactive "P")
   (cond
-   ((eq arg '(4))
+   ((equal arg '(4))
     (denote-tree (denote-tree--get-prop 'button-data)))
-   ((or (eq arg '(16)) (not (null arg)))
+   ((or (equal arg '(16)) (not (null arg)))
     (denote-tree (denote-tree--get-prop 'button-data 1)))
    (t
     (denote-tree--deepen-traversal))))
