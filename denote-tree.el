@@ -560,7 +560,11 @@ low value."
                   (goto-char (line-beginning-position))
                   (search-forward
                    denote-tree-lower-knee (line-end-position) t)))
-         same-child-p)
+         same-child-p
+         non-cyclical
+         to-fix
+         reg-beg
+         reg-end)
     ;; zero the markers of siblings
     (setq same-child-p (denote-tree--set-markers
                         marker-alist nil node-pos same-child-p))
