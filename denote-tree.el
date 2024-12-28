@@ -465,10 +465,11 @@ that position as denote-tree--child of all the cyclic nodes."
       (dolist (node-pos (cdr node-id-and-pos))
         (goto-char node-pos)
         ;; is valid point
-        (when (get-text-property node-pos 'button-data)
-          (add-text-properties
-           (line-beginning-position) (line-end-position)
-           (list 'denote-tree--child marker)))))))
+        (if (get-text-property node-pos 'button-data)
+            (add-text-properties
+             (line-beginning-position) (line-end-position)
+             (list 'denote-tree--child marker))
+          (setf node-id-and-pos (delete node-pos node-id-and-pos)))))))
 
 (defun denote-tree--draw-node (node-name indent lastp)
   "Draw NODE-NAME according to INDENT in current buffer.
