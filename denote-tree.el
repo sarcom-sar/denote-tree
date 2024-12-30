@@ -581,11 +581,8 @@ low value."
               (progn
                 (denote-tree--walk-links
                  id indent lastp denote-tree-max-traversal-depth)
-                (delete-region (1- (point-max)) (point-max))
-                (denote-tree--add-props-to-cycles))
-            (denote-tree--clean-up)))
-        (setq denote-tree--visited-buffers visited-buffers
-              denote-tree--cyclic-buffers cyclical-buffers))
+                (delete-region (1- (point-max)) (point-max)))
+            (denote-tree--clean-up))))
       (goto-char (point-min)))
     ;; regenerate prev/next/parent props
     (let-alist marker-alist
