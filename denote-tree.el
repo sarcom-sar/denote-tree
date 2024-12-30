@@ -603,10 +603,13 @@ low value."
 Non cyclical nodes are removed from `denote-tree--visited-buffers'
 and `denote-tree--cyclic-buffers."
   (save-restriction
+    (widen)
     (narrow-to-region beg end)
     (goto-char (point-min))
     (let ((zero 0)
-          (non-cyclical '()))
+          (non-cyclical '())
+          (visited-buffers denote-tree--visited-buffers)
+          (cyclic-buffers denote-tree--cyclic-buffers))
       (while (= zero 0)
         (let* ((pos (next-single-property-change
                      (line-beginning-position)
@@ -617,13 +620,14 @@ and `denote-tree--cyclic-buffers."
             (push data-prop non-cyclical))
           (goto-char (line-end-position))
           (setq zero (forward-line))))
-      (setq denote-tree--visited-buffers
-            (seq-difference denote-tree--visited-buffers
+      (setq visited-buffers
+            (seq-difference visited-buffers
                             non-cyclical))
       (dolist (el non-cyclical)
-        (setq denote-tree--cyclic-buffers
-              (remove (assoc el denote-tree--cyclic-buffers)
-                      denote-tree--cyclic-buffers))))))
+        (setq cyclic-buffers
+              (remove (assoc el cyclic-buffers)
+                      cyclic-buffers)))
+      (list visited-buffers cyclic-buffers))))
 
 (defun denote-tree--determine-node-bounds (node-pos marker-alist)
   "Determine bounds of current node at NODE-POS.
