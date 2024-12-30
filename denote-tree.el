@@ -616,7 +616,6 @@ and `denote-tree--cyclic-buffers."
           (when (eq face-prop 'denote-tree-node)
             (push data-prop non-cyclical))
           (goto-char (line-end-position))
-          (set-text-properties (line-beginning-position) (point) nil)
           (setq zero (forward-line))))
       (setq denote-tree--visited-buffers
             (seq-difference denote-tree--visited-buffers
@@ -624,8 +623,7 @@ and `denote-tree--cyclic-buffers."
       (dolist (el non-cyclical)
         (setq denote-tree--cyclic-buffers
               (remove (assoc el denote-tree--cyclic-buffers)
-                      denote-tree--cyclic-buffers))))
-    (delete-region (point-min) (point-max))))
+                      denote-tree--cyclic-buffers))))))
 
 (defun denote-tree--determine-node-bounds (node-pos marker-alist)
   "Determine bounds of current node at NODE-POS.
