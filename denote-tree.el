@@ -569,21 +569,23 @@ low value."
                         marker-alist nil node-pos same-child-p))
     (seq-setq (reg-beg reg-end)
               (denote-tree--determine-node-bounds node-pos marker-alist))
-    ;; nuke props and region
-    (denote-tree--nuke-props-in-region reg-beg reg-end)
     (save-restriction
       (narrow-to-region reg-beg reg-end)
-      (unwind-protect
-          (progn
-            (denote-tree--walk-links
-             id indent lastp denote-tree-max-traversal-depth)
-            (goto-char (point-max))
-            (forward-line -1)
-            (goto-char (line-end-position))
-            (when (looking-at "\n")
-              (delete-char 1))
-            (denote-tree--add-props-to-cycles))
-        (denote-tree--clean-up))
+      (seq-let (visited-buffers cyclical-buffers)
+          (denote-tree--nuke-props-in-region reg-beg reg-end)
+        (with-temp-buffer
+          ;; set them in temp buffer
+          (setq denote-tree--visited-buffers visited-buffers
+                denote-tree--cyclic-buffers cyclical-buffers)
+          (unwind-protect
+              (progn
+                (denote-tree--walk-links
+                 id indent lastp denote-tree-max-traversal-depth)
+                (delete-region (1- (point-max)) (point-max))
+                (denote-tree--add-props-to-cycles))
+            (denote-tree--clean-up)))
+        (setq denote-tree--visited-buffers visited-buffers
+              denote-tree--cyclic-buffers cyclical-buffers))
       (goto-char (point-min)))
     ;; regenerate prev/next/parent props
     (let-alist marker-alist
