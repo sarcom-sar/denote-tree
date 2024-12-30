@@ -588,7 +588,6 @@ low value."
         (setq denote-tree--cyclic-buffers
               (remove (assoc el denote-tree--cyclic-buffers)
                       denote-tree--cyclic-buffers)))
-      (delete-region (point-min) (point-max))
       (unwind-protect
           (progn
             (denote-tree--walk-links
