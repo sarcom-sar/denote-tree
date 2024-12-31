@@ -596,6 +596,54 @@ low value."
     (denote-tree--set-markers marker-alist node-pos node-pos same-child-p)
     (goto-char node-pos)))
 
+(defun denote-tree--compare-and-insert-new-to
+    (buffer old-pos new-pos &optional payload)
+  ""
+  (with-current-buffer buffer
+    (goto-char old-pos))
+  (goto-char new-pos)
+  (let ((old-pair (with-current-buffer buffer
+                    (cons (line-beginning-position)
+                          (line-end-position))))
+        (new-pair (cons (line-beginning-position)
+                        (line-end-position))))
+    (when payload
+      (with-current-buffer buffer
+        (forward-line -1)
+        (goto-char (line-end-position))
+        (insert "\n" payload)
+        (forward-line 1)))
+    (cond
+     ;; finish recursion
+     ((with-current-buffer buffer
+        (= (point-max) (point))))
+     ;; move both
+     ((= 0 (compare-buffer-substrings
+            buffer (car old-pair) (cdr old-pair)
+            (buffer-name) (car new-pair) (cdr new-pair)))
+      (denote-tree--compare-and-insert-new-to
+       buffer
+       (with-current-buffer buffer
+         (save-excursion
+           (forward-line)
+           (point)))
+       (progn
+         (forward-line)
+         (point))
+       nil))
+     ;; move old buffer forward until they match
+     (t
+      (setq payload
+            (buffer-substring (line-beginning-position) (line-end-position)))
+      (denote-tree--compare-and-insert-new-to
+       buffer
+       (with-current-buffer buffer
+         (line-end-position))
+       (progn
+         (forward-line)
+         (point))
+       payload)))))
+
 (defun denote-tree--nuke-props-in-region (beg end)
   "For region BEG END remove all props and it's record.
 
