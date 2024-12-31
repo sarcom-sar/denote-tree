@@ -546,6 +546,7 @@ Especially useful, if `denote-tree-max-traversal-depth' is set to very
 low value."
   (let* ((inhibit-read-only t)
          ;; pos of current node
+         (buffer (buffer-name))
          (node-pos
           (next-single-property-change
            (line-beginning-position) 'button-data))
@@ -560,30 +561,29 @@ low value."
                   (goto-char (line-beginning-position))
                   (search-forward
                    denote-tree-lower-knee (line-end-position) t)))
-         same-child-p
-         to-fix
-         reg-beg
-         reg-end)
-    ;; zero the markers of siblings
-    (setq same-child-p (denote-tree--set-markers
-                        marker-alist nil node-pos same-child-p))
-    (seq-setq (reg-beg reg-end)
-              (denote-tree--determine-node-bounds node-pos marker-alist))
-    (save-restriction
-      (narrow-to-region reg-beg reg-end)
-      (seq-let (visited-buffers cyclical-buffers)
-          (denote-tree--nuke-props-in-region reg-beg reg-end)
-        (with-temp-buffer
-          ;; set them in temp buffer
-          (setq denote-tree--visited-buffers visited-buffers
-                denote-tree--cyclic-buffers cyclical-buffers)
-          (unwind-protect
-              (progn
-                (denote-tree--walk-links
-                 id indent lastp denote-tree-max-traversal-depth)
-                (delete-region (1- (point-max)) (point-max)))
-            (denote-tree--clean-up))))
-      (goto-char (point-min)))
+         (reg-beg) (reg-end)
+         (_ (seq-setq (reg-beg reg-end)
+                      (denote-tree--determine-node-bounds
+                       node-pos marker-alist)))
+         ;; zero the markers of siblings
+         (same-child-p (denote-tree--set-markers
+                        marker-alist nil node-pos)))
+    (seq-let (visited-buffers cyclical-buffers)
+        (denote-tree--nuke-props-in-region reg-beg reg-end)
+      (with-temp-buffer
+        (setq denote-tree--visited-buffers visited-buffers
+              denote-tree--cyclic-buffers cyclical-buffers)
+        (unwind-protect
+            (progn
+              (denote-tree--walk-links
+               id indent lastp denote-tree-max-traversal-depth)
+              (delete-region (1- (point-max)) (point-max)))
+          (denote-tree--clean-up))
+        (with-current-buffer buffer
+          (save-restriction
+            (narrow-to-region reg-beg reg-end)
+            (denote-tree--compare-and-insert-new-to buffer (point-min) 1)
+            (goto-char (point-min))))))
     ;; regenerate prev/next/parent props
     (let-alist marker-alist
       (add-text-properties (line-beginning-position)
