@@ -621,8 +621,11 @@ Argument LST-OF-LINKS - list of links the `denote-tree--walk-links' will
                ((symbol-function 'denote-tree--collect-keywords-as-string)
                 (lambda (x y) (propertize x 'denote-tree--type 'title)))
                ((symbol-function 'denote-tree--open-link-maybe)
-                (lambda (x) x)))
-       ,@body)))
+                (lambda (x) (get-buffer x) x)))
+       (unwind-protect
+           (progn
+             ,@body)
+         (denote-tree--clean-up)))))
 
 (ert-deftest denote-tree-test-draw--walk-links ()
   "Tests for how `denote-tree--walk-links' draws."
