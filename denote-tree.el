@@ -596,6 +596,32 @@ low value."
     (denote-tree--set-markers marker-alist node-pos node-pos same-child-p)
     (goto-char node-pos)))
 
+(defun denote-tree--sanitize-deleted-entries (buffer)
+  "Remove all nodes in BUFFER not present during redrawing.
+
+Iterate over all the lines in BUFFER and if they are not present
+in redrawn buffer, then remove them (and their children) from BUFFER."
+  (let ((new-buf (current-buffer))
+        (zero 0))
+    (with-current-buffer buffer
+      (save-excursion
+        (goto-char (point-min))
+        (goto-char (line-end-position))
+        (while (= zero 0)
+          (let* ((old-line
+                  (buffer-substring-no-properties
+                   (line-beginning-position) (line-end-position)))
+                 (foundp (with-current-buffer new-buf
+                           (goto-char 1)
+                           (search-forward old-line nil t))))
+            (if foundp
+                (setq zero (forward-line))
+              ;; this is not the end, what about children?
+              (apply #'delete-region
+                     (denote-tree--determine-node-bounds
+                      (point) (denote-tree--build-marker-alist (point))))
+              (delete-region (point) (1+ (point))))))))))
+
 (defun denote-tree--compare-and-insert-new-to
     (buffer old-pos new-pos &optional payload)
   "Insert new nodes into BUFFER starting from OLD-POS.
