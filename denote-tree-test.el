@@ -1200,5 +1200,25 @@ No need to test `denote-tree-prev-node', because it calls
        (equal (buffer-substring (point-min) (point-max))
               new-buffer-contents)))))
 
+(ert-deftest denote-tree-test--sanitize-deleted-entries ()
+  "Tests for `denote-tree--sanitize-deleted-entries'."
+  (with-temp-buffer
+    (let ((buf (buffer-name))
+          (buf-cont))
+      (denote-tree-test-mock--walk-links-macro nil '(("a" "b" "c"))
+        (denote-tree--walk-links (buffer-name) "" t 3))
+      (goto-line 2)
+      (with-temp-buffer
+        (denote-tree-test-mock--walk-links-macro nil '(("a" "c"))
+          (denote-tree--walk-links (buffer-name) "" t 3))
+        (goto-line 2)
+        (setq buf-cont (buffer-substring-no-properties
+                        (line-beginning-position) (point-max)))
+        (with-current-buffer (buffer-name)
+          (denote-tree--sanitize-deleted-entries buf)))
+      (should (equal (buffer-substring-no-properties
+                      (line-beginning-position) (point-max))
+                     buf-cont)))))
+
 (provide 'denote-tree-test)
 ;;; denote-tree-test.el ends here
