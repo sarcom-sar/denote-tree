@@ -598,29 +598,31 @@ low value."
 
 (defun denote-tree--compare-and-insert-new-to
     (buffer old-pos new-pos &optional payload)
-  ""
+  "Insert new nodes into BUFFER starting from OLD-POS.
+
+Argument NEW-POS - a corresponding position in a temporary buffer where
+                   redrawing with `denote-tree--deepen-traversal' takes place.
+Argument PAYLOAD - node to be drawn."
   (with-current-buffer buffer
     (goto-char old-pos))
   (goto-char new-pos)
-  (let ((old-pair (with-current-buffer buffer
-                    (cons (line-beginning-position)
-                          (line-end-position))))
-        (new-pair (cons (line-beginning-position)
-                        (line-end-position))))
+  (let ((old-line (with-current-buffer buffer
+                    (buffer-substring (line-beginning-position) (line-end-position))))
+        (new-line (progn
+                    (buffer-substring (line-beginning-position) (line-end-position)))))
     (when payload
       (with-current-buffer buffer
-        (forward-line -1)
-        (goto-char (line-end-position))
-        (insert "\n" payload)
-        (forward-line 1)))
+        (save-excursion
+          (forward-line -1)
+          (goto-char (line-end-position))
+          (insert "\n" payload))))
     (cond
      ;; finish recursion
-     ((with-current-buffer buffer
-        (= (point-max) (point))))
+     ((= (point-max) (point)))
      ;; move both
-     ((= 0 (compare-buffer-substrings
-            buffer (car old-pair) (cdr old-pair)
-            (buffer-name) (car new-pair) (cdr new-pair)))
+     ((eq t (compare-strings old-line nil nil
+                             new-line nil nil
+                             t))
       (denote-tree--compare-and-insert-new-to
        buffer
        (with-current-buffer buffer
@@ -631,10 +633,8 @@ low value."
          (forward-line)
          (point))
        nil))
-     ;; move old buffer forward until they match
+     ;; move new buffer forward until they match
      (t
-      (setq payload
-            (buffer-substring (line-beginning-position) (line-end-position)))
       (denote-tree--compare-and-insert-new-to
        buffer
        (with-current-buffer buffer
@@ -642,7 +642,7 @@ low value."
        (progn
          (forward-line)
          (point))
-       payload)))))
+       new-line)))))
 
 (defun denote-tree--nuke-props-in-region (beg end)
   "For region BEG END remove all props and it's record.
