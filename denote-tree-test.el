@@ -1130,5 +1130,75 @@ No need to test `denote-tree-prev-node', because it calls
        (equal (buffer-substring-no-properties (point-min) (point-max))
               buffer-string)))))
 
+(ert-deftest denote-tree-test--compare-and-insert-to--no-props-trivial ()
+  "Tests for `denote-tree--compare-and-insert-new-to'."
+  (with-temp-buffer ;; old buffer
+    (let ((old-buffer (buffer-name))
+          (new-buffer-contents))
+      (insert
+         "'-* a\n"
+         "  +-* b\n"
+         "  +-* c\n"
+         "  '-* d\n")
+      (with-temp-buffer ;; new-buffer
+        (insert
+         "'-* a\n"
+         "  +-* a1\n"
+         "  +-* b\n"
+         "  | +-* b1\n"
+         "  | '-* b2\n"
+         "  +-* c\n"
+         "  | '-* c1\n"
+         "  |   '-* c1a\n"
+         "  '-* d\n")
+        (setq new-buffer-contents (buffer-substring (point-min) (point-max)))
+        (denote-tree--compare-and-insert-new-to old-buffer 1 1))
+      (should
+       (equal (buffer-substring (point-min) (point-max))
+              new-buffer-contents))))
+  (with-temp-buffer ;; old buffer
+    (let ((old-buffer (buffer-name))
+          (new-buffer-contents))
+      (insert
+         "'-* a\n"
+         "  +-* b\n"
+         "  +-* c\n"
+         "  '-* d\n")
+      (with-temp-buffer ;; new-buffer
+        (insert
+         "'-* a\n"
+         "  +-* a1\n"
+         "  +-* b\n"
+         "  | +-* b1\n"
+         "  | '-* b2\n"
+         "  +-* c\n"
+         "  | '-* c1\n"
+         "  |   '-* c1a\n"
+         "  '-* d\n"
+         "    '-* d1\n")
+        (setq new-buffer-contents (buffer-substring (point-min) (point-max)))
+        (denote-tree--compare-and-insert-new-to old-buffer 1 1))
+      (should
+       (equal (buffer-substring (point-min) (point-max))
+              new-buffer-contents))))
+  (with-temp-buffer ;; old buffer
+    (let ((old-buffer (buffer-name))
+          (new-buffer-contents))
+      (insert
+         "'-* a\n"
+         "  +-* b\n"
+         "  +-* c\n"
+         "  '-* d\n")
+      (with-temp-buffer ;; new-buffer
+        (insert
+         "'-* a\n"
+         "  +-* b\n"
+         "  '-* d\n")
+        (setq new-buffer-contents (buffer-substring (point-min) (point-max)))
+        (denote-tree--compare-and-insert-new-to old-buffer 1 1))
+      (should
+       (equal (buffer-substring (point-min) (point-max))
+              new-buffer-contents)))))
+
 (provide 'denote-tree-test)
 ;;; denote-tree-test.el ends here
