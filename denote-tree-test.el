@@ -619,7 +619,10 @@ Argument LST-OF-LINKS - list of links the `denote-tree--walk-links' will
                   (let ((y (funcall denote-tree-test-mock-next-links)))
                     (car y))))
                ((symbol-function 'denote-tree--collect-keywords-as-string)
-                (lambda (x y) (propertize x 'denote-tree--type 'title)))
+                (lambda (x _)
+                  (when (string-match "temp" x)
+                    (setq x " *temp*"))
+                  (propertize x 'denote-tree--type 'title)))
                ((symbol-function 'denote-tree--open-link-maybe)
                 (lambda (x) (get-buffer x) x)))
        (unwind-protect
