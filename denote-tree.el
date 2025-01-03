@@ -262,7 +262,7 @@ BUTTON is pased as node's ID."
      (denote-get-path-by-id button))))
 
 (defun denote-tree-redraw (&optional arg)
-  "Redraw some part of a tree.
+  "Redraw ARG parts of a tree.
 
 Without \\[universal-argument], redraw the current node deepening it.
 With \\[universal-argument] draw current node in a new window.
@@ -814,7 +814,7 @@ Return as a list sans BUFFER's own identifier."
               keywords))))
 
 (defun denote-tree--collect-keywords-helper (el regexps filetype)
-  "Turn EL into cons according to REGEXPS and FILETYPE"
+  "Turn EL into cons according to REGEXPS and FILETYPE."
   (goto-char (point-min))
   (cond
    ;; if it's a string, just push it
