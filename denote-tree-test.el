@@ -988,7 +988,7 @@ No need to test `denote-tree-prev-node', because it calls
                     (get-text-property (point) 'denote-tree--next)))
         (setq parent (marker-position
                       (get-text-property (point) 'denote-tree--parent))))
-      (denote-tree-test-mock--walk-links-macro nil '(("ab" "ab"))
+      (denote-tree-test-mock--walk-links-macro nil '(("ab" "ac"))
         (denote-tree-redraw))
       ;; how marker changed
       (should (= prev (get-text-property (point) 'denote-tree--prev)))
