@@ -636,7 +636,22 @@ Argument PAYLOAD - node to be drawn."
         (save-excursion
           (forward-line -1)
           (goto-char (line-end-position))
-          (insert "\n" payload))))
+          (insert "\n" payload)
+          (let ((text-props (text-properties-at (line-beginning-position))))
+            (dolist (el '(denote-tree--child
+                          denote-tree--next
+                          denote-tree--prev
+                          denote-tree--parent))
+              (when (plist-member text-props el)
+                (setf (plist-get text-props el)
+                      ;; (1- (+ (point-min) position))
+                      (set-marker (make-marker)
+                                  (1- (+ (point-min)
+                                         (marker-position
+                                          (plist-get text-props el))))
+                                  (get-buffer buffer)))))
+            (add-text-properties (line-beginning-position) (line-end-position)
+                                 text-props)))))
     (cond
      ;; finish recursion
      ((= (point-max) (point)))
