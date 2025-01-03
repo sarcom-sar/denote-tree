@@ -1137,6 +1137,35 @@ No need to test `denote-tree-prev-node', because it calls
         (denote-tree-redraw))
       ;; how marker changed
       (save-excursion
+        (goto-line 3)
+        (setq props (next-single-property-change
+                     (line-beginning-position) 'button-data)))
+      (should (= (point) (get-text-property props 'denote-tree--parent)))))
+  ;; "true tree"
+  ;; '-* temp
+  ;;   +-* a
+  ;;   | '-* aa
+  ;;   |   '-* aaa
+  ;;   |     +-* aaab
+  ;;   |     '-* aaac
+  ;;   +-* b
+  ;; what first pass sees
+  ;; '-* temp
+  ;;   +-* a
+  ;;   '-* b
+  (let (parent props)
+    (with-temp-buffer
+      (denote-tree-test-mock--walk-links-macro nil '(("a" "b"))
+        (denote-tree--walk-links
+         (buffer-name (current-buffer)) "" t t)
+        ;; go to "a"
+        (goto-line 2)
+        (setq parent (marker-position
+                      (get-text-property (point) 'denote-tree--parent))))
+      (denote-tree-test-mock--walk-links-macro nil '(("aa") ("aaa") ("aaab" "aaac"))
+        (denote-tree-redraw))
+      ;; how marker changed
+      (save-excursion
         (goto-line 7)
         (setq props (next-single-property-change
                      (line-beginning-position) 'button-data)))
