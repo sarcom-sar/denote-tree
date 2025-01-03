@@ -566,8 +566,7 @@ low value."
                       (denote-tree--determine-node-bounds
                        node-pos marker-alist)))
          ;; zero the markers of siblings
-         (same-child-p (denote-tree--set-markers
-                        marker-alist nil node-pos)))
+         )
     (seq-let (visited-buffers cyclical-buffers)
         (denote-tree--nuke-props-in-region reg-beg reg-end)
       (with-temp-buffer
@@ -584,16 +583,6 @@ low value."
             (narrow-to-region reg-beg reg-end)
             (denote-tree--compare-and-insert-new-to buffer (point-min) 1)
             (goto-char (point-min))))))
-    ;; regenerate prev/next/parent props
-    (let-alist marker-alist
-      (add-text-properties (line-beginning-position)
-                           (line-end-position)
-                           (list
-                            'denote-tree--prev (car .denote-tree--prev)
-                            'denote-tree--next (car .denote-tree--next)
-                            'denote-tree--parent (car .denote-tree--parent))))
-    ;; restore
-    (denote-tree--set-markers marker-alist node-pos node-pos same-child-p)
     (goto-char node-pos)))
 
 (defun denote-tree--sanitize-deleted-entries (buffer)
@@ -746,32 +735,6 @@ signal an error."
            (forward-line -1)
            (line-end-position))))
       (t (error "Denote tree buffer is malformed"))))))
-
-(defun denote-tree--set-markers
-    (marker-alist value &optional node-pos same-child-p)
-  "Set markers in MARKER-ALIST to VALUE.
-
-Optionally supply NODE-POS, if one of markers should point to it.
-If it's not supplied set it's default value to VALUE."
-  (or node-pos (setq node-pos value))
-  (dolist (el marker-alist)
-    (let* ((key (car el))
-           (marker (cadr el))
-           (prop (caddr el))
-           (dad-marker (when (marker-position marker)
-                         (get-text-property marker prop))))
-      (cond
-       ((and dad-marker
-             (not (eq key 'denote-tree--parent)))
-        (set-marker dad-marker value))
-       ((and dad-marker
-             (eq key 'denote-tree--parent)
-             (or same-child-p
-                 (= dad-marker node-pos)))
-        (set-marker dad-marker value)
-        (setq same-child-p t))
-       (t nil))))
-  same-child-p)
 
 (defmacro denote-tree--build-marker-alist (pos)
   "Return alist of KEY MARKER NEXT-PROP at POS.
