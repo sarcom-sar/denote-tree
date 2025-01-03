@@ -638,7 +638,8 @@ Argument LST-OF-LINKS - list of links the `denote-tree--walk-links' will
       (should
        (string=
         (buffer-substring-no-properties (point-min) (point-max))
-        (concat "'-* " (buffer-name (current-buffer)) "\n" "  '-* a\n")))))
+        (concat "'-*  *temp*\n"
+                "  '-* a\n")))))
   (with-temp-buffer
     (denote-tree-test-mock--walk-links-macro nil '(("a") ("b" "c" "d"))
       (denote-tree--walk-links (buffer-name (current-buffer)) "" t t)
@@ -646,7 +647,7 @@ Argument LST-OF-LINKS - list of links the `denote-tree--walk-links' will
        (string=
         (buffer-substring-no-properties (point-min) (point-max))
         (concat
-         "'-* " (buffer-name (current-buffer)) "\n"
+         "'-*  *temp*\n"
          "  '-* a\n"
          "    +-* b\n"
          "    +-* c\n"
@@ -659,7 +660,7 @@ Argument LST-OF-LINKS - list of links the `denote-tree--walk-links' will
        (string=
         (buffer-substring-no-properties (point-min) (point-max))
         (concat
-         "'-* " (buffer-name (current-buffer)) "\n"
+         "'-*  *temp*\n"
          "  '-* a\n"
          "    +-* b\n"
          "    +-* c\n"
@@ -672,7 +673,8 @@ Argument LST-OF-LINKS - list of links the `denote-tree--walk-links' will
       (should
        (string=
         (buffer-substring-no-properties (point-min) (point-max))
-        (concat "'-* " (buffer-name (current-buffer)) "\n" "  '-* a\n"))))))
+        (concat "'-*  *temp*\n"
+                "  '-* a\n"))))))
 
 (ert-deftest denote-tree-test-props--walk-links ()
   "Tests for how `denote-tree--walk-links' adds props."
