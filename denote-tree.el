@@ -721,7 +721,8 @@ signal an error."
      (line-beginning-position)
      (cond
       ((not (marker-position (car .denote-tree--next)))
-       (point-max))
+       ;; do not kill the last newline
+       (1- (point-max)))
       ((< node-pos (car .denote-tree--next))
        (save-excursion
          (goto-char (car .denote-tree--next))
@@ -735,7 +736,8 @@ signal an error."
                        (> node-pos next))
              (goto-char (get-text-property (point) 'denote-tree--parent))))
          (if (> node-pos (or (get-text-property (point) 'denote-tree--next) 1))
-             (point-max)
+             ;; ditto
+             (1- (point-max))
            (goto-char (get-text-property (point) 'denote-tree--next))
            (forward-line -1)
            (line-end-position))))
