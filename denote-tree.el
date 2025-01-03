@@ -546,7 +546,7 @@ Especially useful, if `denote-tree-max-traversal-depth' is set to very
 low value."
   (let* ((inhibit-read-only t)
          ;; pos of current node
-         (buffer (buffer-name))
+         (old-buffer (buffer-name))
          (node-pos
           (next-single-property-change
            (line-beginning-position) 'button-data))
@@ -569,20 +569,22 @@ low value."
          )
     (seq-let (visited-buffers cyclical-buffers)
         (denote-tree--nuke-props-in-region reg-beg reg-end)
-      (with-temp-buffer
-        (setq denote-tree--visited-buffers visited-buffers
-              denote-tree--cyclic-buffers cyclical-buffers)
-        (unwind-protect
-            (progn
-              (denote-tree--walk-links
-               id indent lastp denote-tree-max-traversal-depth)
-              (delete-region (1- (point-max)) (point-max)))
-          (denote-tree--clean-up))
-        (with-current-buffer buffer
-          (save-restriction
-            (narrow-to-region reg-beg reg-end)
-            (denote-tree--compare-and-insert-new-to buffer (point-min) 1)
-            (goto-char (point-min))))))
+      (with-temp-buffer ;; new-buffer
+        (let ((new-buffer (buffer-name)))
+          (setq denote-tree--visited-buffers visited-buffers
+                denote-tree--cyclic-buffers cyclical-buffers)
+          (unwind-protect
+              (progn
+                (denote-tree--walk-links
+                 id indent lastp denote-tree-max-traversal-depth))
+            (denote-tree--clean-up))
+          (with-current-buffer old-buffer
+            (save-restriction
+              ;; do not forget the trailing newline
+              (narrow-to-region reg-beg (1+ reg-end))
+              (with-current-buffer new-buffer
+                (denote-tree--compare-and-insert-new-to old-buffer (point-min) 1))
+              (goto-char (point-min)))))))
     (goto-char node-pos)))
 
 (defun denote-tree--sanitize-deleted-entries (buffer)
