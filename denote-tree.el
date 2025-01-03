@@ -703,19 +703,19 @@ and `denote-tree--cyclic-buffers."
       (list visited-buffers cyclic-buffers))))
 
 (defun denote-tree--determine-node-bounds (node-pos marker-alist)
-  "Determine bounds of current node at NODE-POS.
+  "Determine bounds of current node at NODE-POS with MARKER-ALIST.
 
-NEXT-MARKER is initial position of next node. Return cons of node
-start and node end.
+MARKER-ALIST contains information about neighbors of the node.  Return
+cons of node's start and node's end.
 
-If NEXT-MARKER doesn't exist, the situation is trivial.  If
-NEXT-MARKER is further along the buffer than NODE-POS, then
-just jump to it and return EoL of previous line.  If NODE-POS
-and NEXT-MARKER are one and the same or NEXT-MARKER precedes the
-NODE-POS, then we can have arbitrary \"deepness\", iterate until
-you find parent node which next node is grater than node to be
-redrawn.  If you ran out of nodes to check, you are at the top and the
-last node is your target.  If nothing matches, signal an error."
+If \\='denote-tree--next doesn't exist, the situation is trivial.  If
+it is further along the buffer than NODE-POS, then just jump to it and
+return EoL of previous line.  If NODE-POS and \\='denote-tree--next point
+to the same location \\='denote-tree--next precedes the NODE-POS, then
+we can have arbitrary \"deepness\", iterate until you find parent node which
+next node is grater than node to be redrawn.  If you ran out of nodes to
+check, you are at the top and the last node is your target.  If nothing matches,
+signal an error."
   (let-alist marker-alist
     (list
      (line-beginning-position)
