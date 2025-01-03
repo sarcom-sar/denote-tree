@@ -647,7 +647,7 @@ Argument PAYLOAD - node to be drawn."
       (denote-tree--compare-and-insert-new-to
        buffer
        (with-current-buffer buffer
-         (save-excursion
+         (progn
            (forward-line)
            (point)))
        (progn
