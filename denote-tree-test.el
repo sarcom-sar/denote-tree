@@ -1128,7 +1128,7 @@ No need to test `denote-tree-prev-node', because it calls
         ;; go to "temp"
         (goto-line 1)
         (setq buffer-string
-              (buffer-substring-no-properties (point-min) (1- (point-max)))))
+              (buffer-substring-no-properties (point-min) (point-max))))
       (denote-tree-test-mock--walk-links-macro nil '(("a" "b") ("aa") ("aaa") ("aaab" "aaac"))
         (denote-tree-redraw))
       (should
