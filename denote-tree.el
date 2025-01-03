@@ -610,7 +610,11 @@ in redrawn buffer, then remove them (and their children) from BUFFER."
         (while (= zero 0)
           (let* ((old-line
                   (buffer-substring-no-properties
-                   (line-beginning-position) (line-end-position)))
+                   (or
+                    (next-single-property-change
+                     (line-beginning-position) 'button-data)
+                    (point))
+                   (line-end-position)))
                  (foundp (with-current-buffer new-buf
                            (goto-char 1)
                            (search-forward old-line nil t))))
