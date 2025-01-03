@@ -526,7 +526,7 @@ somewhere earlier, find it."
       (denote-tree--add-props-to-cycles)
       (let ((pos (marker-position (get-text-property 22 'denote-tree--child))))
         (should (equal pos 10)))))
-  (let ((denote-tree--cyclic-buffers '(("name" 14 20))))
+  (let ((denote-tree--cyclic-buffers '(("name" 15 21))))
     (with-temp-buffer
       (insert
        "-"
