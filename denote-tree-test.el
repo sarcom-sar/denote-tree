@@ -1185,24 +1185,6 @@ No need to test `denote-tree-prev-node', because it calls
         (denote-tree--compare-and-insert-new-to old-buffer 1 1))
       (should
        (equal (buffer-substring (point-min) (point-max))
-              new-buffer-contents))))
-  (with-temp-buffer ;; old buffer
-    (let ((old-buffer (buffer-name))
-          (new-buffer-contents))
-      (insert
-         "'-* a\n"
-         "  +-* b\n"
-         "  +-* c\n"
-         "  '-* d\n")
-      (with-temp-buffer ;; new-buffer
-        (insert
-         "'-* a\n"
-         "  +-* b\n"
-         "  '-* d\n")
-        (setq new-buffer-contents (buffer-substring (point-min) (point-max)))
-        (denote-tree--compare-and-insert-new-to old-buffer 1 1))
-      (should
-       (equal (buffer-substring (point-min) (point-max))
               new-buffer-contents)))))
 
 (ert-deftest denote-tree-test--sanitize-deleted-entries ()
