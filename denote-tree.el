@@ -451,7 +451,7 @@ Argument DEPTH  - maximum depth of the traversal."
     'notvalid))
 
 (defun denote-tree--add-props-to-cycles ()
-  "Add denote-tree--child prop to elements of `denote-tree--cyclic-buffers'.
+  "Add \\='denote-tree--child prop to elements of `denote-tree--cyclic-buffers'.
 
 Find first element with button-data set to the car of
 `denote-tree--cyclic-buffers' (since DFS is in effect, the first found match
@@ -460,8 +460,7 @@ that position as denote-tree--child of all the cyclic nodes."
   (dolist (node-id-and-pos denote-tree--cyclic-buffers)
     (goto-char (point-min))
     (text-property-search-forward 'button-data (car node-id-and-pos))
-    (let* ((prop (get-text-property (point) 'denote-tree--child))
-           (marker (set-marker (make-marker) prop)))
+    (let* ((marker (get-text-property (point) 'denote-tree--child)))
       (dolist (node-pos (cdr node-id-and-pos))
         (goto-char node-pos)
         ;; is valid point
