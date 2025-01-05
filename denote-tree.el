@@ -592,13 +592,12 @@ low value."
 
 Iterate over all the lines in BUFFER and if they are not present
 in redrawn buffer, then remove them (and their children) from BUFFER."
-  (let ((new-buf (current-buffer))
-        (zero 0))
+  (let ((new-buf (current-buffer)))
     (with-current-buffer buffer
       (save-excursion
         (goto-char (point-min))
         (goto-char (line-end-position))
-        (while (= zero 0)
+        (while (> (point-max) (point))
           (let* ((old-line
                   (buffer-substring-no-properties
                    (or
@@ -610,7 +609,7 @@ in redrawn buffer, then remove them (and their children) from BUFFER."
                            (goto-char 1)
                            (search-forward old-line nil t))))
             (if foundp
-                (setq zero (forward-line))
+                (forward-line)
               ;; this is not the end, what about children?
               (apply #'delete-region
                      (denote-tree--determine-node-bounds
@@ -675,11 +674,10 @@ and `denote-tree--cyclic-buffers."
     (widen)
     (narrow-to-region beg end)
     (goto-char (point-min))
-    (let ((zero 0)
-          (non-cyclical '())
+    (let ((non-cyclical '())
           (visited-buffers denote-tree--visited-buffers)
           (cyclic-buffers denote-tree--cyclic-buffers))
-      (while (= zero 0)
+      (while (> (point-max) (point))
         (let* ((pos (next-single-property-change
                      (line-beginning-position)
                      'button-data))
@@ -688,7 +686,7 @@ and `denote-tree--cyclic-buffers."
           (when (eq face-prop 'denote-tree-node)
             (push data-prop non-cyclical))
           (goto-char (line-end-position))
-          (setq zero (forward-line))))
+          (forward-line)))
       (setq visited-buffers
             (seq-difference visited-buffers
                             non-cyclical))
