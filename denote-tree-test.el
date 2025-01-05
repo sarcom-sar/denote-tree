@@ -381,27 +381,20 @@ and it's value in plist is a string."
   (with-temp-buffer
     (insert (concat "'-* A\n" "  '-* B"))
     (goto-char (point-min))
-    (denote-tree--add-props-to-children '(7) 1)
+    (denote-tree--add-props-to-children
+     (denote-tree-test-helper--make-marker-at '(7))
+     (denote-tree-test-helper--make-marker-at 1))
     (let ((props (text-properties-at 1)))
-      (setq props
-            (mapcar
-             (lambda (x)
-               (if (markerp x)
-                   (marker-position x)
-                 x))
-             props))
-      (should (equal props '(denote-tree--child 7))))
-    (let ((props (text-properties-at 7)))
-      (setq props
-            (mapcar
-             (lambda (x)
-               (if (markerp x)
-                   (marker-position x)
-                 x))
-             props))
       (should
-       (equal '(denote-tree--parent 1 denote-tree--prev 7 denote-tree--next 7)
-              props))))
+       (equal `(denote-tree--child ,(denote-tree-test-helper--make-marker-at 7))
+              props)))
+    (let ((props (text-properties-at 7)))
+      (should
+       (equal
+        `( denote-tree--parent ,(denote-tree-test-helper--make-marker-at 1)
+           denote-tree--prev ,(denote-tree-test-helper--make-marker-at 7)
+           denote-tree--next ,(denote-tree-test-helper--make-marker-at 7))
+        props))))
   (with-temp-buffer
     (insert
      "A\n"
@@ -410,19 +403,20 @@ and it's value in plist is a string."
      " B\n"
      " B\n")
     (goto-char (point-min))
-    (denote-tree--add-props-to-children '(4 7 10 13) 1)
+    (denote-tree--add-props-to-children
+     (denote-tree-test-helper--make-marker-at '(4 7 10 13))
+     (denote-tree-test-helper--make-marker-at 1))
     (let ((props (text-properties-at 1)))
-      (setq props (mapcar (lambda (x) (if (markerp x) (marker-position x) x))
-                          props))
       (should
-       (equal props
-              '(denote-tree--child 4))))
+       (equal `(denote-tree--child ,(denote-tree-test-helper--make-marker-at 4))
+              props)))
     (let ((props (text-properties-at 4)))
-      (setq props (mapcar (lambda (x) (if (markerp x) (marker-position x) x))
-                          props))
       (should
-       (equal '(denote-tree--parent 1 denote-tree--prev 13 denote-tree--next 7)
-              props))))
+       (equal
+        `( denote-tree--parent ,(denote-tree-test-helper--make-marker-at 1)
+           denote-tree--prev ,(denote-tree-test-helper--make-marker-at 13)
+           denote-tree--next ,(denote-tree-test-helper--make-marker-at 7))
+        props))))
   (with-temp-buffer
     (insert
      " B\n"
@@ -431,19 +425,20 @@ and it's value in plist is a string."
      " B\n"
      " B\n")
     (goto-char (point-min))
-    (denote-tree--add-props-to-children '(2 4 10 13) 7)
+    (denote-tree--add-props-to-children
+     (denote-tree-test-helper--make-marker-at '(2 4 10 13))
+     (denote-tree-test-helper--make-marker-at 7))
     (let ((props (text-properties-at 7)))
-      (setq props (mapcar (lambda (x) (if (markerp x) (marker-position x) x))
-                          props))
       (should
-       (equal '(denote-tree--child 2)
+       (equal `(denote-tree--child ,(denote-tree-test-helper--make-marker-at 2))
               props)))
     (let ((props (text-properties-at 2)))
-      (setq props (mapcar (lambda (x) (if (markerp x) (marker-position x) x))
-                          props))
       (should
-       (equal '(denote-tree--parent 7 denote-tree--prev 13 denote-tree--next 4)
-              props))))
+       (equal
+        `( denote-tree--parent ,(denote-tree-test-helper--make-marker-at 7)
+           denote-tree--prev ,(denote-tree-test-helper--make-marker-at 13)
+           denote-tree--next ,(denote-tree-test-helper--make-marker-at 4))
+        props))))
   (should-not (denote-tree--add-props-to-children '(4 5 6) nil)))
 
 (defmacro denote-tree-test-mock--draw-node-macro (properties cyclic &rest body)
@@ -511,7 +506,7 @@ and it's value in plist is a string."
       (should (equal ret-val (list (point-marker) "  "))))))
 
 (ert-deftest denote-tree-test--add-props-to-cycles ()
-  "Tests for `denote-tree--add-props-to-children'.
+  "Tests for `denote-tree--add-props-to-cycles'.
 
 If any 'button-data value repeats, then child of that node is
 somewhere earlier, find it."
@@ -520,63 +515,63 @@ somewhere earlier, find it."
       (insert (propertize "* " 'button-data "name"))
       (denote-tree--add-props-to-cycles)
       (should (equal (text-properties-at 1) '(button-data "name")))))
-  (let ((denote-tree--cyclic-buffers '(("name" 22))))
-    (with-temp-buffer
-      (insert
-       "'-"
-       (propertize "* " 'button-data "name" 'denote-tree--child 10)
-       "A\n"
-       "  '-"
-       (propertize "* " 'button-data "eman" 'denote-tree--child 22)
-       "B\n"
-       "     '-"
-       (propertize "* " 'button-data "name"))
+  (with-temp-buffer
+    (insert
+     "'-"
+     (propertize "* " 'button-data "name" 'denote-tree--child 10)
+     "A\n"
+     "  '-"
+     (propertize "* " 'button-data "eman" 'denote-tree--child 22)
+     "B\n"
+     "     '-"
+     (propertize "* " 'button-data "name"))
+    (let ((denote-tree--cyclic-buffers `(("name" ,(denote-tree-test-helper--make-marker-at 22)))))
       (goto-char (point-min))
-      (denote-tree--add-props-to-cycles)
-      (let ((pos (marker-position (get-text-property 22 'denote-tree--child))))
-        (should (equal pos 10)))))
-  (let ((denote-tree--cyclic-buffers '(("name" 15 21))))
-    (with-temp-buffer
-      (insert
-       "-"
-       (propertize "* " 'button-data "name" 'denote-tree--child 8)
-       "A1\n "
-       (propertize "* " 'button-data "eman" 'denote-tree--child 19)
-       "B1\n  "
-       (propertize "* " 'button-data "name" 'denote-tree--child nil)
-       "A2\n "
-       (propertize "* " 'button-data "name")
-       "A3\n")
+      (denote-tree--add-props-to-cycles))
+    (let ((pos (get-text-property 22 'denote-tree--child)))
+      (should (= pos 10))))
+  (with-temp-buffer
+    (insert
+     "-"
+     (propertize "* " 'button-data "name" 'denote-tree--child 8)
+     "A1\n "
+     (propertize "* " 'button-data "eman" 'denote-tree--child 19)
+     "B1\n  "
+     (propertize "* " 'button-data "name" 'denote-tree--child nil)
+     "A2\n "
+     (propertize "* " 'button-data "name")
+     "A3\n")
+    (let ((denote-tree--cyclic-buffers `(("name" ,@(denote-tree-test-helper--make-marker-at '(15 21))))))
       (goto-char (point-min))
-      (denote-tree--add-props-to-cycles)
-      (let ((pos (marker-position (get-text-property 15 'denote-tree--child))))
-        (should (equal pos 8)))
-      (let ((pos (marker-position (get-text-property 21 'denote-tree--child))))
-        (should (equal pos 8)))))
-  (let ((denote-tree--cyclic-buffers '(("name" 7))))
-    (with-temp-buffer
-      (insert
-       "-"
-       (propertize "* " 'button-data "foo")
-       "B\n "
-       (propertize "* " 'button-data "name")
-       "A\n")
+      (denote-tree--add-props-to-cycles))
+    (let ((pos (get-text-property 15 'denote-tree--child)))
+      (should (= pos 8)))
+    (let ((pos (get-text-property 21 'denote-tree--child)))
+      (should (= pos 8))))
+  (with-temp-buffer
+    (insert
+     "-"
+     (propertize "* " 'button-data "foo")
+     "B\n "
+     (propertize "* " 'button-data "name")
+     "A\n")
+    (let ((denote-tree--cyclic-buffers `(("name" ,(denote-tree-test-helper--make-marker-at 7)))))
       (goto-char (point-min))
-      (denote-tree--add-props-to-cycles)
-      (let ((pos (marker-position (get-text-property 7 'denote-tree--child))))
-        (should (equal pos nil)))))
-  (let ((denote-tree--cyclic-buffers '(("name" 7))))
-    (with-temp-buffer
-      (insert
-       "-"
-       (propertize "* " 'button-data "foo")
-       "B\n "
-       (propertize "* " 'button-data "name" 'denote-tree--child 7)
-       "A\n")
+      (denote-tree--add-props-to-cycles))
+    (let ((pos (get-text-property 7 'denote-tree--child)))
+      (should (equal pos nil))))
+  (with-temp-buffer
+    (insert
+     "-"
+     (propertize "* " 'button-data "foo")
+     "B\n "
+     (propertize "* " 'button-data "name" 'denote-tree--child 7)
+     "A\n")
+    (let ((denote-tree--cyclic-buffers `(("name" ,(denote-tree-test-helper--make-marker-at 7)))))
       (goto-char (point-min))
-      (denote-tree--add-props-to-cycles)
-      (let ((pos (marker-position (get-text-property 7 'denote-tree--child))))
-        (should (equal pos 7))))))
+      (denote-tree--add-props-to-cycles))
+    (let ((pos (get-text-property 7 'denote-tree--child)))
+      (should (= pos 7)))))
 
 (ert-deftest denote-tree-test--open-link-maybe ()
   "Tests for `denote-tree--open-link-maybe'."
@@ -768,7 +763,7 @@ Argument LST-OF-LINKS - list of links the `denote-tree--walk-links' will
     (should
      (equal
       denote-tree--teleport-stack
-      (list (list (set-marker (make-marker) 6) 2)))))
+      `((,(denote-tree-test-helper--make-marker-at 6) 2)))))
   (with-temp-buffer
     (insert
      "*" (propertize "A" 'denote-tree--child 6 'button-data "foo") "\n"
