@@ -366,6 +366,15 @@ and it's value in plist is a string."
    (equal (denote-tree--get-regexps '(:foo-regexp "foor" :bar-regexp "baar"))
           '(:bar-regexp :foo-regexp))))
 
+(defun denote-tree-test-helper--make-marker-at (pos)
+  (cond
+   ((numberp pos)
+    (set-marker (make-marker) pos))
+   ((listp pos)
+    (mapcar (lambda (x)
+              (set-marker (make-marker) x))
+            pos))))
+
 (ert-deftest denote-tree-test--add-props-to-children ()
   "Tests for `denote-tree--add-props-to-children'."
   (should (equal (denote-tree--add-props-to-children '() '()) nil))
