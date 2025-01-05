@@ -642,14 +642,14 @@ Argument PAYLOAD - node to be drawn."
                           denote-tree--next
                           denote-tree--prev
                           denote-tree--parent))
-              (when (plist-member text-props el)
+              (when-let* ((marker (plist-get text-props el))
+                          ((marker-position marker))
+                          ;; node position in new buffer is offset from
+                          ;; the marker of old buffer by (point-min)
+                          (new-position (1- (+ (point-min) marker)))
+                          (new-buffer (get-buffer buffer)))
                 (setf (plist-get text-props el)
-                      ;; (1- (+ (point-min) position))
-                      (set-marker (make-marker)
-                                  (1- (+ (point-min)
-                                         (marker-position
-                                          (plist-get text-props el))))
-                                  (get-buffer buffer)))))
+                      (set-marker marker new-position new-buffer))))
             (add-text-properties (line-beginning-position) (line-end-position)
                                  text-props)))))
     (cond
