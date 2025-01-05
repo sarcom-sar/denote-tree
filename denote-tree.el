@@ -710,9 +710,9 @@ we can have arbitrary \"deepness\", iterate until you find parent node which
 next node is grater than node to be redrawn.  If you ran out of nodes to
 check, you are at the top and the last node is your target.  If nothing matches,
 signal an error."
-  (let-alist marker-alist
-    (list
-     (line-beginning-position)
+  (list
+   (line-beginning-position)
+   (let-alist marker-alist
      (cond
       ((not (marker-position (car .denote-tree--next)))
        ;; do not kill the last newline
