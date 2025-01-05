@@ -618,39 +618,28 @@ in redrawn buffer, then remove them (and their children) from BUFFER."
               (delete-region (point) (1+ (point))))))))))
 
 (defun denote-tree--compare-and-insert-new-to
-    (buffer old-pos new-pos &optional donep payload)
-  "Insert new nodes into BUFFER starting from OLD-POS.
+    (buffer old-pos new-pos)
+  "Insert current buffer nodes into BUFFER starting from OLD-POS.
 
 Argument NEW-POS - a corresponding position in a temporary buffer where
-                   redrawing with `denote-tree--deepen-traversal' takes place.
-  Argument DONEP - is recursion done?
-Argument PAYLOAD - node to be drawn."
+                   redrawing with `denote-tree--deepen-traversal' takes place."
   (with-current-buffer buffer
-    (goto-char old-pos))
+      (goto-char old-pos))
   (goto-char new-pos)
-  (let ((old-line (with-current-buffer buffer
-                    (buffer-substring (line-beginning-position) (line-end-position))))
-        (new-line (buffer-substring (line-beginning-position) (line-end-position))))
-    (when payload
-      (with-current-buffer buffer
-        (save-excursion
-          (denote-tree--compare-and-insert-new-to-helper payload))))
-    (cond
-     ;; finish recursion
-     ((= (point-max) (point))
-      (setq donep t))
-     ;; move both
-     ((eq t (compare-strings old-line nil nil new-line nil nil t))
-      (setq old-pos (with-current-buffer buffer (forward-line) (point)))
-      (setq new-pos (progn (forward-line) (point)))
-      (setq new-line nil))
-     ;; move new buffer forward until it matches with old buffer
-     (t
-      (setq old-pos (with-current-buffer buffer (line-end-position)))
-      (setq new-pos (progn (forward-line) (point)))))
-    (unless donep
-      (denote-tree--compare-and-insert-new-to
-       buffer old-pos new-pos donep new-line))))
+  (while (> (point-max) (point))
+    (let ((old-line (with-current-buffer buffer
+                      (buffer-substring (line-beginning-position) (line-end-position))))
+          (new-line (buffer-substring (line-beginning-position) (line-end-position))))
+      (cond
+       ((eq t (compare-strings old-line nil nil new-line nil nil t))
+        (with-current-buffer buffer (forward-line))
+        (forward-line))
+       (t
+        (with-current-buffer buffer
+          (save-excursion
+            (denote-tree--compare-and-insert-new-to-helper new-line))
+          (goto-char (line-end-position)))
+        (forward-line))))))
 
 (defun denote-tree--compare-and-insert-new-to-helper (payload)
   "Insert PAYLOAD and correct it's properties.
