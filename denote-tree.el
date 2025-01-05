@@ -611,9 +611,28 @@ in redrawn buffer, then remove them (and their children) from BUFFER."
             (if foundp
                 (forward-line)
               ;; this is not the end, what about children?
-              (apply #'delete-region
-                     (denote-tree--determine-node-bounds
-                      (point) (denote-tree--build-marker-alist (point))))
+              (save-restriction
+                (apply #'narrow-to-region
+                       (denote-tree--determine-node-bounds
+                        (point) (denote-tree--build-marker-alist (point))))
+                ;;unimplemented
+                ;; (find-cyclical-buffers)
+                ;; determine if they exist at all and every reference
+                ;; to them should be deleted
+                ;; or
+                ;; reference are "killed" locally, then move the
+                ;; resulting tree to earliest suitable location
+
+                ;;unimplemented
+                ;; (reset-parent-node-maybe)
+                ;; (stitch-prev-and-next)
+                ;; if parent points to it's child, set it to next
+                ;; refer prev and next node to each other
+
+                ;;unimplemented
+                ;; (strip-all-markers)
+                ;; iteratively remove /all/ markers in props
+                (delete-region (point-min) (point-max)))
               (delete-region (point) (1+ (point))))))))))
 
 (defun denote-tree--compare-and-insert-new-to
