@@ -521,7 +521,7 @@ previous/next sibling node or a parent."
       (add-text-properties
        (line-beginning-position) (line-end-position)
        (list
-        'denote-tree--child (set-marker (make-marker) (car node-children))))))
+        'denote-tree--child (car node-children)))))
   (let ((prev (car (last node-children)))
         (tail node-children))
     (dolist (el node-children)
@@ -537,7 +537,7 @@ previous/next sibling node or a parent."
             'denote-tree--next (set-marker (make-marker) next)
             'denote-tree--prev (set-marker (make-marker) prev)
             'denote-tree--parent (set-marker (make-marker) parent)))))
-      (setq prev el))))
+      (setq prev el)))))
 
 (defun denote-tree--deepen-traversal ()
   "Retraverse current node under point.
