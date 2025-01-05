@@ -634,24 +634,7 @@ Argument PAYLOAD - node to be drawn."
     (when payload
       (with-current-buffer buffer
         (save-excursion
-          (forward-line -1)
-          (goto-char (line-end-position))
-          (insert "\n" payload)
-          (let ((text-props (text-properties-at (line-beginning-position))))
-            (dolist (el '(denote-tree--child
-                          denote-tree--next
-                          denote-tree--prev
-                          denote-tree--parent))
-              (when-let* ((marker (plist-get text-props el))
-                          ((marker-position marker))
-                          ;; node position in new buffer is offset from
-                          ;; the marker of old buffer by (point-min)
-                          (new-position (1- (+ (point-min) marker)))
-                          (new-buffer (get-buffer buffer)))
-                (setf (plist-get text-props el)
-                      (set-marker marker new-position new-buffer))))
-            (add-text-properties (line-beginning-position) (line-end-position)
-                                 text-props)))))
+          (denote-tree--compare-and-insert-new-to-helper payload))))
     (cond
      ;; finish recursion
      ((= (point-max) (point)))
@@ -679,6 +662,30 @@ Argument PAYLOAD - node to be drawn."
          (forward-line)
          (point))
        new-line)))))
+(defun denote-tree--compare-and-insert-new-to-helper (payload)
+  "Insert PAYLOAD and correct it's properties.
+
+PAYLOAD comes from smaller buffer.  It's properties need
+to be realigned, so marker positions match those of bigger
+buffer."
+  (forward-line -1)
+  (goto-char (line-end-position))
+  (insert "\n" payload)
+  (let ((text-props (text-properties-at (line-beginning-position))))
+    (dolist (el '(denote-tree--child
+                  denote-tree--next
+                  denote-tree--prev
+                  denote-tree--parent))
+      (when-let* ((marker (plist-get text-props el))
+                  ((marker-position marker))
+                  ;; node position in new buffer is offset from
+                  ;; the marker of old buffer by (point-min)
+                  (new-position (1- (+ (point-min) marker)))
+                  (new-buffer (current-buffer)))
+        (setf (plist-get text-props el)
+              (set-marker marker new-position new-buffer))))
+    (add-text-properties (line-beginning-position) (line-end-position)
+                         text-props)))
 
 (defun denote-tree--nuke-props-in-region (beg end)
   "For region BEG END remove all props and it's record.
