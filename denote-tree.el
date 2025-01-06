@@ -611,6 +611,7 @@ in redrawn buffer, then remove them (and their children) from BUFFER."
             (if foundp
                 (forward-line)
               ;; this is not the end, what about children?
+              (denote-tree--link-next-and-prev-node (point))
               (save-restriction
                 (apply #'narrow-to-region
                        (denote-tree--determine-node-bounds
@@ -622,18 +623,33 @@ in redrawn buffer, then remove them (and their children) from BUFFER."
                 ;; or
                 ;; reference are "killed" locally, then move the
                 ;; resulting tree to earliest suitable location
-
-                ;;unimplemented
-                ;; (reset-parent-node-maybe)
-                ;; (stitch-prev-and-next)
-                ;; if parent points to it's child, set it to next
-                ;; refer prev and next node to each other
-
                 ;;unimplemented
                 ;; (strip-all-markers)
                 ;; iteratively remove /all/ markers in props
                 (delete-region (point-min) (point-max)))
               (delete-region (point) (1+ (point))))))))))
+
+(defun denote-tree--link-next-and-prev-node (pos)
+  "Nodes in vicinity of node at POS point at nearest neighbor."
+  (when-let* ((next (get-text-property pos 'denote-tree--next))
+              (next-prev (get-text-property next 'denote-tree--prev))
+              (prev (get-text-property pos 'denote-tree--prev))
+              (prev-next (get-text-property prev 'denote-tree--next))
+              (parent (get-text-property pos 'denote-tree--parent))
+              (parent-child (get-text-property parent 'denote-tree--child)))
+    ;; handle neighbors
+    (cond
+     ;; there are /at max/ two nodes
+     ((equal next prev)
+      (set-marker next-prev next)
+      (set-marker prev-next prev))
+     ;; there is more than two nodes
+     (t
+      (set-marker next-prev prev)
+      (set-marker prev-next next)))
+    ;; handle parent
+    (when (= parent-child pos)
+      (set-marker parent-child next))))
 
 (defun denote-tree--compare-and-insert-new-to
     (buffer old-pos new-pos)
