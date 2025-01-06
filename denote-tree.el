@@ -523,21 +523,22 @@ previous/next sibling node or a parent."
        (list
         'denote-tree--child (car node-children)))))
   (let ((prev (car (last node-children)))
-        (tail node-children))
-    (dolist (el node-children)
-      (setq tail (cdr tail))
+        (next (copy-sequence node-children)))
+    (when next
+      (setcdr (last next) next))
+    (dolist (current node-children)
+      (setq next (cdr next))
       ;; if tail is null, then we are at last element,
       ;; fetch start of child nodes
-      (let ((next (or (car tail) (car node-children))))
-        (save-excursion
-          (goto-char el)
-          (add-text-properties
-           (line-beginning-position) (line-end-position)
-           (list
-            'denote-tree--next (set-marker (make-marker) next)
-            'denote-tree--prev (set-marker (make-marker) prev)
-            'denote-tree--parent (set-marker (make-marker) parent)))))
-      (setq prev el)))))
+      (save-excursion
+        (goto-char current)
+        (add-text-properties
+         (line-beginning-position) (line-end-position)
+         (list
+          'denote-tree--next (set-marker (make-marker) (car next))
+          'denote-tree--prev (set-marker (make-marker) prev)
+          'denote-tree--parent (set-marker (make-marker) parent))))
+      (setq prev current))))
 
 (defun denote-tree--deepen-traversal ()
   "Retraverse current node under point.
