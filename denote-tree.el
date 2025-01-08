@@ -630,7 +630,10 @@ in redrawn buffer, then remove them (and their children) from BUFFER."
               (delete-region (point) (1+ (point))))))))))
 
 (defun denote-tree--link-next-and-prev-node (pos)
-  "Nodes in vicinity of node at POS point at nearest neighbor."
+  "Nodes in vicinity of node at POS point at nearest neighbor.
+
+If node points at node at POS with \\='denote-tree--child prop
+set marker to nil."
   (when-let* ((next (get-text-property pos 'denote-tree--next))
               (next-prev (get-text-property next 'denote-tree--prev))
               (prev (get-text-property pos 'denote-tree--prev))
@@ -648,8 +651,13 @@ in redrawn buffer, then remove them (and their children) from BUFFER."
       (set-marker next-prev prev)
       (set-marker prev-next next)))
     ;; handle parent
-    (when (= parent-child pos)
-      (set-marker parent-child next))))
+    (let ((next-next (get-text-property next 'denote-tree--next)))
+      (cond
+       ((and (= next-next pos)
+             (= parent-child pos))
+        (set-marker parent-child nil))
+       ((= parent-child pos)
+        (set-marker parent-child next))))))
 
 (defun denote-tree--compare-and-insert-new-to
     (buffer old-pos new-pos)
