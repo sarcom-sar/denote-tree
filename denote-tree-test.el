@@ -1344,6 +1344,20 @@ No need to test `denote-tree-prev-node', because it calls
                       (line-beginning-position) (point-max))
                      buf-cont)))))
 
+(defun denote-tree-test-helper--iterate-over-solutions (lst)
+  "Iterate of LST in `denote-tree--link-next-and-prev-node'.
+
+LST looks like (START PROP END)."
+  (dolist (pos-prop lst)
+    (goto-line (car pos-prop))
+    (should
+     (= (get-text-property (point) (cadr pos-prop))
+        (save-excursion
+          (goto-line (caddr pos-prop))
+          (next-single-property-change
+           (line-beginning-position)
+           'button-data))))))
+
 (ert-deftest denote-tree-test--link-next-and-prev-node ()
   "Tests for `denote-tree--link-next-and-prev-node'."
   (with-temp-buffer
@@ -1351,80 +1365,44 @@ No need to test `denote-tree-prev-node', because it calls
       (denote-tree--walk-links (buffer-name) "" nil t))
     ;; node "b"
     (denote-tree--link-next-and-prev-node (goto-line 3))
-    (dolist (pos-prop '((2 denote-tree--next 4) (2 denote-tree--prev 4)
-                        (4 denote-tree--next 2) (4 denote-tree--prev 2)))
-      (goto-line (car pos-prop))
-      (should
-       (= (get-text-property (point) (cadr pos-prop))
-          (save-excursion
-            (goto-line (caddr pos-prop))
-            (next-single-property-change
-             (line-beginning-position)
-             'button-data))))))
+    (denote-tree-test-helper--iterate-over-solutions
+     '((2 denote-tree--next 4) (2 denote-tree--prev 4)
+       (4 denote-tree--next 2) (4 denote-tree--prev 2))))
   (with-temp-buffer
     (denote-tree-test-mock--walk-links-macro nil '(("a" "b" "c"))
       (denote-tree--walk-links (buffer-name) "" nil t))
     ;; node "a"
     (denote-tree--link-next-and-prev-node (goto-line 2))
-    (dolist (pos-prop '((4 denote-tree--next 3) (4 denote-tree--prev 3)
-                        (3 denote-tree--next 4) (3 denote-tree--prev 4)))
-      (goto-line (car pos-prop))
-      (should
-       (= (get-text-property (point) (cadr pos-prop))
-          (save-excursion
-            (goto-line (caddr pos-prop))
-            (next-single-property-change
-             (line-beginning-position)
-             'button-data))))))
+    (denote-tree-test-helper--iterate-over-solutions
+     '((4 denote-tree--next 3) (4 denote-tree--prev 3)
+       (3 denote-tree--next 4) (3 denote-tree--prev 4))))
   (with-temp-buffer
     (denote-tree-test-mock--walk-links-macro nil '(("a" "b" "c"))
       (denote-tree--walk-links (buffer-name) "" nil t))
     ;; node "c"
     (denote-tree--link-next-and-prev-node (goto-line 4))
-    (dolist (pos-prop '((2 denote-tree--next 3) (2 denote-tree--prev 3)
-                        (3 denote-tree--next 2) (3 denote-tree--prev 2)))
-      (goto-line (car pos-prop))
-      (should
-       (= (get-text-property (point) (cadr pos-prop))
-          (save-excursion
-            (goto-line (caddr pos-prop))
-            (next-single-property-change
-             (line-beginning-position)
-             'button-data))))))
+    (denote-tree-test-helper--iterate-over-solutions
+     '((2 denote-tree--next 3) (2 denote-tree--prev 3)
+       (3 denote-tree--next 2) (3 denote-tree--prev 2))))
   (with-temp-buffer
     (denote-tree-test-mock--walk-links-macro nil '(("a"))
       (denote-tree--walk-links (buffer-name) "" nil t))
     ;; node "a"
     (goto-line 2)
     (denote-tree--link-next-and-prev-node 17)
-    (dolist (pos-prop '((2 denote-tree--next 2) (2 denote-tree--prev 2)))
-      (goto-line (car pos-prop))
-      (should
-       (= (get-text-property (point) (cadr pos-prop))
-          (save-excursion
-            (goto-line (caddr pos-prop))
-            (next-single-property-change
-             (line-beginning-position)
-             'button-data)))))
-    (goto-line 1)
+    (denote-tree-test-helper--iterate-over-solutions
+     '((2 denote-tree--next 2) (2 denote-tree--prev 2)))
     (should-not
-     (marker-position (get-text-property (point) 'denote-tree--child))))
+     (marker-position (get-text-property (goto-line 1) 'denote-tree--child))))
   (with-temp-buffer
     (denote-tree-test-mock--walk-links-macro nil '(("a" "b"))
       (denote-tree--walk-links (buffer-name) "" nil t))
     ;; node "b"
     (denote-tree--link-next-and-prev-node (goto-line 3))
-    (dolist (pos-prop '((2 denote-tree--next 2)
-                        (2 denote-tree--prev 2)
-                        (1 denote-tree--child 2)))
-      (goto-line (car pos-prop))
-      (should
-       (= (get-text-property (point) (cadr pos-prop))
-          (save-excursion
-            (goto-line (caddr pos-prop))
-            (next-single-property-change
-             (line-beginning-position)
-             'button-data)))))))
+    (denote-tree-test-helper--iterate-over-solutions
+     '((2 denote-tree--next 2)
+       (2 denote-tree--prev 2)
+       (1 denote-tree--child 2)))))
 
 (provide 'denote-tree-test)
 ;;; denote-tree-test.el ends here
