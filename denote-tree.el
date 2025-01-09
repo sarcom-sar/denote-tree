@@ -299,8 +299,7 @@ the parent node position for future backtracking."
       (dotimes (_ arg next-point)
         (and (setq next-point (get-text-property (point) 'denote-tree--child))
              (setq curr-point
-                   (next-single-property-change
-                    (line-beginning-position) 'button-data))
+                   (denote-tree--get-node-pos curr-point))
              (goto-char next-point)
              preserve-teleport-p
              (> curr-point next-point)
@@ -542,16 +541,12 @@ low value."
   (let* ((inhibit-read-only t)
          ;; pos of current node
          (old-buffer (buffer-name))
-         (node-pos
-          (next-single-property-change
-           (line-beginning-position) 'button-data))
+         (node-pos (denote-tree--get-node-pos))
          (marker-alist (denote-tree--build-marker-alist node-pos))
          (id (denote-tree--get-prop 'button-data))
          (indent (buffer-substring-no-properties
                   (line-beginning-position)
-                  (- (next-single-property-change
-                      (line-beginning-position) 'button-data)
-                     (length denote-tree-node))))
+                  (- node-pos (length denote-tree-node))))
          (lastp (save-excursion
                   (goto-char (line-beginning-position))
                   (search-forward
@@ -606,10 +601,8 @@ in redrawn buffer, then remove them (and their children) from BUFFER."
         (while (> (point-max) (point))
           (let* ((old-line
                   (buffer-substring-no-properties
-                   (or
-                    (next-single-property-change
-                     (line-beginning-position) 'button-data)
-                    (point))
+                   (or (denote-tree--get-node-pos)
+                       (point))
                    (line-end-position)))
                  (foundp (with-current-buffer new-buf
                            (goto-char 1)
@@ -756,7 +749,7 @@ buffer."
   "For region BEG END remove all props and it's record.
 
 Non cyclical nodes are removed from `denote-tree--visited-buffers'
-and `denote-tree--cyclic-buffers."
+and `denote-tree--cyclic-buffers'."
   (save-restriction
     (widen)
     (narrow-to-region beg end)
@@ -765,9 +758,7 @@ and `denote-tree--cyclic-buffers."
           (visited-buffers denote-tree--visited-buffers)
           (cyclic-buffers denote-tree--cyclic-buffers))
       (while (> (point-max) (point))
-        (let* ((pos (next-single-property-change
-                     (line-beginning-position)
-                     'button-data))
+        (let* ((pos (denote-tree--get-node-pos))
                (data-prop (and pos (get-text-property pos 'button-data)))
                (face-prop (and pos (get-text-property pos 'face))))
           (when (eq face-prop 'denote-tree-node)
@@ -996,6 +987,11 @@ Add ELEMENT to `denote-tree--visited-buffers' to delete it after
   "Default function returning STR of TYPE with properties.
 One props returned has to be denote-tree--type."
   (propertize str 'denote-tree--type type))
+
+(defun denote-tree--get-node-pos (&optional object limit)
+  "Get node position in line."
+  (next-single-property-change
+   (line-beginning-position) 'button-data object limit))
 
 (defun denote-tree--get-prop (prop &optional at-pos)
   "Get PROP at current line or starting from AT-POS.
