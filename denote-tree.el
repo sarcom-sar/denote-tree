@@ -578,6 +578,8 @@ low value."
                 (denote-tree--walk-links
                  id indent lastp denote-tree-max-traversal-depth))
             (denote-tree--clean-up))
+          (setq visited-buffers denote-tree--visited-buffers
+                cyclical-buffers denote-tree--cyclic-buffers)
           (with-current-buffer old-buffer
             (save-restriction
               ;; do not forget the trailing newline
