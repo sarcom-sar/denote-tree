@@ -587,12 +587,6 @@ low value."
               (with-current-buffer new-buffer
                 (denote-tree--compare-and-insert-new-to old-buffer (point-min) 1))
               (goto-char (point-min))
-              (put-text-property
-               (line-beginning-position) (line-end-position)
-               'denote-tree--child
-               (save-excursion
-                 (next-single-property-change
-                  (goto-line-relative 2) 'button-data)))
               (denote-tree--set-positions-to-markers)
               (goto-char (point-min)))))))
     (goto-char node-pos)))
