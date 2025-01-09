@@ -684,7 +684,9 @@ Argument NEW-POS - a corresponding position in a temporary buffer where
           (new-line (buffer-substring (line-beginning-position) (line-end-position))))
       (cond
        ((eq t (compare-strings old-line nil nil new-line nil nil t))
-        (with-current-buffer buffer (forward-line))
+        (with-current-buffer buffer
+          (denote-tree--copy-new-markers new-line)
+          (forward-line))
         (forward-line))
        (t
         (with-current-buffer buffer
@@ -692,6 +694,18 @@ Argument NEW-POS - a corresponding position in a temporary buffer where
             (denote-tree--compare-and-insert-new-to-helper new-line))
           (goto-char (line-end-position)))
         (forward-line))))))
+
+(defun denote-tree--copy-new-markers (payload)
+  (let ((text-props (text-properties-at (line-beginning-position))))
+    (dolist (el '(denote-tree--child denote-tree--next denote-tree--prev denote-tree--parent))
+      (unless (plist-member text-props el)
+        (when-let* ((new-marker (get-text-property 0 el payload))
+                    (new-position (1- (+ (point-min) new-marker))))
+          (setf text-props
+                (append
+                 text-props (list el (cons new-marker new-position)))))
+        (add-text-properties (line-beginning-position) (line-end-position)
+                             text-props)))))
 
 (defun denote-tree--compare-and-insert-new-to-helper (payload)
   "Insert PAYLOAD and correct it's properties.
