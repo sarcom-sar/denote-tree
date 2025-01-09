@@ -681,7 +681,7 @@ Argument NEW-POS - a corresponding position in a temporary buffer where
       (cond
        ((eq t (compare-strings old-line nil nil new-line nil nil t))
         (with-current-buffer buffer
-          (denote-tree--copy-new-markers new-line)
+          (denote-tree--copy-new-markers-to-old-node new-line)
           (forward-line))
         (forward-line))
        (t
@@ -691,7 +691,7 @@ Argument NEW-POS - a corresponding position in a temporary buffer where
           (goto-char (line-end-position)))
         (forward-line))))))
 
-(defun denote-tree--copy-new-markers (payload)
+(defun denote-tree--copy-new-markers-to-old-node (payload)
   (let ((text-props (text-properties-at (line-beginning-position))))
     (dolist (el '(denote-tree--child denote-tree--next denote-tree--prev denote-tree--parent))
       (unless (plist-member text-props el)
