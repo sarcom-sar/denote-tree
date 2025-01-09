@@ -588,7 +588,24 @@ low value."
                 (denote-tree--compare-and-insert-new-to old-buffer (point-min) 1))
               (goto-char (point-min))
               (denote-tree--set-positions-to-markers)
-              (goto-char (point-min)))))))
+              (goto-char (point-min))))))
+      (setq denote-tree--visited-buffers
+            (seq-union denote-tree--visited-buffers
+                       visited-buffers))
+      (setq denote-tree--cyclic-buffers
+            (let ((first denote-tree--cyclic-buffers)
+                  (second cyclical-buffers)
+                  result)
+              (dolist (el first)
+                (if (alist-get (car el) second)
+                    (push (seq-union el (rassoc (car el) second)) result)
+                  (push el result)))
+              (dolist (el second)
+                (if (alist-get (car el) first)
+                    (push (seq-union el (rassoc (car el) first)) result)
+                  (push el result)))
+              (nreverse (seq-uniq result)))))
+    (denote-tree--add-props-to-cycles)
     (goto-char node-pos)))
 
 (defun denote-tree--sanitize-deleted-entries (buffer)
