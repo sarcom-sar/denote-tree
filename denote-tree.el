@@ -704,7 +704,7 @@ buffer."
                   (new-position (1- (+ (point-min) marker)))
                   (new-buffer (current-buffer)))
         (setf (plist-get text-props el)
-              (set-marker marker new-position new-buffer))))
+              (cons marker new-position))))
     (add-text-properties (line-beginning-position) (line-end-position)
                          text-props)))
 
