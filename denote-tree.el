@@ -733,14 +733,14 @@ buffer."
                          text-props)))
 
 (defun denote-tree--set-positions-to-markers ()
-  (goto-line-relative 2)
   (while (> (point-max) (point))
     (let ((text-props (text-properties-at (line-beginning-position))))
       (dolist (el '(denote-tree--child
                     denote-tree--next
                     denote-tree--prev
                     denote-tree--parent))
-        (when-let* ((pos (plist-get text-props el)))
+        (when-let* ((pos (plist-get text-props el))
+                    ((consp pos)))
           (setf (plist-get text-props el)
                 (set-marker (car pos) (cdr pos) (current-buffer)))))
       (add-text-properties (line-beginning-position) (line-end-position)
