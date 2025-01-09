@@ -419,7 +419,6 @@ Argument DEPTH  - maximum depth of the traversal."
   ;; carry over the indent
   (if-let* ((buffer (denote-tree--open-link-maybe buffer)))
       (let ((links-in-buffer (denote-tree--collect-links buffer))
-            (cyclical-node (assoc buffer denote-tree--cyclic-buffers #'string=))
             (depth (cond
                     ((symbolp depth) depth)
                     ((and (numberp depth) (< 0 (1- depth))) (1- depth))
@@ -430,19 +429,16 @@ Argument DEPTH  - maximum depth of the traversal."
         ;; traverse the buffer structure
         ;; if current buffer is in denote-tree--cyclic-buffers
         ;; do not go deeper, because you enter a cycle
-        (cond
-         (cyclical-node
-          (setcdr cyclical-node (append (cdr cyclical-node) (list pos))))
-         (t
+        (unless (member buffer denote-tree--cyclic-buffers)
           (dolist (el links-in-buffer)
             (when (and (get-buffer el)
                        (not (member
-                             el (mapcar #'car denote-tree--cyclic-buffers))))
-              (push (list el) denote-tree--cyclic-buffers))
+                             el denote-tree--cyclic-buffers)))
+              (push el denote-tree--cyclic-buffers))
             (when depth
               (push (denote-tree--walk-links
                      el indent (string= el (car (last links-in-buffer))) depth)
-                    node-children)))))
+                    node-children))))
         ;; add props to current node and it's children
         (denote-tree--set-button pos buffer)
         (denote-tree--add-props-to-children
@@ -480,7 +476,7 @@ Call `denote-tree-node-colorize-function' on title.
 
 Return location of a point where the node starts and the current indent.
 Argument LASTP is the current node last child of parent."
-  (let ((circularp (assoc node-name denote-tree--cyclic-buffers))
+  (let ((circularp (member node-name denote-tree--cyclic-buffers))
         (keywords denote-tree-node-description)
         point-star-loc)
     (insert indent)
@@ -592,18 +588,8 @@ low value."
             (seq-union denote-tree--visited-buffers
                        visited-buffers))
       (setq denote-tree--cyclic-buffers
-            (let ((first denote-tree--cyclic-buffers)
-                  (second cyclical-buffers)
-                  result)
-              (dolist (el first)
-                (if (alist-get (car el) second)
-                    (push (seq-union el (rassoc (car el) second)) result)
-                  (push el result)))
-              (dolist (el second)
-                (if (alist-get (car el) first)
-                    (push (seq-union el (rassoc (car el) first)) result)
-                  (push el result)))
-              (nreverse (seq-uniq result)))))
+            (seq-union denote-tree--cyclic-buffers
+                       cyclical-buffers)))
     (denote-tree--add-props-to-cycles)
     (goto-char node-pos)))
 
