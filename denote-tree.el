@@ -584,6 +584,14 @@ low value."
               (narrow-to-region reg-beg (1+ reg-end))
               (with-current-buffer new-buffer
                 (denote-tree--compare-and-insert-new-to old-buffer (point-min) 1))
+              (goto-char (point-min))
+              (put-text-property
+               (line-beginning-position) (line-end-position)
+               'denote-tree--child
+               (save-excursion
+                 (next-single-property-change
+                  (goto-line-relative 2) 'button-data)))
+              (denote-tree--set-positions-to-markers)
               (goto-char (point-min)))))))
     (goto-char node-pos)))
 
@@ -707,6 +715,22 @@ buffer."
               (cons marker new-position))))
     (add-text-properties (line-beginning-position) (line-end-position)
                          text-props)))
+
+(defun denote-tree--set-positions-to-markers ()
+  (goto-line-relative 2)
+  (while (> (point-max) (point))
+    (let ((text-props (text-properties-at (line-beginning-position))))
+      (dolist (el '(denote-tree--child
+                    denote-tree--next
+                    denote-tree--prev
+                    denote-tree--parent))
+        (when-let* ((pos (plist-get text-props el)))
+          (setf (plist-get text-props el)
+                (set-marker (car pos) (cdr pos) (current-buffer)))))
+      (add-text-properties (line-beginning-position) (line-end-position)
+                           text-props))
+    (forward-line)
+    (goto-char (line-end-position))))
 
 (defun denote-tree--nuke-props-in-region (beg end)
   "For region BEG END remove all props and it's record.
