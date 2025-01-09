@@ -475,7 +475,7 @@ and it's value in plist is a string."
     (should (equal (text-properties-at 7) '(denote-tree--type b))))
   (denote-tree-test-mock--draw-node-macro
       ((propertize "A " 'denote-tree--type 'a) (propertize "B" 'denote-tree--type 'b))
-      '(("name" 3 5))
+      '("name")
     (denote-tree--draw-node "name" "" t)
     (should (equal (text-properties-at 3) '(face denote-tree-circular-node)))
     (should (equal (text-properties-at 5) '(denote-tree--type a)))
@@ -518,14 +518,14 @@ somewhere earlier, find it."
   (with-temp-buffer
     (insert
      "'-"
-     (propertize "* " 'button-data "name" 'denote-tree--child 10)
+     (propertize "* " 'face 'denote-tree-node 'button-data "name" 'denote-tree--child 10)
      "A\n"
      "  '-"
      (propertize "* " 'button-data "eman" 'denote-tree--child 22)
      "B\n"
      "     '-"
-     (propertize "* " 'button-data "name"))
-    (let ((denote-tree--cyclic-buffers `(("name" ,(denote-tree-test-helper--make-marker-at 22)))))
+     (propertize "* " 'face 'denote-tree-circular-node 'button-data "name"))
+    (let ((denote-tree--cyclic-buffers '("name")))
       (goto-char (point-min))
       (denote-tree--add-props-to-cycles))
     (let ((pos (get-text-property 22 'denote-tree--child)))
@@ -533,15 +533,15 @@ somewhere earlier, find it."
   (with-temp-buffer
     (insert
      "-"
-     (propertize "* " 'button-data "name" 'denote-tree--child 8)
+     (propertize "* " 'face 'denote-tree-node 'button-data "name" 'denote-tree--child 8)
      "A1\n "
      (propertize "* " 'button-data "eman" 'denote-tree--child 19)
      "B1\n  "
-     (propertize "* " 'button-data "name" 'denote-tree--child nil)
+     (propertize "* " 'face 'denote-tree-circular-node 'button-data "name" 'denote-tree--child nil)
      "A2\n "
-     (propertize "* " 'button-data "name")
+     (propertize "* " 'face 'denote-tree-circular-node 'button-data "name")
      "A3\n")
-    (let ((denote-tree--cyclic-buffers `(("name" ,@(denote-tree-test-helper--make-marker-at '(15 21))))))
+    (let ((denote-tree--cyclic-buffers '("name")))
       (goto-char (point-min))
       (denote-tree--add-props-to-cycles))
     (let ((pos (get-text-property 15 'denote-tree--child)))
@@ -553,9 +553,9 @@ somewhere earlier, find it."
      "-"
      (propertize "* " 'button-data "foo")
      "B\n "
-     (propertize "* " 'button-data "name")
+     (propertize "* " 'face 'denote-tree-node 'button-data "name")
      "A\n")
-    (let ((denote-tree--cyclic-buffers `(("name" ,(denote-tree-test-helper--make-marker-at 7)))))
+    (let ((denote-tree--cyclic-buffers '("name")))
       (goto-char (point-min))
       (denote-tree--add-props-to-cycles))
     (let ((pos (get-text-property 7 'denote-tree--child)))
@@ -565,9 +565,9 @@ somewhere earlier, find it."
      "-"
      (propertize "* " 'button-data "foo")
      "B\n "
-     (propertize "* " 'button-data "name" 'denote-tree--child 7)
+     (propertize "* " 'face denote-tree-node 'button-data "name" 'denote-tree--child 7)
      "A\n")
-    (let ((denote-tree--cyclic-buffers `(("name" ,(denote-tree-test-helper--make-marker-at 7)))))
+    (let ((denote-tree--cyclic-buffers '("name")))
       (goto-char (point-min))
       (denote-tree--add-props-to-cycles))
     (let ((pos (get-text-property 7 'denote-tree--child)))
@@ -672,7 +672,7 @@ Argument LST-OF-LINKS - list of links the `denote-tree--walk-links' will
          "    | '-* f\n"
          "    '-* d\n")))))
   (with-temp-buffer
-    (denote-tree-test-mock--walk-links-macro '(("a")) '(("a") ("b" "c" "d" "a"))
+    (denote-tree-test-mock--walk-links-macro '("a") '(("a") ("b" "c" "d" "a"))
       (denote-tree--walk-links (buffer-name (current-buffer)) "" t t)
       (should
        (string=
@@ -738,7 +738,7 @@ Argument LST-OF-LINKS - list of links the `denote-tree--walk-links' will
             button (t)
             face denote-tree-node))))))
   (with-temp-buffer
-    (denote-tree-test-mock--walk-links-macro '(("c"))
+    (denote-tree-test-mock--walk-links-macro '("c")
         '(("a") ("b" "d") ("c") ("e" "f") ("c"))
       (denote-tree--walk-links "FOO" "" t t)
       (should (equal (get-text-property 35 'face) 'denote-tree-circular-node))
