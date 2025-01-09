@@ -692,8 +692,16 @@ Argument NEW-POS - a corresponding position in a temporary buffer where
         (forward-line))))))
 
 (defun denote-tree--copy-new-markers-to-old-node (payload)
+  "Copy props from PAYLOAD and insert them to old node.
+
+PAYLOAD comes from smaller buffer.  It's properties need
+to be realigned, so marker positions match those of bigger
+buffer."
   (let ((text-props (text-properties-at (line-beginning-position))))
-    (dolist (el '(denote-tree--child denote-tree--next denote-tree--prev denote-tree--parent))
+    (dolist (el '(denote-tree--child
+                  denote-tree--next
+                  denote-tree--prev
+                  denote-tree--parent))
       (unless (plist-member text-props el)
         (when-let* ((new-marker (get-text-property 0 el payload))
                     (new-position (1- (+ (point-min) new-marker))))
