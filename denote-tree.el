@@ -453,22 +453,21 @@ Argument DEPTH  - maximum depth of the traversal."
 (defun denote-tree--add-props-to-cycles ()
   "Add \\='denote-tree--child prop to elements of `denote-tree--cyclic-buffers'.
 
-Find first element with button-data set to the car of
-`denote-tree--cyclic-buffers' (since DFS is in effect, the first found match
-is guaranteed to be the most expanded one), then save it's position and set
-that position as denote-tree--child of all the cyclic nodes."
-  (dolist (node-id-and-pos denote-tree--cyclic-buffers)
+Iterate over `denote-tree--cyclic-buffers' finding the original and
+then setting \\='denote-tree--child prop of other cyclic buffers to
+the value of the original."
+  (dolist (node-id denote-tree--cyclic-buffers)
     (goto-char (point-min))
-    (text-property-search-forward 'button-data (car node-id-and-pos))
-    (let* ((marker (get-text-property (point) 'denote-tree--child)))
-      (dolist (node-pos (cdr node-id-and-pos))
-        (goto-char node-pos)
-        ;; is valid point
-        (if (get-text-property node-pos 'button-data)
-            (add-text-properties
-             (line-beginning-position) (line-end-position)
-             (list 'denote-tree--child marker))
-          (setf node-id-and-pos (delete node-pos node-id-and-pos)))))))
+    (while (and (> (point-max) (point))
+                (not (eq (get-text-property (point) 'face) 'denote-tree-node)))
+      (text-property-search-forward 'button-data node-id))
+    (let ((marker (get-text-property (point) 'denote-tree--child)))
+      (goto-char (point-min))
+      (while (text-property-search-forward 'button-data node-id)
+        (when (eq (get-text-property (point) 'face) 'denote-tree-circular-node)
+          (add-text-properties
+           (line-beginning-position) (line-end-position)
+           (list 'denote-tree--child marker)))))))
 
 (defun denote-tree--draw-node (node-name indent lastp)
   "Draw NODE-NAME according to INDENT in current buffer.
