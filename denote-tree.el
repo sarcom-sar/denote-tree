@@ -769,10 +769,9 @@ and `denote-tree--cyclic-buffers."
       (setq visited-buffers
             (seq-difference visited-buffers
                             non-cyclical))
-      (dolist (el non-cyclical)
-        (setq cyclic-buffers
-              (remove (assoc el cyclic-buffers)
-                      cyclic-buffers)))
+      (setq cyclic-buffers
+            (seq-difference cyclic-buffers
+                            non-cyclical))
       (list visited-buffers cyclic-buffers))))
 
 (defun denote-tree--determine-node-bounds (node-pos marker-alist)
