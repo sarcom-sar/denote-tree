@@ -687,7 +687,7 @@ Argument NEW-POS - a corresponding position in a temporary buffer where
        (t
         (with-current-buffer buffer
           (save-excursion
-            (denote-tree--compare-and-insert-new-to-helper new-line))
+            (denote-tree--insert-new-node-and-markers new-line))
           (goto-char (line-end-position)))
         (forward-line))))))
 
@@ -703,7 +703,7 @@ Argument NEW-POS - a corresponding position in a temporary buffer where
         (add-text-properties (line-beginning-position) (line-end-position)
                              text-props)))))
 
-(defun denote-tree--compare-and-insert-new-to-helper (payload)
+(defun denote-tree--insert-new-node-and-markers (payload)
   "Insert PAYLOAD and correct it's properties.
 
 PAYLOAD comes from smaller buffer.  It's properties need
