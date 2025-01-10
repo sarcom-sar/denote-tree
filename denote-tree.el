@@ -226,7 +226,6 @@ open it.
 The function uses either the current buffer, if called interactively
 or a BUFFER provided by the user."
   (interactive)
-  (message "Building denote-tree buffer...")
   (let (buffer-name)
     (unwind-protect
         (progn
@@ -397,11 +396,14 @@ Preserve properties."
 
 (defun denote-tree--draw-tree (buffer)
   "Draw and propertize a tree in current buffer starting with BUFFER."
-  (denote-tree--walk-links buffer "" t denote-tree-max-traversal-depth)
-  (delete-region (1- (point-max)) (point-max))
-  (denote-tree--add-props-to-cycles))
+  (let ((progress (make-progress-reporter "Building denote-tree buffer...")))
+    (denote-tree--walk-links
+     buffer "" t denote-tree-max-traversal-depth progress)
+    (delete-region (1- (point-max)) (point-max))
+    (denote-tree--add-props-to-cycles)
+    (progress-reporter-done progress)))
 
-(defun denote-tree--walk-links (buffer indent lastp depth)
+(defun denote-tree--walk-links (buffer indent lastp depth progress)
   "Walk along the links starting from BUFFER.
 
 Draw the current buffer as a node in `denote-tree--buffer-name'.  Set it's
@@ -410,9 +412,10 @@ them recursively.  If BUFFER was already visited do not iterate
 over it.  If BUFFER doesn't have a file, skip over and return a
 symbol \\='notvalid.
 
-Argument INDENT - state of INDENT between traversals.
-Argument LASTP  - is the node the last child of parent node?
-Argument DEPTH  - maximum depth of the traversal."
+Argument INDENT   - state of INDENT between traversals.
+Argument LASTP    - is the node the last child of parent node?
+Argument DEPTH    - maximum depth of the traversal.
+Argument PROGRESS - a progress reporter."
   ;; draw node in buffer,
   ;; extract position of point at node
   ;; carry over the indent
@@ -425,6 +428,7 @@ Argument DEPTH  - maximum depth of the traversal."
                     (t t)))
             node-children pos)
         (seq-setq (pos indent) (denote-tree--draw-node buffer indent lastp))
+        (progress-reporter-update progress)
         ;; traverse the buffer structure
         ;; if current buffer is in denote-tree--cyclic-buffers
         ;; do not go deeper, because you enter a cycle
@@ -565,9 +569,11 @@ low value."
           (setq denote-tree--visited-buffers visited-buffers
                 denote-tree--cyclic-buffers cyclical-buffers)
           (unwind-protect
-              (progn
+              (let ((progress (make-progress-reporter
+                               "Rebuilding denote-tree buffer...")))
                 (denote-tree--walk-links
-                 id indent lastp denote-tree-max-traversal-depth))
+                 id indent lastp denote-tree-max-traversal-depth progress)
+                (progress-reporter-done progress))
             (denote-tree--clean-up))
           (setq visited-buffers denote-tree--visited-buffers
                 cyclical-buffers denote-tree--cyclic-buffers)
