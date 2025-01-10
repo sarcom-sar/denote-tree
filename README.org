@@ -31,8 +31,8 @@ those cyclical nodes by default.  The initial cost of drawing a full tree is
 paid once, at initialization.  It does not draw the tree lazily.  After that,
 =denote-tree= is able to redraw parts of a tree at point.  Important to note, it
 still does not consider neither which buffers /were/ visited nor which buffers
-are cyclic.  It works naively.  The support for proper lazy redraw is being
-worked on.
+are cyclic.  It works naively.  The support for proper lazy redrawing works
+while you /add/ nodes, but doesn't yet when you delete them.
 
 *** Keybindings for =*denote-tree*= buffer
 
@@ -87,7 +87,7 @@ worked on.
 - =denote-tree-buffer-prefix=, every denote tree is built by a custom custom
   prefix, customizable here, and root node of a tree.
 - =denote-tree-fancy-edit=, use fancy propertized edit over thin wrapper around
-  =denote-rename-file=.
+  =denote-rename-file=. *EXPERIMENTAL*
 - =denote-tree-extend-filetype-with=, extend what kinds of regexps =denote-tree=
   is aware of in your front matter.  It also provides backwards compatibility
   with versions od =denote= older than commit 3517ba2.
@@ -138,16 +138,16 @@ issue tracker, if you find a bug, have an idea, etc.  Same with code
 contributions.
 
 ** To-Do list
-*** Nice to have
 
 - [X] Make it major mode agnostic;
 - [X] give the user the ability to colorize node titles;
 - [X] unite traversal functions;
 - [-] smarter redrawing of a tree,
   - [ ] collapsible tree  (with hierarchy.el);
-  - [X] redraw parts of a buffer;
-  - [ ] handle cyclical nodes while redrawing;
+  - [-] redraw parts of a buffer and handle cyclic-buffers,
+    - [X] works while adding nodes;
+    - [ ] works while deleting nodes.
 - [X] ability to edit the front matter at point;
 - [X] edit front matter with widgets (as optional denote-tree-edit);
 - [X] multiple denote-tree buffers;
-- [ ] generate a child note from parent;
+- [ ] generate a child note from parent.

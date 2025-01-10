@@ -2,7 +2,7 @@
 
 ;; Copyright 2024, Sararin
 ;; Created: 2024-09-15 Sun
-;; Version: 0.8.5
+;; Version: 0.8.6
 ;; Keywords: convenience
 ;; URL: http://github.com/sarcom-sar/denote-tree.el
 ;; Package-Requires: ((emacs "28.1") (denote "3.0.1"))
