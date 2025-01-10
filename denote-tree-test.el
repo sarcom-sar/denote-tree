@@ -615,7 +615,8 @@ Argument LST-OF-LINKS - list of links the `denote-tree--walk-links' will
                         construct a drawing where \"d\" is a child of \"c\";"
   (declare (indent 2))
   ;; ugly by hand check
-  `(let ((denote-tree--cyclic-buffers ,cyc-bufs)
+  `(let ((denote-tree-max-traversal-depth t)
+         (denote-tree--cyclic-buffers ,cyc-bufs)
          (denote-tree--visited-buffers nil))
      (denote-tree-test-mock-make-next-links ,lst-of-links)
      (cl-letf (((symbol-function 'denote-tree--collect-links)
