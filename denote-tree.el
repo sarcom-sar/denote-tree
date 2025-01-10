@@ -695,7 +695,7 @@ buffer."
                   denote-tree--next
                   denote-tree--prev
                   denote-tree--parent))
-      (when-let* ((not (plist-member text-props el))
+      (when-let* (((null (plist-member text-props el)))
                   (new-marker (get-text-property 0 el payload))
                   (new-position (1- (+ (point-min) new-marker))))
         (setf text-props
