@@ -559,9 +559,7 @@ low value."
          (reg-beg) (reg-end)
          (_ (seq-setq (reg-beg reg-end)
                       (denote-tree--determine-node-bounds
-                       node-pos marker-alist)))
-         ;; zero the markers of siblings
-         )
+                       node-pos marker-alist))))
     (seq-let (visited-buffers cyclical-buffers)
         (denote-tree--nuke-props-in-region reg-beg reg-end)
       (with-temp-buffer ;; new-buffer
