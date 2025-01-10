@@ -435,8 +435,9 @@ Argument DEPTH  - maximum depth of the traversal."
                              el denote-tree--cyclic-buffers)))
               (push el denote-tree--cyclic-buffers))
             (when depth
+              (setq lastp (string= el (car (last links-in-buffer))))
               (push (denote-tree--walk-links
-                     el indent (string= el (car (last links-in-buffer))) depth)
+                     el indent lastp depth progress)
                     node-children))))
         ;; add props to current node and it's children
         (denote-tree--set-button pos buffer)
