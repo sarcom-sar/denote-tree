@@ -410,7 +410,7 @@ properties."
     (denote-tree--add-props-to-cycles)
     (progress-reporter-done progress)))
 
-(defun denote-tree--walk-links (buffer indent lastp depth progress)
+(defun denote-tree--walk-links (buffer indent lastp depth &optional progress)
   "Walk along the links starting from BUFFER.
 
 Draw the current buffer as a node in `denote-tree--buffer-name'.  Set
@@ -435,7 +435,8 @@ Argument PROGRESS - a progress reporter."
                     (t t)))
             node-children pos)
         (seq-setq (pos indent) (denote-tree--draw-node buffer indent lastp))
-        (progress-reporter-update progress)
+        (when progress
+          (progress-reporter-update progress))
         ;; traverse the buffer structure
         ;; if current buffer is in denote-tree--cyclic-buffers
         ;; do not go deeper, because you enter a cycle
