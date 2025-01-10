@@ -736,6 +736,11 @@ buffer."
                          text-props)))
 
 (defun denote-tree--set-positions-to-markers ()
+  "Reset positions of prop markers from consp to singular value.
+
+In previous step of redrawing, the newly inserted nodes had their new
+position saved as `cdr' of a cons cell.  In restore those positions in
+current buffers as actual positions."
   (while (> (point-max) (point))
     (let ((text-props (text-properties-at (line-beginning-position))))
       (dolist (el '(denote-tree--child
