@@ -568,12 +568,12 @@ low value."
          (_ (seq-setq (reg-beg reg-end)
                       (denote-tree--determine-node-bounds
                        node-pos marker-alist))))
-    (seq-let (visited-buffers cyclical-buffers)
+    (seq-let (visited-buffers cyclic-buffers)
         (denote-tree--nuke-props-in-region reg-beg reg-end)
       (with-temp-buffer ;; new-buffer
         (let ((new-buffer (buffer-name)))
           (setq denote-tree--visited-buffers visited-buffers
-                denote-tree--cyclic-buffers cyclical-buffers)
+                denote-tree--cyclic-buffers cyclic-buffers)
           (unwind-protect
               (let ((progress (make-progress-reporter
                                "Rebuilding denote-tree buffer...")))
@@ -582,7 +582,7 @@ low value."
                 (progress-reporter-done progress))
             (denote-tree--clean-up))
           (setq visited-buffers denote-tree--visited-buffers
-                cyclical-buffers denote-tree--cyclic-buffers)
+                cyclic-buffers denote-tree--cyclic-buffers)
           (with-current-buffer old-buffer
             (save-restriction
               (narrow-to-region reg-beg (1+ reg-end))
@@ -596,7 +596,7 @@ low value."
                        visited-buffers))
       (setq denote-tree--cyclic-buffers
             (seq-union denote-tree--cyclic-buffers
-                       cyclical-buffers)))
+                       cyclic-buffers)))
     (denote-tree--add-props-to-cycles)
     (goto-char node-pos)))
 
