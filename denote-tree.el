@@ -470,6 +470,12 @@ Argument PROGRESS - a progress reporter."
                        (current
                         (append links-in-buffer (cdr current-children))))
                   (list (car current) current))))))
+(defun denote-tree--unique-nodes (x parent indent alist)
+  (list
+   (if (alist-get x alist) (gensym x) x)
+   :indent indent
+   :name (symbol-name x)
+   :parent parent))
 
 (defun denote-tree--add-props-to-cycles ()
   "Add \\='denote-tree--child prop to elements of `denote-tree--cyclic-buffers'.
