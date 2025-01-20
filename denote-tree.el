@@ -923,7 +923,7 @@ Return as a list sans BUFFER's own identifier."
         (push (intern (concat (match-string-no-properties 1)
                               (match-string-no-properties 2)))
               found-ids))
-      (delete buffer-id (nreverse found-ids)))))
+      (delete (intern buffer-id) (nreverse found-ids)))))
 
 (defun denote-tree--build-extended-filetype (gen-from add-this)
   "Add keys and values from ADD-THIS to GEN-FROM alist."
