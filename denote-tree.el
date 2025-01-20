@@ -523,6 +523,9 @@ of the original."
            (line-beginning-position) (line-end-position)
            (list 'denote-tree--child marker)))))))
 
+(defun denote-tree--calculate-indent (indent lastp)
+  (concat indent (if lastp denote-tree-space denote-tree-pipe)))
+
 (defun denote-tree--draw-node (node-name indent lastp)
   "Draw NODE-NAME according to INDENT in current buffer.
 
