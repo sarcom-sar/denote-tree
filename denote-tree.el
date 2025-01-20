@@ -470,6 +470,23 @@ Argument PROGRESS - a progress reporter."
                        (current
                         (append links-in-buffer (cdr current-children))))
                   (list (car current) current))))))
+(defun denote-tree--grow-alist-and-children (node alist children)
+  (let* ((current-plist (alist-get node alist))
+         (node (denote-tree--open-link-maybe (symbol-name node)))
+         (indent "")                    ; make proper indent
+         (uniq-links-in-node
+          (mapcar (lambda (x)
+                    (denote-tree--unique-nodes x node indent alist))
+                  (denote-tree--collect-links (symbol-name node))))
+         (keys (mapcar #'car uniq-links-in-node)))
+    (mapc (lambda (x) (push x alist)) uniq-links-in-node)
+    (push keys (alist-get node alist))
+    (push :children (alist-get node alist))
+    (setf (alist-get node alist)
+          (append (list :children keys) current-plist))
+    (setq children (append keys (cdr children)))
+    (list (car children) alist children)))
+
 (defun denote-tree--unique-nodes (x parent indent alist)
   (list
    (if (alist-get x alist) (gensym x) x)
