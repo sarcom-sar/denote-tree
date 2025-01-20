@@ -458,6 +458,19 @@ Argument PROGRESS - a progress reporter."
         pos)
     'notvalid))
 
+(defun denote-tree--walk-links-iteratively (buffer)
+  (let* ((buffer (denote-tree--open-link-maybe buffer))
+         (current-children (list buffer))
+         (node (car current-children)))
+    (while node
+      (seq-setq (node current-children)
+                (let* ((node (denote-tree--open-link-maybe node))
+                       (links-in-buffer
+                        (denote-tree--collect-links node))
+                       (current
+                        (append links-in-buffer (cdr current-children))))
+                  (list (car current) current))))))
+
 (defun denote-tree--add-props-to-cycles ()
   "Add \\='denote-tree--child prop to elements of `denote-tree--cyclic-buffers'.
 
