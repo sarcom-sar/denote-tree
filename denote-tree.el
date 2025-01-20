@@ -459,12 +459,12 @@ Argument PROGRESS - a progress reporter."
     'notvalid))
 
 (defun denote-tree--walk-links-iteratively (buffer indent lastp)
-  (let* ((buffer (denote-tree--open-link-maybe buffer))
-         (current-children (list buffer))
-         (node buffer)
-         (node-alist (list (list node
-                                 :indent indent
-                                 :name (symbol-name node)))))
+  (let ((node (intern buffer))
+        (children (list (intern buffer)))
+        (node-alist (list (list (intern buffer)
+                                :indent indent
+                                :name buffer
+                                :last t))))
     (while node
       (let ((current-node (alist-get node node-alist)))
         (insert
@@ -474,11 +474,12 @@ Argument PROGRESS - a progress reporter."
       (push (point-marker) (alist-get node node-alist))
       (push :pos (alist-get node node-alist))
       (insert "\n")
-      (seq-setq (node node-alist current-children)
+      (seq-setq (node node-alist children)
                 (if (eq node (intern (plist-get (alist-get node node-alist) :name)))
                     (denote-tree--grow-alist-and-children
-                     node node-alist current-children)
-                  (list (cadr current-children) node-alist (cdr current-children)))))))
+                     node node-alist children)
+                  (list (cadr children) node-alist (cdr children)))))
+    node-alist))
 
 (defun denote-tree--grow-alist-and-children (node alist children)
   (let* ((current-plist (alist-get node alist))
