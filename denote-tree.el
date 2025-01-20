@@ -468,8 +468,12 @@ Argument PROGRESS - a progress reporter."
     (while node
       (let ((current-node (alist-get node node-alist)))
         (insert
-         (format "%s%s"
+         (format "%s%s%s%s"
                  (plist-get current-node :indent)
+                 (if (plist-get current-node :last) denote-tree-lower-knee denote-tree-tee)
+                 (if (eq node (intern (plist-get current-node :name)))
+                     (propertize denote-tree-node 'face 'denote-tree-node)
+                   (propertize denote-tree-node 'face 'denote-tree-circular-node))
                  (plist-get current-node :name))))
       (push (point-marker) (alist-get node node-alist))
       (push :pos (alist-get node node-alist))
