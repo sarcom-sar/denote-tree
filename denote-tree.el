@@ -458,18 +458,28 @@ Argument PROGRESS - a progress reporter."
         pos)
     'notvalid))
 
-(defun denote-tree--walk-links-iteratively (buffer)
+(defun denote-tree--walk-links-iteratively (buffer indent lastp)
   (let* ((buffer (denote-tree--open-link-maybe buffer))
          (current-children (list buffer))
-         (node (car current-children)))
+         (node buffer)
+         (node-alist (list (list node
+                                 :indent indent
+                                 :name (symbol-name node)))))
     (while node
-      (seq-setq (node current-children)
-                (let* ((node (denote-tree--open-link-maybe node))
-                       (links-in-buffer
-                        (denote-tree--collect-links node))
-                       (current
-                        (append links-in-buffer (cdr current-children))))
-                  (list (car current) current))))))
+      (let ((current-node (alist-get node node-alist)))
+        (insert
+         (format "%s%s"
+                 (plist-get current-node :indent)
+                 (plist-get current-node :name))))
+      (push (point-marker) (alist-get node node-alist))
+      (push :pos (alist-get node node-alist))
+      (insert "\n")
+      (seq-setq (node node-alist current-children)
+                (if (eq node (intern (plist-get (alist-get node node-alist) :name)))
+                    (denote-tree--grow-alist-and-children
+                     node node-alist current-children)
+                  (list (cadr current-children) node-alist (cdr current-children)))))))
+
 (defun denote-tree--grow-alist-and-children (node alist children)
   (let* ((current-plist (alist-get node alist))
          (node (denote-tree--open-link-maybe (symbol-name node)))
