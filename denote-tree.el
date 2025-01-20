@@ -898,8 +898,8 @@ Return as a list sans BUFFER's own identifier."
     (with-current-buffer buffer
       (goto-char (point-min))
       (while (search-forward-regexp denote-id-regexp nil t)
-        (push (concat (match-string-no-properties 1)
-                      (match-string-no-properties 2))
+        (push (intern (concat (match-string-no-properties 1)
+                              (match-string-no-properties 2)))
               found-ids))
       (delete buffer-id (nreverse found-ids)))))
 
