@@ -497,12 +497,15 @@ Argument PROGRESS - a progress reporter."
     (setq children (append keys (cdr children)))
     (list (car children) alist children)))
 
-(defun denote-tree--unique-nodes (x parent indent alist)
-  (list
-   (if (alist-get x alist) (gensym x) x)
-   :indent indent
-   :name (symbol-name x)
-   :parent parent))
+(defun denote-tree--unique-nodes (x parent indent alist last-sibling)
+  ""
+  (let ((indent (denote-tree--calculate-indent indent (eq x last-sibling))))
+    (list
+     (if (alist-get x alist) (gensym x) x)
+     :indent indent
+     :name (symbol-name x)
+     :parent parent
+     :last (eq x last-sibling))))
 
 (defun denote-tree--add-props-to-cycles ()
   "Add \\='denote-tree--child prop to elements of `denote-tree--cyclic-buffers'.
