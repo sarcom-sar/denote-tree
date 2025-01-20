@@ -483,11 +483,12 @@ Argument PROGRESS - a progress reporter."
 (defun denote-tree--grow-alist-and-children (node alist children)
   (let* ((current-plist (alist-get node alist))
          (node (denote-tree--open-link-maybe (symbol-name node)))
-         (indent "")                    ; make proper indent
+         (children-nodes (denote-tree--collect-links (symbol-name node)))
          (uniq-links-in-node
           (mapcar (lambda (x)
-                    (denote-tree--unique-nodes x node indent alist))
-                  (denote-tree--collect-links (symbol-name node))))
+                    (denote-tree--unique-nodes
+                     x node indent alist (car (last children-nodes))))
+                  children-nodes))
          (keys (mapcar #'car uniq-links-in-node)))
     (mapc (lambda (x) (push x alist)) uniq-links-in-node)
     (push keys (alist-get node alist))
