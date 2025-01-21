@@ -458,7 +458,7 @@ Argument PROGRESS - a progress reporter."
         pos)
     'notvalid))
 
-(defun denote-tree--walk-links-iteratively (buffer indent lastp)
+(defun denote-tree--walk-links-iteratively (buffer indent &optional lastp)
   ""
   (let* ((node (intern buffer))
          (children (list (intern buffer)))
