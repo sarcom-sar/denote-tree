@@ -459,14 +459,17 @@ Argument PROGRESS - a progress reporter."
     'notvalid))
 
 (defun denote-tree--walk-links-iteratively (buffer indent lastp)
-  (let ((node (intern buffer))
-        (children (list (intern buffer)))
-        (node-alist (list (list (intern buffer)
-                                :next-indent (denote-tree--calculate-indent
-                                              indent lastp)
-                                :parent nil
-                                :name buffer
-                                :last t))))
+  ""
+  (let* ((node (intern buffer))
+         (children (list (intern buffer)))
+         (node-alist (list (list node
+                                 :next-indent (denote-tree--calculate-indent
+                                               indent lastp)
+                                 :next node
+                                 :prev node
+                                 :parent nil
+                                 :name buffer
+                                 :last lastp))))
     (while node
       (let* ((current-node
               (alist-get node node-alist))
