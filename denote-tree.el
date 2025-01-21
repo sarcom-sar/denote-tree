@@ -469,6 +469,8 @@ Argument PROGRESS - a progress reporter."
                                  :prev node
                                  :parent nil
                                  :name buffer
+                                 :descp (denote-tree--collect-keywords-as-string
+                                         buffer denote-tree-node-description)
                                  :last lastp))))
     (while node
       (let* ((current-node
@@ -483,7 +485,7 @@ Argument PROGRESS - a progress reporter."
          (if (eq node (intern (plist-get current-node :name)))
              (propertize denote-tree-node 'face 'denote-tree-node)
            (propertize denote-tree-node 'face 'denote-tree-circular-node))
-         (plist-get current-node :name)))
+         (plist-get current-node :descp)))
       (setf (alist-get node node-alist)
             (append (alist-get node node-alist)
                     (list :pos (point-marker))))
@@ -523,11 +525,13 @@ Argument PROGRESS - a progress reporter."
      (if (alist-get x alist) (gensym x) x)
      :next-indent indent
      :name (symbol-name x)
+     :descp (denote-tree--collect-keywords-as-string
+             (symbol-name x) denote-tree-node-description)
      :parent parent
      :last lastp)))
 
 (defun denote-tree--next-sibling (x alist siblings)
-  ""
+  "Set :next/:prev property of X in ALIST."
   (let ((next (copy-tree siblings))
         (prev (copy-tree (reverse siblings))))
     (setcdr (last next) next)
