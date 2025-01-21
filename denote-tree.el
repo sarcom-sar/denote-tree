@@ -459,7 +459,7 @@ Argument PROGRESS - a progress reporter."
     'notvalid))
 
 (defun denote-tree--walk-links-iteratively (buffer indent &optional lastp)
-  ""
+  "Walk links from BUFFER with starting INDENT."
   (let* ((node (intern buffer))
          (children (list (intern buffer)))
          (node-alist (list (list node
@@ -498,6 +498,7 @@ Argument PROGRESS - a progress reporter."
     node-alist))
 
 (defun denote-tree--grow-alist-and-children (node alist children)
+  "Add NODE to ALIST, fetch more nodes for CHILDREN."
   (let* ((current-plist (alist-get node alist))
          (node (denote-tree--open-link-maybe (symbol-name node)))
          (indent (plist-get (alist-get node alist) :next-indent))
@@ -519,7 +520,9 @@ Argument PROGRESS - a progress reporter."
     (list (car children) alist children)))
 
 (defun denote-tree--unique-nodes (x alist &optional parent indent lastp)
-  ""
+  "Construct skeletal plist of X.
+
+If X already exists in ALIST, create new copy."
   (let* ((indent (denote-tree--calculate-indent indent lastp)))
     (list
      (if (alist-get x alist) (gensym x) x)
