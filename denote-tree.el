@@ -462,7 +462,9 @@ Argument PROGRESS - a progress reporter."
   (let ((node (intern buffer))
         (children (list (intern buffer)))
         (node-alist (list (list (intern buffer)
-                                :indent indent
+                                :next-indent (denote-tree--calculate-indent
+                                              indent lastp)
+                                :parent nil
                                 :name buffer
                                 :last t))))
     (while node
@@ -488,7 +490,7 @@ Argument PROGRESS - a progress reporter."
 (defun denote-tree--grow-alist-and-children (node alist children)
   (let* ((current-plist (alist-get node alist))
          (node (denote-tree--open-link-maybe (symbol-name node)))
-         (indent (plist-get (alist-get node alist) :indent))
+         (indent (plist-get (alist-get node alist) :next-indent))
          (children-nodes (save-excursion (denote-tree--collect-links (symbol-name node))))
          (uniq-links-in-node
           (mapcar (lambda (x)
@@ -509,7 +511,7 @@ Argument PROGRESS - a progress reporter."
   (let ((indent (denote-tree--calculate-indent indent (eq x last-sibling))))
     (list
      (if (alist-get x alist) (gensym x) x)
-     :indent indent
+     :next-indent indent
      :name (symbol-name x)
      :parent parent
      :last (eq x last-sibling))))
