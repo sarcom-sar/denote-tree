@@ -507,6 +507,9 @@ Argument PROGRESS - a progress reporter."
                   children-nodes))
          (keys (mapcar #'car uniq-links-in-node)))
     (mapc (lambda (x) (push x alist)) uniq-links-in-node)
+    (mapc (lambda (x)
+            (denote-tree--next-sibling x alist keys))
+          keys)
     (setf (alist-get node alist)
           (append (list :children keys) current-plist))
     (setq children (append keys (cdr children)))
@@ -522,6 +525,16 @@ Argument PROGRESS - a progress reporter."
      :parent parent
      :last lastp)))
 
+(defun denote-tree--next-sibling (x alist siblings)
+  ""
+  (let ((next (copy-tree siblings))
+        (prev (copy-tree (reverse siblings))))
+    (setcdr (last next) next)
+    (setcdr (last prev) prev)
+    (setf (alist-get x alist)
+          (append (list :next (cadr (memq x next))
+                        :prev (cadr (memq x prev)))
+                  (alist-get x alist)))))
 
 (defun denote-tree--add-props-to-cycles ()
   "Add \\='denote-tree--child prop to elements of `denote-tree--cyclic-buffers'.
