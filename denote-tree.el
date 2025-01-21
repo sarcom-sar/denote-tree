@@ -507,8 +507,6 @@ Argument PROGRESS - a progress reporter."
                   children-nodes))
          (keys (mapcar #'car uniq-links-in-node)))
     (mapc (lambda (x) (push x alist)) uniq-links-in-node)
-    (push keys (alist-get node alist))
-    (push :children (alist-get node alist))
     (setf (alist-get node alist)
           (append (list :children keys) current-plist))
     (setq children (append keys (cdr children)))
