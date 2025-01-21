@@ -499,10 +499,11 @@ Argument PROGRESS - a progress reporter."
          (node (denote-tree--open-link-maybe (symbol-name node)))
          (indent (plist-get (alist-get node alist) :next-indent))
          (children-nodes (save-excursion (denote-tree--collect-links (symbol-name node))))
+         (last-children-node (car (last children-nodes)))
          (uniq-links-in-node
           (mapcar (lambda (x)
                     (denote-tree--unique-nodes
-                     x node indent alist (car (last children-nodes))))
+                     x node indent alist (eq x last-children-node)))
                   children-nodes))
          (keys (mapcar #'car uniq-links-in-node)))
     (mapc (lambda (x) (push x alist)) uniq-links-in-node)
@@ -513,15 +514,16 @@ Argument PROGRESS - a progress reporter."
     (setq children (append keys (cdr children)))
     (list (car children) alist children)))
 
-(defun denote-tree--unique-nodes (x parent indent alist last-sibling)
+(defun denote-tree--unique-nodes (x parent indent alist lastp)
   ""
-  (let ((indent (denote-tree--calculate-indent indent (eq x last-sibling))))
+  (let* ((indent (denote-tree--calculate-indent indent lastp)))
     (list
      (if (alist-get x alist) (gensym x) x)
      :next-indent indent
      :name (symbol-name x)
      :parent parent
-     :last (eq x last-sibling))))
+     :last lastp)))
+
 
 (defun denote-tree--add-props-to-cycles ()
   "Add \\='denote-tree--child prop to elements of `denote-tree--cyclic-buffers'.
