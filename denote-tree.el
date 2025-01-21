@@ -504,7 +504,7 @@ Argument PROGRESS - a progress reporter."
          (uniq-links-in-node
           (mapcar (lambda (x)
                     (denote-tree--unique-nodes
-                     x node indent alist (eq x last-children-node)))
+                     x alist node indent (eq x last-children-node)))
                   children-nodes))
          (keys (mapcar #'car uniq-links-in-node)))
     (mapc (lambda (x) (push x alist)) uniq-links-in-node)
@@ -516,7 +516,7 @@ Argument PROGRESS - a progress reporter."
     (setq children (append keys (cdr children)))
     (list (car children) alist children)))
 
-(defun denote-tree--unique-nodes (x parent indent alist lastp)
+(defun denote-tree--unique-nodes (x alist &optional parent indent lastp)
   ""
   (let* ((indent (denote-tree--calculate-indent indent lastp)))
     (list
