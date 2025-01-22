@@ -530,14 +530,30 @@ If NODE is in ALIST, return an unique identifier."
   (cons (if (alist-get node alist) (gensym node) node)
         node))
 
+(defun denote-tree--node-plist (x &optional next prev parent indent lastp depth)
+  "Build full plist for X.
+
+  Argument NEXT - next sibling
+  Argument PREV - previous sibling
+Argument PARENT - parent node
+Argument INDENT - next indent
+ Argument LASTP - is the node last node."
+  (let* ((node (car x))
+         (true-node (cdr x))
+         (indent (denote-tree--calculate-indent indent lastp)))
+    (denote-tree--open-link-maybe (symbol-name true-node))
     (list
-     (if (alist-get x alist) (gensym x) x)
+     node
      :next-indent indent
-     :true-name x
+     :true-name true-node
+     :next next
+     :prev prev
      :descp (denote-tree--collect-keywords-as-string
-             (symbol-name x) denote-tree-node-description)
+             (symbol-name true-node) denote-tree-node-description)
+     :children nil
      :parent parent
-     :last lastp)))
+     :last lastp
+     :depth depth)))
 
 (defun denote-tree--next-sibling (x alist siblings)
   "Set :next/:prev property of X in ALIST."
