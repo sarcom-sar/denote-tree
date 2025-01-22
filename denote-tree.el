@@ -544,6 +544,15 @@ If X already exists in ALIST, create new copy."
                         :prev (cadr (memq x prev)))
                   (alist-get x alist)))))
 
+(defun denote-tree--nested-value (alist initial-key &rest nested-value)
+  ""
+  (let* ((prop (car nested-value))
+         (value (plist-get (alist-get initial-key alist) prop)))
+    (dolist (trio (cdr nested-value) value)
+      (let ((key value)
+            (prop trio))
+        (setq value (plist-get (alist-get key alist) prop))))))
+
 (defun denote-tree--add-props-to-cycles ()
   "Add \\='denote-tree--child prop to elements of `denote-tree--cyclic-buffers'.
 
