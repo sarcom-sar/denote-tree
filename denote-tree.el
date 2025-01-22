@@ -520,12 +520,16 @@ Argument PROGRESS - a progress reporter."
     (setq children (append keys (cdr children)))
     (list (car children) alist children)))
 
-(defun denote-tree--unique-nodes (x alist &optional parent indent lastp)
-  "Construct skeletal plist of X.
+          (plist-put (alist-get node alist) :children keys))
+    (list (car new-children) new-alist new-children)))
 
-If X already exists in ALIST, create new copy."
-  (let* ((indent (denote-tree--calculate-indent indent lastp)))
-    (denote-tree--open-link-maybe (symbol-name x))
+(defun denote-tree--unique-nodes (node alist)
+  "Return a pair new id of NODE and NODE symbol itself.
+
+If NODE is in ALIST, return an unique identifier."
+  (cons (if (alist-get node alist) (gensym node) node)
+        node))
+
     (list
      (if (alist-get x alist) (gensym x) x)
      :next-indent indent
