@@ -525,6 +525,7 @@ Argument PROGRESS - a progress reporter."
 
 If X already exists in ALIST, create new copy."
   (let* ((indent (denote-tree--calculate-indent indent lastp)))
+    (denote-tree--open-link-maybe (symbol-name x))
     (list
      (if (alist-get x alist) (gensym x) x)
      :next-indent indent
