@@ -473,29 +473,28 @@ Argument PROGRESS - a progress reporter."
                                          buffer denote-tree-node-description)
                                  :last lastp))))
     (while node
-      (let* ((current-node
-              (alist-get node node-alist))
-             (parent-node
-              (alist-get (plist-get current-node :parent) node-alist)))
-        (insert
-         (if parent-node
-             (plist-get parent-node :next-indent)
-           "")
-         (if (plist-get current-node :last) denote-tree-lower-knee denote-tree-tee)
-         (if (eq node (intern (plist-get current-node :name)))
-             (propertize denote-tree-node 'face 'denote-tree-node)
-           (propertize denote-tree-node 'face 'denote-tree-circular-node))
-         (plist-get current-node :descp)))
-      (setf (alist-get node node-alist)
-            (append (alist-get node node-alist)
-                    (list :pos (point-marker))))
-      (insert "\n")
+      (denote-tree--draw-node-foo alist node)
       (seq-setq (node node-alist children)
                 (if (eq node (intern (plist-get (alist-get node node-alist) :name)))
                     (denote-tree--grow-alist-and-children
                      node node-alist children)
                   (list (cadr children) node-alist (cdr children)))))
     node-alist))
+(defun denote-tree--draw-node-foo (alist node)
+  (insert
+   (if (denote-tree--nested-value alist node :parent)
+       (denote-tree--nested-value alist node :parent :next-indent)
+     "")
+   (if (denote-tree--nested-value
+        alist node :last)
+       denote-tree-lower-knee
+     denote-tree-tee)
+   (if (eq node (denote-tree--nested-value alist node :true-name))
+       (propertize denote-tree-node 'face 'denote-tree-node)
+     (propertize denote-tree-node 'face 'denote-tree-circular-node))
+   (denote-tree--nested-value alist node :descp))
+  (plist-put (alist-get node alist) :pos (point-marker))
+  (insert "\n"))
 
 (defun denote-tree--grow-alist-and-children (node alist children)
   "Add NODE to ALIST, fetch more nodes for CHILDREN."
