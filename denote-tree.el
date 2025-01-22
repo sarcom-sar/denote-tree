@@ -555,16 +555,11 @@ Argument INDENT - next indent
      :last lastp
      :depth depth)))
 
-(defun denote-tree--next-sibling (x alist siblings)
-  "Set :next/:prev property of X in ALIST."
-  (let ((next (copy-tree siblings))
-        (prev (copy-tree (reverse siblings))))
+(defun denote-tree--next-sibling (x siblings)
+  "Return the :next SIBLING of X."
+  (let ((next (copy-tree siblings)))
     (setcdr (last next) next)
-    (setcdr (last prev) prev)
-    (setf (alist-get x alist)
-          (append (list :next (cadr (memq x next))
-                        :prev (cadr (memq x prev)))
-                  (alist-get x alist)))))
+    (cadr (memq x next))))
 
 (defun denote-tree--nested-value (alist initial-key &rest nested-value)
   ""
