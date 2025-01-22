@@ -573,7 +573,7 @@ Argument INDENT - next indent
     (cadr (memq x next))))
 
 (defun denote-tree--nested-value (alist initial-key &rest nested-value)
-  ""
+  "Iteratively return NESTED-VALUE of INITIAL-KEY in ALIST."
   (let* ((prop (car nested-value))
          (value (plist-get (alist-get initial-key alist) prop)))
     (dolist (trio (cdr nested-value) value)
