@@ -404,10 +404,8 @@ properties."
 (defun denote-tree--draw-tree (buffer)
   "Draw and propertize a tree in current buffer starting with BUFFER."
   (let ((progress (make-progress-reporter "Building denote-tree buffer...")))
-    (denote-tree--walk-links
-     buffer "" t denote-tree-max-traversal-depth progress)
-    (delete-region (1- (point-max)) (point-max))
-    (denote-tree--add-props-to-cycles)
+    (denote-tree--walk-links-iteratively
+     buffer "" t denote-tree-max-traversal-depth)
     (progress-reporter-done progress)))
 
 (defun denote-tree--walk-links (buffer indent lastp depth &optional progress)
@@ -458,7 +456,7 @@ Argument PROGRESS - a progress reporter."
         pos)
     'notvalid))
 
-(defun denote-tree--walk-links-iteratively (buffer indent &optional lastp)
+(defun denote-tree--walk-links-iteratively (buffer indent lastp depth)
   "Walk links from BUFFER with starting INDENT."
   (let* ((node (intern buffer))
          (children (list (intern buffer)))
@@ -472,13 +470,15 @@ Argument PROGRESS - a progress reporter."
             :parent nil
             :pos nil
             :true-name node
+            :depth depth
             :descp (denote-tree--collect-keywords-as-string buffer denote-tree-node-description)
             :last lastp))))
     (while node
       (denote-tree--draw-node-foo alist node)
-      (let ((node-true-name (denote-tree--nested-value alist node :true-name)))
+      (let ((node-true-name (denote-tree--nested-value alist node :true-name))
+            (node-depth (denote-tree--nested-value alist node :depth)))
         (seq-setq (node alist children)
-                  (if (eq node node-true-name)
+                  (if (and node-depth (eq node node-true-name))
                       (denote-tree--grow-alist-and-children node alist children)
                     (list (cadr children) alist (cdr children))))))
     alist))
