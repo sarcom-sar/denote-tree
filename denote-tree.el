@@ -503,23 +503,34 @@ Argument PROGRESS - a progress reporter."
   "Add NODE to ALIST, fetch more nodes for CHILDREN."
   (let* ((node (denote-tree--open-link-maybe (symbol-name node)))
          (indent (denote-tree--nested-value alist node :next-indent))
-         (children-nodes (save-excursion (denote-tree--collect-links (symbol-name node))))
-         (last-children-node (car (last children-nodes)))
+         (depth (denote-tree--nested-value alist node :depth))
+         (new-depth (cond
+                     ((symbolp depth) depth)
+                     ((and (numberp depth) (< 0 (1- depth))) (1- depth))
+                     ((and (numberp depth) (= 0 (1- depth))) nil)
+                     (t t)))
          (uniq-links-in-node
           (mapcar (lambda (x)
-                    (denote-tree--unique-nodes
-                     x alist node indent (eq x last-children-node)))
-                  children-nodes))
-         (keys (mapcar #'car uniq-links-in-node)))
-    (mapc (lambda (x) (push x alist)) uniq-links-in-node)
-    (mapc (lambda (x)
-            (denote-tree--next-sibling x alist keys))
-          keys)
+                    (denote-tree--unique-nodes x alist))
+                  (save-excursion
+                    (denote-tree--collect-links (symbol-name node)))))
+         (last-children-node (caar (last uniq-links-in-node)))
+         (keys (mapcar #'car uniq-links-in-node))
+         (new-alist
+          (append
+           (mapcar (lambda (x)
+                     (denote-tree--node-plist
+                      x
+                      (denote-tree--next-sibling (car x) keys)
+                      (denote-tree--next-sibling (car x) (reverse keys))
+                      node
+                      indent
+                      (eq (car x) last-children-node)
+                      new-depth))
+                   uniq-links-in-node)
+           alist))
+         (new-children (append keys (cdr children))))
     (setf (alist-get node alist)
-          (append (list :children keys) (alist-get node alist)))
-    (setq children (append keys (cdr children)))
-    (list (car children) alist children)))
-
           (plist-put (alist-get node alist) :children keys))
     (list (car new-children) new-alist new-children)))
 
