@@ -501,9 +501,8 @@ Argument PROGRESS - a progress reporter."
 
 (defun denote-tree--grow-alist-and-children (node alist children)
   "Add NODE to ALIST, fetch more nodes for CHILDREN."
-  (let* ((current-plist (alist-get node alist))
-         (node (denote-tree--open-link-maybe (symbol-name node)))
-         (indent (plist-get (alist-get node alist) :next-indent))
+  (let* ((node (denote-tree--open-link-maybe (symbol-name node)))
+         (indent (denote-tree--nested-value alist node :next-indent))
          (children-nodes (save-excursion (denote-tree--collect-links (symbol-name node))))
          (last-children-node (car (last children-nodes)))
          (uniq-links-in-node
@@ -517,7 +516,7 @@ Argument PROGRESS - a progress reporter."
             (denote-tree--next-sibling x alist keys))
           keys)
     (setf (alist-get node alist)
-          (append (list :children keys) current-plist))
+          (append (list :children keys) (alist-get node alist)))
     (setq children (append keys (cdr children)))
     (list (car children) alist children)))
 
