@@ -462,24 +462,27 @@ Argument PROGRESS - a progress reporter."
   "Walk links from BUFFER with starting INDENT."
   (let* ((node (intern buffer))
          (children (list (intern buffer)))
-         (node-alist (list (list node
-                                 :next-indent (denote-tree--calculate-indent
-                                               indent lastp)
-                                 :next node
-                                 :prev node
-                                 :parent nil
-                                 :name buffer
-                                 :descp (denote-tree--collect-keywords-as-string
-                                         buffer denote-tree-node-description)
-                                 :last lastp))))
+         (alist
+          (list
+           (list
+            node
+            :next-indent (denote-tree--calculate-indent indent lastp)
+            :next node
+            :prev node
+            :parent nil
+            :pos nil
+            :true-name node
+            :descp (denote-tree--collect-keywords-as-string buffer denote-tree-node-description)
+            :last lastp))))
     (while node
       (denote-tree--draw-node-foo alist node)
-      (seq-setq (node node-alist children)
-                (if (eq node (intern (plist-get (alist-get node node-alist) :name)))
-                    (denote-tree--grow-alist-and-children
-                     node node-alist children)
-                  (list (cadr children) node-alist (cdr children)))))
-    node-alist))
+      (let ((node-true-name (denote-tree--nested-value alist node :true-name)))
+        (seq-setq (node alist children)
+                  (if (eq node node-true-name)
+                      (denote-tree--grow-alist-and-children node alist children)
+                    (list (cadr children) alist (cdr children))))))
+    alist))
+
 (defun denote-tree--draw-node-foo (alist node)
   (insert
    (if (denote-tree--nested-value alist node :parent)
