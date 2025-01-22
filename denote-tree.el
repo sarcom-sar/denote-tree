@@ -491,12 +491,15 @@ Argument PROGRESS - a progress reporter."
    (if (denote-tree--nested-value
         alist node :last)
        denote-tree-lower-knee
-     denote-tree-tee)
+     denote-tree-tee))
+  (plist-put (alist-get node alist) :pos (point-marker))
+  (insert
    (if (eq node (denote-tree--nested-value alist node :true-name))
        (propertize denote-tree-node 'face 'denote-tree-node)
      (propertize denote-tree-node 'face 'denote-tree-circular-node))
    (denote-tree--nested-value alist node :descp))
-  (plist-put (alist-get node alist) :pos (point-marker))
+  (denote-tree--set-button (denote-tree--nested-value alist node :pos)
+                (symbol-name (denote-tree--nested-value alist node :true-name)))
   (insert "\n"))
 
 (defun denote-tree--grow-alist-and-children (node alist children)
