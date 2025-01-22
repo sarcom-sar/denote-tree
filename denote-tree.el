@@ -529,7 +529,7 @@ If X already exists in ALIST, create new copy."
     (list
      (if (alist-get x alist) (gensym x) x)
      :next-indent indent
-     :name (symbol-name x)
+     :true-name x
      :descp (denote-tree--collect-keywords-as-string
              (symbol-name x) denote-tree-node-description)
      :parent parent
