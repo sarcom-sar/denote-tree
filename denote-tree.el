@@ -408,6 +408,25 @@ properties."
      buffer "" t denote-tree-max-traversal-depth)
     (progress-reporter-done progress)))
 
+(defun denote-tree--walk-links-real (initial-buffer)
+  "Return node-list starting from INITIAL-BUFFER.
+
+As a side effect open all buffers encountered."
+  (let* ((node (intern initial-buffer))
+         (node-list (list (list node)))
+         (stack (list node))
+         (visited '()))
+    (while node
+      (denote-tree--open-link-maybe (symbol-name node))
+      (if (not (memq node visited))
+          (let ((new-links (denote-tree--collect-links (symbol-name node))))
+            (setq node-list (append node-list (list new-links)))
+            (setq visited (append (list node) visited))
+            (setq stack (append new-links (cdr stack))))
+        (setq stack (cdr stack)))
+      (setq node (car stack)))
+    node-list))
+
 (defun denote-tree--walk-links (buffer indent lastp depth &optional progress)
   "Walk along the links starting from BUFFER.
 
