@@ -519,24 +519,28 @@ Argument PROGRESS - a progress reporter."
                     (list (cadr children) alist (cdr children))))))
     alist))
 
-(defun denote-tree--draw-node-foo (alist node)
-  (insert
-   (if (denote-tree--nested-value alist node :parent)
-       (denote-tree--nested-value alist node :parent :next-indent)
-     "")
-   (if (denote-tree--nested-value
-        alist node :last)
-       denote-tree-lower-knee
-     denote-tree-tee))
-  (plist-put (alist-get node alist) :pos (point-marker))
-  (insert
-   (if (eq node (denote-tree--nested-value alist node :true-name))
-       (propertize denote-tree-node 'face 'denote-tree-node)
-     (propertize denote-tree-node 'face 'denote-tree-circular-node))
-   (denote-tree--nested-value alist node :descp))
-  (denote-tree--set-button (denote-tree--nested-value alist node :pos)
-                (symbol-name (denote-tree--nested-value alist node :true-name)))
-  (insert "\n"))
+(defun denote-tree--draw-node-foo (plist next-indent)
+  (let ((point 0))
+    (insert
+     (if next-indent
+         next-indent
+       "")
+     (if (plist-get plist :last)
+         denote-tree-lower-knee
+       denote-tree-tee))
+    (setq point (point-marker))
+    (insert
+     (if (eq node (plist-get plist :true-name))
+         (propertize denote-tree-node 'face 'denote-tree-node)
+       (propertize denote-tree-node 'face 'denote-tree-circular-node))
+     (plist-get plist :descp))
+    (put-text-property
+     (line-beginning-position) (line-end-position)
+     'denote-tree--identifier node)
+    (denote-tree--set-button point
+                  (symbol-name (plist-get plist :true-name)))
+    (insert "\n")
+    point))
 
 (defun denote-tree--grow-alist-and-children (node alist children)
   "Add NODE to ALIST, fetch more nodes for CHILDREN."
