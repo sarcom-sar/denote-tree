@@ -536,9 +536,8 @@ Argument PROGRESS - a progress reporter."
 (defun denote-tree--draw-node-foo (node plist next-indent)
   (let ((point 0))
     (insert
-     (if next-indent
-         next-indent
-       "")
+     (or next-indent
+         "")
      (if (plist-get plist :last)
          denote-tree-lower-knee
        denote-tree-tee))
