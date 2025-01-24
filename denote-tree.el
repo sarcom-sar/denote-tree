@@ -1064,7 +1064,7 @@ Add ELEMENT to `denote-tree--visited-buffers' to delete it after
           (unless (member element denote-tree--visited-buffers)
             (push element denote-tree--visited-buffers)))
       (warn "%s was not found" element)
-      (setq element nil)))
+      (setq element "nil")))
   (intern element))
 
 
