@@ -530,7 +530,7 @@ Argument PROGRESS - a progress reporter."
        :pos
        (denote-tree--draw-node-foo
         node node-plist (denote-tree--nested-value alist node :parent :next-indent)))
-      (setq stack (append (plist-get node :children) (cdr stack)))
+      (setq stack (append (plist-get node-plist :children) (cdr stack)))
       (setq node (car stack))
       (setq node-plist (alist-get node alist)))))
 
