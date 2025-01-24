@@ -187,6 +187,9 @@ Every entry of `denote-tree--cyclic-buffers' is denote ID that appears
 cyclically over the buffer.  `cdr' of that variable is set to the list
 of positions at which that denote ID is present.")
 
+(defvar-local denote-tree--tree-alist '()
+  "Alist of all the nodes in the buffer.")
+
 (defvar denote-tree--extended-filetype nil
   "Full filetype alist.")
 
