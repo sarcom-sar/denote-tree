@@ -338,7 +338,7 @@ parent the point came from."
                  :children :pos))
           (when-let* ((current-teleport (car denote-tree--teleport-stack))
                       ((equal canon-point (cadr current-teleport))))
-            (setq next-point (car current-teleport))
+            (setq next-point (marker-position (car current-teleport)))
             (set-marker (car current-teleport) nil)
             (pop denote-tree--teleport-stack))
           (goto-char next-point))))))
