@@ -323,18 +323,25 @@ If `denote-tree-preserve-teleports-p' is set to t, teleport to the
 parent the point came from."
   (interactive "p")
   (or arg (setq arg 1))
-  (let (next-point canon-point current-teleport)
+  (let ((alist denote-tree--tree-alist)
+        next-point canon-point current-teleport)
     (if (< arg 0)
         (denote-tree-child-node (- arg))
       (dotimes (_ arg next-point)
-        (and (setq next-point (get-text-property (point) 'denote-tree--parent))
-             (setq canon-point
-                   (get-text-property next-point 'denote-tree--child))
-             (goto-char next-point)
-             (setq current-teleport (car denote-tree--teleport-stack))
-             (equal canon-point (cadr current-teleport))
-             (setq next-point (goto-char (car current-teleport)))
-             (pop denote-tree--teleport-stack))))))
+        (let ((node-id (get-text-property (point) 'denote-tree--identifier)))
+          (setq next-point (denote-tree--nested-value
+                            alist node-id :parent :pos))
+          (setq canon-point
+                (denote-tree--nested-value
+                 alist
+                 (get-text-property next-point 'denote-tree--identifier)
+                 :children :pos))
+          (when-let* ((current-teleport (car denote-tree--teleport-stack))
+                      ((equal canon-point (cadr current-teleport))))
+            (setq next-point (car current-teleport))
+            (set-marker (car current-teleport) nil)
+            (pop denote-tree--teleport-stack))
+          (goto-char next-point))))))
 
 (defun denote-tree-next-node (&optional arg)
   "Move the point to the next sibling node ARG times.
