@@ -296,16 +296,16 @@ allows to classify the type of front matter denote is dealing with."
         (goto-char (point-min))
         (should
          (equal (denote-tree--collect-links (buffer-name (current-buffer)))
-                '("20231226T163250"
-                  "20240119T164551"
-                  "20240120T164558"
-                  "20240121T164829"
-                  "20240121T164914"
-                  "20231227T163408"
-                  "20231228T163736"
-                  "20231229T164123"
-                  "20240101T164316"
-                  "20240117T164506"))))
+                '(20231226T163250
+                  20240119T164551
+                  20240120T164558
+                  20240121T164829
+                  20240121T164914
+                  20231227T163408
+                  20231228T163736
+                  20231229T164123
+                  20240101T164316
+                  20240117T164506))))
       (with-temp-buffer
         (insert
          "#+title: FOO\n"
@@ -314,7 +314,7 @@ allows to classify the type of front matter denote is dealing with."
         (goto-char (point-min))
         (should
          (equal (denote-tree--collect-links (buffer-name (current-buffer)))
-                '("20240119T164551" "20240120T164558"))))
+                '(20240119T164551 20240120T164558))))
       (with-temp-buffer
         (insert
          "#+title: FOO\n"
