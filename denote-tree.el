@@ -290,6 +290,7 @@ node position for future backtracking."
   (interactive "P")
   (or arg (setq arg 1))
   (let ((preserve-teleport-p denote-tree-preserve-teleports-p)
+        (alist denote-tree--tree-alist)
         next-point curr-point)
     (cond
      ((listp arg)
@@ -300,14 +301,17 @@ node position for future backtracking."
     (if (< arg 0)
         (denote-tree-parent-node (- arg))
       (dotimes (_ arg next-point)
-        (and (setq next-point (get-text-property (point) 'denote-tree--child))
-             (setq curr-point
-                   (denote-tree--get-node-pos curr-point))
-             (goto-char next-point)
-             preserve-teleport-p
-             (> curr-point next-point)
-             (push (list (set-marker (make-marker) curr-point) next-point)
-                   denote-tree--teleport-stack))))))
+        (let ((node-id (get-text-property (point) 'denote-tree--identifier)))
+          (setq next-point (denote-tree--nested-value
+                            alist node-id :children :pos))
+          (setq curr-point (denote-tree--get-node-pos))
+          (when (and (not preserve-teleport-p)
+                     (eq node-id (denote-tree--nested-value
+                                  alist node-id :true-name)))
+            (push (list (set-marker (make-marker) curr-point) next-point)
+                  denote-tree--teleport-stack))
+          (when next-point
+            (goto-char next-point)))))))
 
 (defun denote-tree-parent-node (&optional arg)
   "Move the point to the parent of a node ARG times.
