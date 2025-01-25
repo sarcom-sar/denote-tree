@@ -305,9 +305,9 @@ node position for future backtracking."
           (setq next-point (denote-tree--nested-value
                             alist node-id :children :pos))
           (setq curr-point (denote-tree--get-node-pos))
-          (when (and (not preserve-teleport-p)
-                     (eq node-id (denote-tree--nested-value
-                                  alist node-id :true-name)))
+          (when (and preserve-teleport-p
+                     (not (eq node-id (denote-tree--nested-value
+                                       alist node-id :true-name))))
             (push (list (set-marker (make-marker) curr-point) next-point)
                   denote-tree--teleport-stack))
           (when next-point
