@@ -519,6 +519,17 @@ Argument PROGRESS - a progress reporter."
                     (list (cadr children) alist (cdr children))))))
     alist))
 
+(defun denote-tree--fix-children-in-alist (alist)
+  (let ((new-alist alist))
+    (dolist (node alist new-alist)
+      (when-let* ((node-symbol (car node))
+                  (node-true-symbol (plist-get (cdr node) :true-name))
+                  ((not (eq node-symbol node-true-symbol))))
+        (let ((true-children (plist-get
+                              (alist-get node-true-symbol alist) :children)))
+          (plist-put (cdr node) :children true-children)))
+      (push node new-alist))))
+
 (defun denote-tree--draw-node-list (alist initial-node)
   "Draw every node in ALIST starting from INITIAL-NODE."
   (let ((node-plist (alist-get initial-node alist))
