@@ -551,7 +551,7 @@ Argument PROGRESS - a progress reporter."
                      (t t)))
          (uniq-links-in-node
           (mapcar (lambda (x)
-                    (denote-tree--unique-nodes x alist))
+                    (denote-tree--unique-nodes x (alist-get x alist)))
                   (save-excursion
                     (denote-tree--collect-links (symbol-name node)))))
          (last-children-node (caar (last uniq-links-in-node)))
@@ -574,11 +574,11 @@ Argument PROGRESS - a progress reporter."
           (plist-put (alist-get node alist) :children keys))
     (list (car new-children) new-alist new-children)))
 
-(defun denote-tree--unique-nodes (node alist)
+(defun denote-tree--unique-nodes (node existsp)
   "Return a pair new id of NODE and NODE symbol itself.
 
-If NODE is in ALIST, return an unique identifier."
-  (cons (if (alist-get node alist) (gensym node) node)
+If EXISTSP, return an unique identifier."
+  (cons (if existsp (gensym node) node)
         node))
 
 (defun denote-tree--node-plist (x &optional next prev parent indent lastp depth)
