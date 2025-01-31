@@ -520,15 +520,18 @@ Argument PROGRESS - a progress reporter."
     alist))
 
 (defun denote-tree--fix-children-in-alist (alist)
-  (let ((new-alist alist))
-    (dolist (node alist new-alist)
-      (when-let* ((node-symbol (car node))
-                  (node-true-symbol (plist-get (cdr node) :true-name))
-                  ((not (eq node-symbol node-true-symbol))))
-        (let ((true-children (plist-get
-                              (alist-get node-true-symbol alist) :children)))
-          (plist-put (cdr node) :children true-children)))
-      (push node new-alist))))
+  "Copy :children of true node to the same prop of duplicate node in ALIST."
+  (let (new-alist)
+    (seq-do
+     (lambda (x)
+       (push
+        (let* ((true-name (plist-get (cdr x) :true-name))
+               (children (denote-tree--nested-value alist true-name :children)))
+          (if (not (eq (car x) true-name))
+              (append (list (car x)) (plist-put (cdr x) :children children))
+            x))
+        new-alist))
+     alist)))
 
 (defun denote-tree--draw-node-list (alist initial-node)
   "Draw every node in ALIST starting from INITIAL-NODE."
