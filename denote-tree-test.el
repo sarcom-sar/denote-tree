@@ -1429,5 +1429,12 @@ LST looks like (START PROP END)."
     (should (equal (denote-tree--nested-value alist 'foo :next :1)
                    nil))))
 
+(ert-deftest denote-tree-test--unique-nodes ()
+  "Test for `denote-tree--unique-nodes'."
+  (should-not (equal (car (denote-tree--unique-nodes 'a t))
+                     'a))
+  (should (equal (car (denote-tree--unique-nodes 'a nil))
+                 'a)))
+
 (provide 'denote-tree-test)
 ;;; denote-tree-test.el ends here
