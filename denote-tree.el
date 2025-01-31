@@ -540,16 +540,15 @@ Argument PROGRESS - a progress reporter."
         (node initial-node)
         (stack (list initial-node)))
     (while node
-      (plist-put
-       node-plist
-       :pos
-       (denote-tree--draw-node-foo
-        node node-plist (denote-tree--nested-value alist node :parent :next-indent)))
-      (if (eq node (denote-tree--nested-value alist node :true-name))
-          (setq stack (append (plist-get node-plist :children) (cdr stack)))
-        (setq stack (cdr stack)))
-      (setq node (car stack))
-      (setq node-plist (alist-get node alist)))))
+      (seq-setq (node alist node-plist stack)
+                (or (denote-tree--draw-node-list-helper
+                     node alist node-plist stack)
+                    (list (car stack)
+                          alist
+                          (alist-get (car stack) alist)
+                          (cdr stack)))))
+    alist))
+
 (defun denote-tree--draw-node-list-helper (node alist node-plist stack)
   (let ((point (denote-tree--draw-node-foo
                 node node-plist (denote-tree--nested-value
