@@ -1436,5 +1436,24 @@ LST looks like (START PROP END)."
   (should (equal (car (denote-tree--unique-nodes 'a nil))
                  'a)))
 
+(ert-deftest denote-tree-test--fix-children-in-alist ()
+  "Tests for `denote-tree--fix-children-in-alist'."
+  (let ((alist '((a12 :true-name a :children nil)
+                 (a :true-name a :children (b c)))))
+    (should (equal (denote-tree--fix-children-in-alist alist)
+                   '((a12 :true-name a :children (b c))
+                     (a :true-name a :children (b c))))))
+  (let ((alist '((a :true-name a :children nil))))
+    (should (equal (denote-tree--fix-children-in-alist alist)
+                   '((a :true-name a :children nil)))))
+  (let ((alist '((a12 :true-name a :children nil))))
+    (should (equal (denote-tree--fix-children-in-alist alist)
+                   '((a12 :true-name a :children nil)))))
+  (let ((alist '((a12 :true-name a :children (b c))
+                 (a :true-name a :children (d e)))))
+    (should (equal (denote-tree--fix-children-in-alist alist)
+                   '((a12 :true-name a :children (d e))
+                     (a :true-name a :children (d e)))))))
+
 (provide 'denote-tree-test)
 ;;; denote-tree-test.el ends here
