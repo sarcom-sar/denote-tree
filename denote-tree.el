@@ -605,9 +605,9 @@ Argument INDENT - next indent
   (let* ((prop (car nested-value))
          (value (plist-get (alist-get initial-key alist) prop)))
     (dolist (trio (cdr nested-value) value)
-      (let ((key value)
-            (prop trio))
-        (setq value (plist-get (alist-get key alist) prop))))))
+      (seq-find
+       (lambda (x) (setq value (plist-get (alist-get x alist) trio)))
+       (if (listp value) value (list value))))))
 
 (defun denote-tree--add-props-to-cycles ()
   "Add \\='denote-tree--child prop to elements of `denote-tree--cyclic-buffers'.
