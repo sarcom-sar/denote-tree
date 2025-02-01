@@ -426,24 +426,23 @@ properties."
            buffer "" t denote-tree-max-traversal-depth))
     (progress-reporter-done progress)))
 
-(defun denote-tree--walk-links-real (initial-buffer)
-  "Return node-list starting from INITIAL-BUFFER.
+(defun denote-tree--traverse-structure
+    (element alist info stack call-fn &optional other-fn)
+  "Traverse the structure calling CALL-FN or OTHER-FN, return the ALIST.
 
-As a side effect open all buffers encountered."
-  (let* ((node (intern initial-buffer))
-         (node-list (list (list node)))
-         (stack (list node))
-         (visited '()))
-    (while node
-      (denote-tree--open-link-maybe (symbol-name node))
-      (if (not (memq node visited))
-          (let ((new-links (denote-tree--collect-links (symbol-name node))))
-            (setq node-list (append node-list (list new-links)))
-            (setq visited (append (list node) visited))
-            (setq stack (append new-links (cdr stack))))
-        (setq stack (cdr stack)))
-      (setq node (car stack)))
-    node-list))
+CALL-FN and OTHER-FN are user supplied functions with 4 arguments which
+are in charge of maintaining the stack.  ELEMENT is a current element under
+traversal.  ALIST stores the general information, INFO should store the
+specific information, while STACK maintains the elements to traverse further.
+
+If CALL-FN returns nil, OTHER-FN is called instead.  These functions should
+return a list of four elements each."
+  (let ((new-alist (copy-sequence alist)))
+    (while element
+      (seq-setq (element new-alist info stack)
+                (or (funcall call-fn element new-alist info stack)
+                    (funcall other-fn element new-alist info stack))))
+    new-alist))
 
 (defun denote-tree--walk-links (buffer indent lastp depth &optional progress)
   "Walk along the links starting from BUFFER.
