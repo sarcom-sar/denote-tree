@@ -512,9 +512,9 @@ Argument PROGRESS - a progress reporter."
             :descp (denote-tree--collect-keywords-as-string buffer denote-tree-node-description)
             :last lastp))))
     (while node
-      (seq-setq (node alist stack)
-                (or (denote-tree--grow-alist-and-stack node alist stack)
-                    (list (cadr stack) alist (cdr stack)))))
+      (seq-setq (node alist info stack)
+                (or (denote-tree--grow-alist-and-stack node alist nil stack)
+                    (list (cadr stack) alist nil (cdr stack)))))
     alist))
 
 (defun denote-tree--fix-children-in-alist (alist)
@@ -577,7 +577,7 @@ Argument PROGRESS - a progress reporter."
     (insert "\n")
     point))
 
-(defun denote-tree--grow-alist-and-stack (node alist stack)
+(defun denote-tree--grow-alist-and-stack (node alist info stack)
   "Add NODE to ALIST, fetch more nodes for STACK."
   (when-let* (((eq node (denote-tree--nested-value alist node :true-name)))
               (depth (denote-tree--nested-value alist node :depth)))
@@ -611,7 +611,7 @@ Argument PROGRESS - a progress reporter."
            (new-stack (append keys (cdr stack))))
       (setf (alist-get node alist)
             (plist-put (alist-get node alist) :children keys))
-      (list (car new-stack) new-alist new-stack))))
+      (list (car new-stack) new-alist info new-stack))))
 
 (defun denote-tree--unique-nodes (node existsp)
   "Return a pair new id of NODE and NODE symbol itself.
