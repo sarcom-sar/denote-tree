@@ -421,8 +421,9 @@ properties."
 (defun denote-tree--draw-tree (buffer)
   "Draw and propertize a tree in current buffer starting with BUFFER."
   (let ((progress (make-progress-reporter "Building denote-tree buffer...")))
-    (denote-tree--walk-links-iteratively
-     buffer "" t denote-tree-max-traversal-depth)
+    (setq denote-tree--tree-alist
+          (denote-tree--walk-links-iteratively
+           buffer "" t denote-tree-max-traversal-depth))
     (progress-reporter-done progress)))
 
 (defun denote-tree--walk-links-real (initial-buffer)
