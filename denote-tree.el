@@ -443,7 +443,7 @@ return a list of four elements each."
     (while element
       (seq-setq (element new-alist info stack)
                 (or (funcall call-fn element new-alist info stack)
-                    (funcall other-fn element new-alist info stack))))
+                    (funcall other-fn new-alist info stack))))
     new-alist))
 
 (defun denote-tree--walk-links (buffer indent lastp depth &optional progress)
@@ -505,7 +505,7 @@ Argument PROGRESS - a progress reporter."
      nil
      (list node)
      #'denote-tree--grow-alist-and-stack
-     (lambda (element alist info stack)
+     (lambda (alist info stack)
        (list (cadr stack)
              alist
              nil
@@ -530,7 +530,7 @@ Argument PROGRESS - a progress reporter."
   (denote-tree--traverse-structure
    initial-node alist (alist-get initial-node alist) (list initial-node)
    #'denote-tree--draw-node-list-helper
-   (lambda (element alist info stack)
+   (lambda (alist info stack)
      (list (cadr stack)
            alist
            (alist-get (cadr stack) alist)
