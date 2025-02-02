@@ -533,18 +533,14 @@ Argument PROGRESS - a progress reporter."
 
 (defun denote-tree--draw-node-list (alist initial-node)
   "Draw every node in ALIST starting from INITIAL-NODE."
-  (let ((node-plist (alist-get initial-node alist))
-        (node initial-node)
-        (stack (list initial-node)))
-    (while node
-      (seq-setq (node alist node-plist stack)
-                (or (denote-tree--draw-node-list-helper
-                     node alist node-plist stack)
-                    (list (cadr stack)
-                          alist
-                          (alist-get (cadr stack) alist)
-                          (cdr stack)))))
-    alist))
+  (denote-tree--traverse-structure
+   initial-node alist (alist-get initial-node alist) (list initial-node)
+   #'denote-tree--draw-node-list-helper
+   (lambda (element alist info stack)
+     (list (cadr stack)
+           alist
+           (alist-get (cadr stack) alist)
+           (cdr stack)))))
 
 (defun denote-tree--draw-node-list-helper (node alist node-plist stack)
   (let ((point (denote-tree--draw-node-foo
