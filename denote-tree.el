@@ -424,6 +424,7 @@ properties."
     (setq denote-tree--tree-alist
           (denote-tree--walk-links-iteratively
            buffer "" t denote-tree-max-traversal-depth))
+    (denote-tree--draw-node-list denote-tree--tree-alist (intern buffer))
     (progress-reporter-done progress)))
 
 (defun denote-tree--traverse-structure
@@ -510,7 +511,6 @@ Argument PROGRESS - a progress reporter."
             :descp (denote-tree--collect-keywords-as-string buffer denote-tree-node-description)
             :last lastp))))
     (while node
-      (denote-tree--draw-node-foo alist node)
       (let ((node-true-name (denote-tree--nested-value alist node :true-name))
             (node-depth (denote-tree--nested-value alist node :depth)))
         (seq-setq (node alist children)
