@@ -496,26 +496,20 @@ Argument PROGRESS - a progress reporter."
 
 (defun denote-tree--walk-links-iteratively (buffer indent lastp depth)
   "Walk links from BUFFER with starting INDENT."
-  (let* ((node (intern buffer))
-         (stack (list (intern buffer)))
-         (alist
-          (list
-           (list
-            node
-            :next-indent (denote-tree--calculate-indent indent lastp)
-            :next node
-            :prev node
-            :parent nil
-            :pos nil
-            :true-name node
-            :depth depth
-            :descp (denote-tree--collect-keywords-as-string buffer denote-tree-node-description)
-            :last lastp))))
-    (while node
-      (seq-setq (node alist info stack)
-                (or (denote-tree--grow-alist-and-stack node alist nil stack)
-                    (list (cadr stack) alist nil (cdr stack)))))
-    alist))
+  (let ((node (intern buffer)))
+    (denote-tree--traverse-structure
+     node
+     (list
+      (denote-tree--node-plist
+       (cons node node) node node nil indent  lastp depth))
+     nil
+     (list node)
+     #'denote-tree--grow-alist-and-stack
+     (lambda (element alist info stack)
+       (list (cadr stack)
+             alist
+             nil
+             (cdr stack))))))
 
 (defun denote-tree--fix-children-in-alist (alist)
   "Copy :children of true node to the same prop of duplicate node in ALIST."
