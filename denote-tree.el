@@ -294,7 +294,7 @@ node position for future backtracking."
         next-point curr-point)
     (cond
      ((listp arg)
-      (setq preserve-teleport-p (not denote-tree-preserve-teleports-p))
+      (setq preserve-teleport-p (not preserve-teleport-p))
       (setq arg 1))
      ((eq arg '-)
       (setq arg -1)))
