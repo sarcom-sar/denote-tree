@@ -180,13 +180,6 @@ User can extend it in format of (KEY TYPE VALUE)."
 (defvar-local denote-tree--visited-buffers '()
   "List of already created buffers.  Used for clean up.")
 
-(defvar-local denote-tree--cyclic-buffers '()
-  "List of buffers that are cyclic nodes.
-
-Every entry of `denote-tree--cyclic-buffers' is denote ID that appears
-cyclically over the buffer.  `cdr' of that variable is set to the list
-of positions at which that denote ID is present.")
-
 (defvar-local denote-tree--tree-alist '()
   "Alist of all the nodes in the buffer.")
 
