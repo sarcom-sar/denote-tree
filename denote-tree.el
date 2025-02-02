@@ -621,124 +621,127 @@ Argument INDENT - next indent
 
 Especially useful, if `denote-tree-max-traversal-depth' is set to very
 low value."
-  (let* ((inhibit-read-only t)
-         ;; pos of current node
-         (old-buffer (buffer-name))
-         (node-pos (denote-tree--get-node-pos))
-         (marker-alist (denote-tree--build-marker-alist node-pos))
-         (id (denote-tree--get-prop 'button-data))
-         (indent (buffer-substring-no-properties
-                  (line-beginning-position)
-                  (- node-pos (length denote-tree-node))))
-         (lastp (save-excursion
-                  (goto-char (line-beginning-position))
-                  (search-forward
-                   denote-tree-lower-knee (line-end-position) t)))
-         (reg-beg) (reg-end)
-         (_ (seq-setq (reg-beg reg-end)
-                      (denote-tree--determine-node-bounds
-                       node-pos marker-alist))))
-    (seq-let (visited-buffers cyclic-buffers)
-        (denote-tree--nuke-props-in-region reg-beg reg-end)
-      (with-temp-buffer ;; new-buffer
-        (let ((new-buffer (buffer-name)))
-          (setq denote-tree--visited-buffers visited-buffers
-                denote-tree--cyclic-buffers cyclic-buffers)
-          (unwind-protect
-              (let ((progress (make-progress-reporter
-                               "Rebuilding denote-tree buffer...")))
-                (denote-tree--walk-links
-                 id indent lastp denote-tree-max-traversal-depth progress)
-                (progress-reporter-done progress))
-            (denote-tree--clean-up))
-          (setq visited-buffers denote-tree--visited-buffers
-                cyclic-buffers denote-tree--cyclic-buffers)
-          (with-current-buffer old-buffer
-            (save-restriction
-              (narrow-to-region reg-beg (1+ reg-end))
-              (with-current-buffer new-buffer
-                (denote-tree--compare-and-insert-new-to old-buffer (point-min) 1))
-              (goto-char (point-min))
-              (denote-tree--set-positions-to-markers)
-              (goto-char (point-min))))))
-      (setq denote-tree--visited-buffers
-            (seq-union denote-tree--visited-buffers
-                       visited-buffers))
-      (setq denote-tree--cyclic-buffers
-            (seq-union denote-tree--cyclic-buffers
-                       cyclic-buffers)))
-    (denote-tree--add-props-to-cycles)
-    (goto-char node-pos)))
+  ;; (let* ((inhibit-read-only t)
+  ;;        ;; pos of current node
+  ;;        (old-buffer (buffer-name))
+  ;;        (node-pos (denote-tree--get-node-pos))
+  ;;        (marker-alist (denote-tree--build-marker-alist node-pos))
+  ;;        (id (denote-tree--get-prop 'button-data))
+  ;;        (indent (buffer-substring-no-properties
+  ;;                 (line-beginning-position)
+  ;;                 (- node-pos (length denote-tree-node))))
+  ;;        (lastp (save-excursion
+  ;;                 (goto-char (line-beginning-position))
+  ;;                 (search-forward
+  ;;                  denote-tree-lower-knee (line-end-position) t)))
+  ;;        (reg-beg) (reg-end)
+  ;;        (_ (seq-setq (reg-beg reg-end)
+  ;;                     (denote-tree--determine-node-bounds
+  ;;                      node-pos marker-alist))))
+  ;;   (seq-let (visited-buffers cyclic-buffers)
+  ;;       (denote-tree--nuke-props-in-region reg-beg reg-end)
+  ;;     (with-temp-buffer ;; new-buffer
+  ;;       (let ((new-buffer (buffer-name)))
+  ;;         (setq denote-tree--visited-buffers visited-buffers
+  ;;               denote-tree--cyclic-buffers cyclic-buffers)
+  ;;         (unwind-protect
+  ;;             (let ((progress (make-progress-reporter
+  ;;                              "Rebuilding denote-tree buffer...")))
+  ;;               (denote-tree--walk-links
+  ;;                id indent lastp denote-tree-max-traversal-depth progress)
+  ;;               (progress-reporter-done progress))
+  ;;           (denote-tree--clean-up))
+  ;;         (setq visited-buffers denote-tree--visited-buffers
+  ;;               cyclic-buffers denote-tree--cyclic-buffers)
+  ;;         (with-current-buffer old-buffer
+  ;;           (save-restriction
+  ;;             (narrow-to-region reg-beg (1+ reg-end))
+  ;;             (with-current-buffer new-buffer
+  ;;               (denote-tree--compare-and-insert-new-to old-buffer (point-min) 1))
+  ;;             (goto-char (point-min))
+  ;;             (denote-tree--set-positions-to-markers)
+  ;;             (goto-char (point-min))))))
+  ;;     (setq denote-tree--visited-buffers
+  ;;           (seq-union denote-tree--visited-buffers
+  ;;                      visited-buffers))
+  ;;     (setq denote-tree--cyclic-buffers
+  ;;           (seq-union denote-tree--cyclic-buffers
+  ;;                      cyclic-buffers)))
+  ;;   (denote-tree--add-props-to-cycles)
+  ;;   (goto-char node-pos))
+  )
 
 (defun denote-tree--sanitize-deleted-entries (buffer)
   "Remove all nodes in BUFFER not present during redrawing.
 
 Iterate over all the lines in BUFFER and if they are not present in
 redrawn buffer, then remove them (and their children) from BUFFER."
-  (let ((new-buf (current-buffer)))
-    (with-current-buffer buffer
-      (save-excursion
-        (goto-char (point-min))
-        (goto-char (line-end-position))
-        (while (> (point-max) (point))
-          (let* ((old-line
-                  (buffer-substring-no-properties
-                   (or (denote-tree--get-node-pos)
-                       (point))
-                   (line-end-position)))
-                 (foundp (with-current-buffer new-buf
-                           (goto-char 1)
-                           (search-forward old-line nil t))))
-            (if foundp
-                (forward-line)
-              ;; this is not the end, what about children?
-              (denote-tree--link-next-and-prev-node (point))
-              (save-restriction
-                (apply #'narrow-to-region
-                       (denote-tree--determine-node-bounds
-                        (point) (denote-tree--build-marker-alist (point))))
-                ;;unimplemented
-                ;; (find-cyclical-buffers)
-                ;; determine if they exist at all and every reference
-                ;; to them should be deleted
-                ;; or
-                ;; reference are "killed" locally, then move the
-                ;; resulting tree to earliest suitable location
-                ;;unimplemented
-                ;; (strip-all-markers)
-                ;; iteratively remove /all/ markers in props
-                (delete-region (point-min) (point-max)))
-              (delete-region (point) (1+ (point))))))))))
+  ;; (let ((new-buf (current-buffer)))
+  ;;   (with-current-buffer buffer
+  ;;     (save-excursion
+  ;;       (goto-char (point-min))
+  ;;       (goto-char (line-end-position))
+  ;;       (while (> (point-max) (point))
+  ;;         (let* ((old-line
+  ;;                 (buffer-substring-no-properties
+  ;;                  (or (denote-tree--get-node-pos)
+  ;;                      (point))
+  ;;                  (line-end-position)))
+  ;;                (foundp (with-current-buffer new-buf
+  ;;                          (goto-char 1)
+  ;;                          (search-forward old-line nil t))))
+  ;;           (if foundp
+  ;;               (forward-line)
+  ;;             ;; this is not the end, what about children?
+  ;;             (denote-tree--link-next-and-prev-node (point))
+  ;;             (save-restriction
+  ;;               (apply #'narrow-to-region
+  ;;                      (denote-tree--determine-node-bounds
+  ;;                       (point) (denote-tree--build-marker-alist (point))))
+  ;;               ;;unimplemented
+  ;;               ;; (find-cyclical-buffers)
+  ;;               ;; determine if they exist at all and every reference
+  ;;               ;; to them should be deleted
+  ;;               ;; or
+  ;;               ;; reference are "killed" locally, then move the
+  ;;               ;; resulting tree to earliest suitable location
+  ;;               ;;unimplemented
+  ;;               ;; (strip-all-markers)
+  ;;               ;; iteratively remove /all/ markers in props
+  ;;               (delete-region (point-min) (point-max)))
+  ;;             (delete-region (point) (1+ (point)))))))))
+  )
 
 (defun denote-tree--link-next-and-prev-node (pos)
   "Nodes in vicinity of node at POS point at nearest neighbor.
 
 If node points at node at POS with \\='denote-tree--child prop set
 marker to nil."
-  (when-let* ((next (get-text-property pos 'denote-tree--next))
-              (next-prev (get-text-property next 'denote-tree--prev))
-              (prev (get-text-property pos 'denote-tree--prev))
-              (prev-next (get-text-property prev 'denote-tree--next))
-              (parent (get-text-property pos 'denote-tree--parent))
-              (parent-child (get-text-property parent 'denote-tree--child)))
-    ;; handle neighbors
-    (cond
-     ;; there are /at max/ two nodes
-     ((equal next prev)
-      (set-marker next-prev next)
-      (set-marker prev-next prev))
-     ;; there is more than two nodes
-     (t
-      (set-marker next-prev prev)
-      (set-marker prev-next next)))
-    ;; handle parent
-    (let ((next-next (get-text-property next 'denote-tree--next)))
-      (cond
-       ((and (= next-next pos)
-             (= parent-child pos))
-        (set-marker parent-child nil))
-       ((= parent-child pos)
-        (set-marker parent-child next))))))
+  ;; (when-let* ((next (get-text-property pos 'denote-tree--next))
+  ;;             (next-prev (get-text-property next 'denote-tree--prev))
+  ;;             (prev (get-text-property pos 'denote-tree--prev))
+  ;;             (prev-next (get-text-property prev 'denote-tree--next))
+  ;;             (parent (get-text-property pos 'denote-tree--parent))
+  ;;             (parent-child (get-text-property parent 'denote-tree--child)))
+  ;;   ;; handle neighbors
+  ;;   (cond
+  ;;    ;; there are /at max/ two nodes
+  ;;    ((equal next prev)
+  ;;     (set-marker next-prev next)
+  ;;     (set-marker prev-next prev))
+  ;;    ;; there is more than two nodes
+  ;;    (t
+  ;;     (set-marker next-prev prev)
+  ;;     (set-marker prev-next next)))
+  ;;   ;; handle parent
+  ;;   (let ((next-next (get-text-property next 'denote-tree--next)))
+  ;;     (cond
+  ;;      ((and (= next-next pos)
+  ;;            (= parent-child pos))
+  ;;       (set-marker parent-child nil))
+  ;;      ((= parent-child pos)
+  ;;       (set-marker parent-child next)))))
+  )
 
 (defun denote-tree--compare-and-insert-new-to
     (buffer old-pos new-pos)
@@ -747,67 +750,70 @@ marker to nil."
 Argument NEW-POS - a corresponding position in a temporary buffer where
                    redrawing with `denote-tree--deepen-traversal' takes
                    place."
-  (with-current-buffer buffer
-      (goto-char old-pos))
-  (goto-char new-pos)
-  (while (> (point-max) (point))
-    (let ((old-line (with-current-buffer buffer
-                      (buffer-substring (line-beginning-position) (line-end-position))))
-          (new-line (buffer-substring (line-beginning-position) (line-end-position))))
-      (cond
-       ((eq t (compare-strings old-line nil nil new-line nil nil t))
-        (with-current-buffer buffer
-          (denote-tree--copy-new-markers-to-old-node new-line)
-          (forward-line))
-        (forward-line))
-       (t
-        (with-current-buffer buffer
-          (save-excursion
-            (denote-tree--insert-new-node-and-markers new-line))
-          (goto-char (line-end-position)))
-        (forward-line))))))
+  ;; (with-current-buffer buffer
+  ;;     (goto-char old-pos))
+  ;; (goto-char new-pos)
+  ;; (while (> (point-max) (point))
+  ;;   (let ((old-line (with-current-buffer buffer
+  ;;                     (buffer-substring (line-beginning-position) (line-end-position))))
+  ;;         (new-line (buffer-substring (line-beginning-position) (line-end-position))))
+  ;;     (cond
+  ;;      ((eq t (compare-strings old-line nil nil new-line nil nil t))
+  ;;       (with-current-buffer buffer
+  ;;         (denote-tree--copy-new-markers-to-old-node new-line)
+  ;;         (forward-line))
+  ;;       (forward-line))
+  ;;      (t
+  ;;       (with-current-buffer buffer
+  ;;         (save-excursion
+  ;;           (denote-tree--insert-new-node-and-markers new-line))
+  ;;         (goto-char (line-end-position)))
+  ;;       (forward-line)))))
+  )
 
 (defun denote-tree--copy-new-markers-to-old-node (payload)
   "Copy props from PAYLOAD and insert them to old node.
 
 PAYLOAD comes from smaller buffer.  It's properties need to be
 realigned, so marker positions match those of bigger buffer."
-  (let ((text-props (text-properties-at (line-beginning-position))))
-    (dolist (el '(denote-tree--child
-                  denote-tree--next
-                  denote-tree--prev
-                  denote-tree--parent))
-      (when-let* (((null (plist-member text-props el)))
-                  (new-marker (get-text-property 0 el payload))
-                  (new-position (1- (+ (point-min) new-marker))))
-        (setq text-props
-              (plist-put text-props el (cons new-marker new-position)))))
-    (add-text-properties (line-beginning-position) (line-end-position)
-                         text-props)))
+  ;; (let ((text-props (text-properties-at (line-beginning-position))))
+  ;;   (dolist (el '(denote-tree--child
+  ;;                 denote-tree--next
+  ;;                 denote-tree--prev
+  ;;                 denote-tree--parent))
+  ;;     (when-let* (((null (plist-member text-props el)))
+  ;;                 (new-marker (get-text-property 0 el payload))
+  ;;                 (new-position (1- (+ (point-min) new-marker))))
+  ;;       (setq text-props
+  ;;             (plist-put text-props el (cons new-marker new-position)))))
+  ;;   (add-text-properties (line-beginning-position) (line-end-position)
+  ;;                        text-props))
+  )
 
 (defun denote-tree--insert-new-node-and-markers (payload)
   "Insert PAYLOAD and correct it's properties.
 
 PAYLOAD comes from smaller buffer.  It's properties need to be
 realigned, so marker positions match those of bigger buffer."
-  (forward-line -1)
-  (goto-char (line-end-position))
-  (insert "\n" payload)
-  (let ((text-props (text-properties-at (line-beginning-position))))
-    (dolist (el '(denote-tree--child
-                  denote-tree--next
-                  denote-tree--prev
-                  denote-tree--parent))
-      (when-let* ((marker (plist-get text-props el))
-                  ((marker-position marker))
-                  ;; node position in new buffer is offset from
-                  ;; the marker of old buffer by (point-min)
-                  (new-position (1- (+ (point-min) marker)))
-                  (new-buffer (current-buffer)))
-        (setf (plist-get text-props el)
-              (cons marker new-position))))
-    (add-text-properties (line-beginning-position) (line-end-position)
-                         text-props)))
+  ;; (forward-line -1)
+  ;; (goto-char (line-end-position))
+  ;; (insert "\n" payload)
+  ;; (let ((text-props (text-properties-at (line-beginning-position))))
+  ;;   (dolist (el '(denote-tree--child
+  ;;                 denote-tree--next
+  ;;                 denote-tree--prev
+  ;;                 denote-tree--parent))
+  ;;     (when-let* ((marker (plist-get text-props el))
+  ;;                 ((marker-position marker))
+  ;;                 ;; node position in new buffer is offset from
+  ;;                 ;; the marker of old buffer by (point-min)
+  ;;                 (new-position (1- (+ (point-min) marker)))
+  ;;                 (new-buffer (current-buffer)))
+  ;;       (setf (plist-get text-props el)
+  ;;             (cons marker new-position))))
+  ;;   (add-text-properties (line-beginning-position) (line-end-position)
+  ;;                        text-props))
+  )
 
 (defun denote-tree--set-positions-to-markers ()
   "Reset positions of prop markers from consp to singular value.
@@ -815,48 +821,50 @@ realigned, so marker positions match those of bigger buffer."
 In previous step of redrawing, the newly inserted nodes had their new
 position saved as `cdr' of a cons cell.  In restore those positions in
 current buffers as actual positions."
-  (while (> (point-max) (point))
-    (let ((text-props (text-properties-at (line-beginning-position))))
-      (dolist (el '(denote-tree--child
-                    denote-tree--next
-                    denote-tree--prev
-                    denote-tree--parent))
-        (when-let* ((pos (plist-get text-props el))
-                    ((consp pos)))
-          (setf (plist-get text-props el)
-                (set-marker (car pos) (cdr pos) (current-buffer)))))
-      (add-text-properties (line-beginning-position) (line-end-position)
-                           text-props))
-    (forward-line)
-    (goto-char (line-end-position))))
+  ;; (while (> (point-max) (point))
+  ;;   (let ((text-props (text-properties-at (line-beginning-position))))
+  ;;     (dolist (el '(denote-tree--child
+  ;;                   denote-tree--next
+  ;;                   denote-tree--prev
+  ;;                   denote-tree--parent))
+  ;;       (when-let* ((pos (plist-get text-props el))
+  ;;                   ((consp pos)))
+  ;;         (setf (plist-get text-props el)
+  ;;               (set-marker (car pos) (cdr pos) (current-buffer)))))
+  ;;     (add-text-properties (line-beginning-position) (line-end-position)
+  ;;                          text-props))
+  ;;   (forward-line)
+  ;;   (goto-char (line-end-position)))
+  )
 
 (defun denote-tree--nuke-props-in-region (beg end)
   "For region BEG END remove all props and it's record.
 
 Non cyclical nodes are removed from `denote-tree--visited-buffers' and
 `denote-tree--cyclic-buffers'."
-  (save-restriction
-    (widen)
-    (narrow-to-region beg end)
-    (goto-char (point-min))
-    (let ((non-cyclical '())
-          (visited-buffers denote-tree--visited-buffers)
-          (cyclic-buffers denote-tree--cyclic-buffers))
-      (while (> (point-max) (point))
-        (let* ((pos (denote-tree--get-node-pos))
-               (data-prop (and pos (get-text-property pos 'button-data)))
-               (face-prop (and pos (get-text-property pos 'face))))
-          (when (eq face-prop 'denote-tree-node)
-            (push data-prop non-cyclical))
-          (goto-char (line-end-position))
-          (forward-line)))
-      (setq visited-buffers
-            (seq-difference visited-buffers
-                            non-cyclical))
-      (setq cyclic-buffers
-            (seq-difference cyclic-buffers
-                            non-cyclical))
-      (list visited-buffers cyclic-buffers))))
+  ;; (save-restriction
+  ;;   (widen)
+  ;;   (narrow-to-region beg end)
+  ;;   (goto-char (point-min))
+  ;;   (let ((non-cyclical '())
+  ;;         (visited-buffers denote-tree--visited-buffers)
+  ;;         (cyclic-buffers denote-tree--cyclic-buffers))
+  ;;     (while (> (point-max) (point))
+  ;;       (let* ((pos (denote-tree--get-node-pos))
+  ;;              (data-prop (and pos (get-text-property pos 'button-data)))
+  ;;              (face-prop (and pos (get-text-property pos 'face))))
+  ;;         (when (eq face-prop 'denote-tree-node)
+  ;;           (push data-prop non-cyclical))
+  ;;         (goto-char (line-end-position))
+  ;;         (forward-line)))
+  ;;     (setq visited-buffers
+  ;;           (seq-difference visited-buffers
+  ;;                           non-cyclical))
+  ;;     (setq cyclic-buffers
+  ;;           (seq-difference cyclic-buffers
+  ;;                           non-cyclical))
+  ;;     (list visited-buffers cyclic-buffers)))
+  )
 
 (defun denote-tree--determine-node-bounds (node-pos marker-alist)
   "Determine bounds of current node at NODE-POS with MARKER-ALIST.
@@ -872,32 +880,33 @@ then we can have arbitrary \"deepness\", iterate until you find parent
 node which next node is grater than node to be redrawn.  If you ran out
 of nodes to check, you are at the top and the last node is your target.
 If nothing matches, signal an error."
-  (list
-   (line-beginning-position)
-   (let-alist marker-alist
-     (cond
-      ((not (marker-position (car .denote-tree--next)))
-       ;; do not kill the last newline
-       (1- (point-max)))
-      ((< node-pos (car .denote-tree--next))
-       (save-excursion
-         (goto-char (car .denote-tree--next))
-         (forward-line -1)
-         (line-end-position)))
-      ((>= node-pos (car .denote-tree--next))
-       (save-excursion
-         (goto-char (car .denote-tree--parent))
-         (let (next)
-           (while (and (setq next (get-text-property (point) 'denote-tree--next))
-                       (> node-pos next))
-             (goto-char (get-text-property (point) 'denote-tree--parent))))
-         (if (> node-pos (or (get-text-property (point) 'denote-tree--next) 1))
-             ;; ditto
-             (1- (point-max))
-           (goto-char (get-text-property (point) 'denote-tree--next))
-           (forward-line -1)
-           (line-end-position))))
-      (t (error "Denote tree buffer is malformed"))))))
+  ;; (list
+  ;;  (line-beginning-position)
+  ;;  (let-alist marker-alist
+  ;;    (cond
+  ;;     ((not (marker-position (car .denote-tree--next)))
+  ;;      ;; do not kill the last newline
+  ;;      (1- (point-max)))
+  ;;     ((< node-pos (car .denote-tree--next))
+  ;;      (save-excursion
+  ;;        (goto-char (car .denote-tree--next))
+  ;;        (forward-line -1)
+  ;;        (line-end-position)))
+  ;;     ((>= node-pos (car .denote-tree--next))
+  ;;      (save-excursion
+  ;;        (goto-char (car .denote-tree--parent))
+  ;;        (let (next)
+  ;;          (while (and (setq next (get-text-property (point) 'denote-tree--next))
+  ;;                      (> node-pos next))
+  ;;            (goto-char (get-text-property (point) 'denote-tree--parent))))
+  ;;        (if (> node-pos (or (get-text-property (point) 'denote-tree--next) 1))
+  ;;            ;; ditto
+  ;;            (1- (point-max))
+  ;;          (goto-char (get-text-property (point) 'denote-tree--next))
+  ;;          (forward-line -1)
+  ;;          (line-end-position))))
+  ;;     (t (error "Denote tree buffer is malformed")))))
+  )
 
 (defmacro denote-tree--build-marker-alist (pos)
   "Return alist of KEY MARKER NEXT-PROP at POS.
@@ -905,19 +914,20 @@ If nothing matches, signal an error."
 The alist is made out of identifier of a marker, the marker itself and
 the opposite identifier.  It's used when referencing the node under the
 marker in order to set it's opposite to the current node."
-  `(list
-    (list 'denote-tree--prev
-          (copy-marker
-           (get-text-property ,pos 'denote-tree--prev))
-          'denote-tree--next)
-    (list 'denote-tree--next
-          (copy-marker
-           (get-text-property ,pos 'denote-tree--next))
-          'denote-tree--prev)
-    (list 'denote-tree--parent
-          (copy-marker
-           (get-text-property ,pos 'denote-tree--parent))
-          'denote-tree--child)))
+  ;; `(list
+  ;;   (list 'denote-tree--prev
+  ;;         (copy-marker
+  ;;          (get-text-property ,pos 'denote-tree--prev))
+  ;;         'denote-tree--next)
+  ;;   (list 'denote-tree--next
+  ;;         (copy-marker
+  ;;          (get-text-property ,pos 'denote-tree--next))
+  ;;         'denote-tree--prev)
+  ;;   (list 'denote-tree--parent
+  ;;         (copy-marker
+  ;;          (get-text-property ,pos 'denote-tree--parent))
+  ;;         'denote-tree--child))
+  )
 
 
 ;;;; Helpers for Links and Buffers
