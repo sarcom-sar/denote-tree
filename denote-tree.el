@@ -447,54 +447,6 @@ return a list of four elements each."
                     (funcall other-fn new-alist info stack))))
     new-alist))
 
-(defun denote-tree--walk-links (buffer indent lastp depth &optional progress)
-  "Walk along the links starting from BUFFER.
-
-Draw the current buffer as a node in `denote-tree--buffer-name'.  Set
-it's properties.  Collect all the links and call
-`denote-tree--walk-links' on them recursively.  If BUFFER was already
-visited do not iterate over it.  If BUFFER doesn't have a file, skip
-over and return a symbol \\='notvalid.
-
-Argument INDENT   - state of INDENT between traversals.
-Argument LASTP    - is the node the last child of parent node?
-Argument DEPTH    - maximum depth of the traversal.
-Argument PROGRESS - a progress reporter."
-  ;; draw node in buffer,
-  ;; extract position of point at node
-  ;; carry over the indent
-  (if-let* ((buffer (denote-tree--open-link-maybe buffer)))
-      (let ((links-in-buffer (denote-tree--collect-links buffer))
-            (depth (cond
-                    ((symbolp depth) depth)
-                    ((and (numberp depth) (< 0 (1- depth))) (1- depth))
-                    ((and (numberp depth) (= 0 (1- depth))) nil)
-                    (t t)))
-            node-children pos)
-        (seq-setq (pos indent) (denote-tree--draw-node buffer indent lastp))
-        (when progress
-          (progress-reporter-update progress))
-        ;; traverse the buffer structure
-        ;; if current buffer is in denote-tree--cyclic-buffers
-        ;; do not go deeper, because you enter a cycle
-        (unless (member buffer denote-tree--cyclic-buffers)
-          (dolist (el links-in-buffer)
-            (when (and (get-buffer el)
-                       (not (member
-                             el denote-tree--cyclic-buffers)))
-              (push el denote-tree--cyclic-buffers))
-            (when depth
-              (setq lastp (string= el (car (last links-in-buffer))))
-              (push (denote-tree--walk-links
-                     el indent lastp depth progress)
-                    node-children))))
-        ;; add props to current node and it's children
-        (denote-tree--set-button pos buffer)
-        (denote-tree--add-props-to-children
-         (nreverse (seq-filter #'markerp node-children)) pos)
-        pos)
-    'notvalid))
-
 (defun denote-tree--walk-links-iteratively (buffer indent lastp depth)
   "Walk links from BUFFER with starting INDENT."
   (let ((node (intern buffer)))
@@ -655,96 +607,14 @@ Argument INDENT - next indent
        (lambda (x) (setq value (plist-get (alist-get x alist) trio)))
        (if (listp value) value (list value))))))
 
-(defun denote-tree--add-props-to-cycles ()
-  "Add \\='denote-tree--child prop to elements of `denote-tree--cyclic-buffers'.
-
-Iterate over `denote-tree--cyclic-buffers' finding the original and then
-setting \\='denote-tree--child prop of other cyclic buffers to the value
-of the original."
-  (dolist (node-id denote-tree--cyclic-buffers)
-    (goto-char (point-min))
-    (while (and (> (point-max) (point))
-                (not (eq (get-text-property (point) 'face) 'denote-tree-node)))
-      (text-property-search-forward 'button-data node-id))
-    (let ((marker (get-text-property (point) 'denote-tree--child)))
-      (goto-char (point-min))
-      (while (text-property-search-forward 'button-data node-id)
-        (when (eq (get-text-property (point) 'face) 'denote-tree-circular-node)
-          (add-text-properties
-           (line-beginning-position) (line-end-position)
-           (list 'denote-tree--child marker)))))))
-
 (defun denote-tree--calculate-indent (indent lastp)
   (concat indent (if lastp denote-tree-space denote-tree-pipe)))
-
-(defun denote-tree--draw-node (node-name indent lastp)
-  "Draw NODE-NAME according to INDENT in current buffer.
-
-Insert the current line as follows INDENT `denote-tree-node' title of
-the current denote note.  Face of `denote-tree-node' is either
-`denote-tree-circular-node' if current NODE-NAME is a member of
-`denote-tree--cyclic-buffers' or `denote-tree-node' if it's not.  Call
-`denote-tree-node-colorize-function' on title.
-
-Return location of a point where the node starts and the current indent.
-Argument LASTP is the current node last child of parent."
-  (let ((circularp (member node-name denote-tree--cyclic-buffers))
-        (keywords denote-tree-node-description)
-        point-star-loc)
-    (insert indent)
-    (cond
-     (lastp
-      (setq indent (concat indent denote-tree-space))
-      (insert denote-tree-lower-knee))
-     (t
-      (setq indent (concat indent denote-tree-pipe))
-      (insert denote-tree-tee)))
-    (setq point-star-loc (point-marker))
-    (insert
-     (propertize denote-tree-node
-                 'face
-                 (if circularp
-                     'denote-tree-circular-node
-                   'denote-tree-node))
-     (denote-tree--collect-keywords-as-string node-name keywords) "\n")
-    (list point-star-loc indent)))
 
 (defun denote-tree--set-button (position buffer)
   "Add button to visit BUFFER at POSITION."
   (make-text-button position (+ position (length denote-tree-node))
                     'action #'denote-tree-enter-node
                     'button-data buffer))
-
-(defun denote-tree--add-props-to-children (node-children parent)
-  "Iterate over NODE-CHILDREN to set node's props.  Keep node's PARENT.
-
-Every node contains props \\='denote-tree--next, \\='denote-tree--prev
-and \\='denote-tree--parent which contain point's position to go to get
-to previous/next sibling node or a parent."
-  (when (and parent node-children)
-    (save-excursion
-      (goto-char parent)
-      (add-text-properties
-       (line-beginning-position) (line-end-position)
-       (list
-        'denote-tree--child (car node-children)))))
-  (let ((prev (car (last node-children)))
-        (next (copy-sequence node-children)))
-    (when next
-      (setcdr (last next) next))
-    (dolist (current node-children)
-      (setq next (cdr next))
-      ;; if tail is null, then we are at last element,
-      ;; fetch start of child nodes
-      (save-excursion
-        (goto-char current)
-        (add-text-properties
-         (line-beginning-position) (line-end-position)
-         (list
-          'denote-tree--next (set-marker (make-marker) (car next))
-          'denote-tree--prev (set-marker (make-marker) prev)
-          'denote-tree--parent (set-marker (make-marker) parent))))
-      (setq prev current))))
 
 (defun denote-tree--deepen-traversal ()
   "Retraverse current node under point.
