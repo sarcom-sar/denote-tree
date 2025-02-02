@@ -497,7 +497,7 @@ Argument PROGRESS - a progress reporter."
 (defun denote-tree--walk-links-iteratively (buffer indent lastp depth)
   "Walk links from BUFFER with starting INDENT."
   (let* ((node (intern buffer))
-         (children (list (intern buffer)))
+         (stack (list (intern buffer)))
          (alist
           (list
            (list
@@ -512,9 +512,9 @@ Argument PROGRESS - a progress reporter."
             :descp (denote-tree--collect-keywords-as-string buffer denote-tree-node-description)
             :last lastp))))
     (while node
-      (seq-setq (node alist children)
-                (or (denote-tree--grow-alist-and-children node alist children)
-                    (list (cadr children) alist (cdr children)))))
+      (seq-setq (node alist stack)
+                (or (denote-tree--grow-alist-and-stack node alist stack)
+                    (list (cadr stack) alist (cdr stack)))))
     alist))
 
 (defun denote-tree--fix-children-in-alist (alist)
@@ -581,8 +581,8 @@ Argument PROGRESS - a progress reporter."
     (insert "\n")
     point))
 
-(defun denote-tree--grow-alist-and-children (node alist children)
-  "Add NODE to ALIST, fetch more nodes for CHILDREN."
+(defun denote-tree--grow-alist-and-stack (node alist stack)
+  "Add NODE to ALIST, fetch more nodes for STACK."
   (when-let* (((eq node (denote-tree--nested-value alist node :true-name)))
               (depth (denote-tree--nested-value alist node :depth)))
     (let* ((node (denote-tree--open-link-maybe (symbol-name node)))
@@ -612,10 +612,10 @@ Argument PROGRESS - a progress reporter."
                         new-depth))
                      uniq-links-in-node)
              alist))
-           (new-children (append keys (cdr children))))
+           (new-stack (append keys (cdr stack))))
       (setf (alist-get node alist)
             (plist-put (alist-get node alist) :children keys))
-      (list (car new-children) new-alist new-children))))
+      (list (car new-stack) new-alist new-stack))))
 
 (defun denote-tree--unique-nodes (node existsp)
   "Return a pair new id of NODE and NODE symbol itself.
