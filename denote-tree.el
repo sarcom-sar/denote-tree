@@ -324,10 +324,10 @@ If `denote-tree-preserve-teleports-p' is set to t, teleport to the
 parent the point came from."
   (interactive "p")
   (or arg (setq arg 1))
-  (let ((alist denote-tree--tree-alist)
-        next-point canon-point current-teleport)
-    (if (< arg 0)
-        (denote-tree-child-node (- arg))
+  (if (< arg 0)
+      (denote-tree-child-node (- arg))
+    (let ((alist denote-tree--tree-alist)
+          next-point canon-point current-teleport)
       (dotimes (_ arg next-point)
         (let ((node-id (get-text-property (point) 'denote-tree--identifier)))
           (setq next-point (denote-tree--nested-value
