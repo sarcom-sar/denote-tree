@@ -512,12 +512,9 @@ Argument PROGRESS - a progress reporter."
             :descp (denote-tree--collect-keywords-as-string buffer denote-tree-node-description)
             :last lastp))))
     (while node
-      (let ((node-true-name (denote-tree--nested-value alist node :true-name))
-            (node-depth (denote-tree--nested-value alist node :depth)))
-        (seq-setq (node alist children)
-                  (if (and node-depth (eq node node-true-name))
-                      (denote-tree--grow-alist-and-children node alist children)
-                    (list (cadr children) alist (cdr children))))))
+      (seq-setq (node alist children)
+                (or (denote-tree--grow-alist-and-children node alist children)
+                    (list (cadr children) alist (cdr children)))))
     alist))
 
 (defun denote-tree--fix-children-in-alist (alist)
@@ -586,38 +583,39 @@ Argument PROGRESS - a progress reporter."
 
 (defun denote-tree--grow-alist-and-children (node alist children)
   "Add NODE to ALIST, fetch more nodes for CHILDREN."
-  (let* ((node (denote-tree--open-link-maybe (symbol-name node)))
-         (indent (denote-tree--nested-value alist node :next-indent))
-         (depth (denote-tree--nested-value alist node :depth))
-         (new-depth (cond
-                     ((symbolp depth) depth)
-                     ((and (numberp depth) (< 0 (1- depth))) (1- depth))
-                     ((and (numberp depth) (= 0 (1- depth))) nil)
-                     (t t)))
-         (uniq-links-in-node
-          (mapcar (lambda (x)
-                    (denote-tree--unique-nodes x (alist-get x alist)))
-                  (save-excursion
-                    (denote-tree--collect-links (symbol-name node)))))
-         (last-children-node (caar (last uniq-links-in-node)))
-         (keys (mapcar #'car uniq-links-in-node))
-         (new-alist
-          (append
-           (mapcar (lambda (x)
-                     (denote-tree--node-plist
-                      x
-                      (denote-tree--next-sibling (car x) keys)
-                      (denote-tree--next-sibling (car x) (reverse keys))
-                      node
-                      indent
-                      (eq (car x) last-children-node)
-                      new-depth))
-                   uniq-links-in-node)
-           alist))
-         (new-children (append keys (cdr children))))
-    (setf (alist-get node alist)
-          (plist-put (alist-get node alist) :children keys))
-    (list (car new-children) new-alist new-children)))
+  (when-let* (((eq node (denote-tree--nested-value alist node :true-name)))
+              (depth (denote-tree--nested-value alist node :depth)))
+    (let* ((node (denote-tree--open-link-maybe (symbol-name node)))
+           (indent (denote-tree--nested-value alist node :next-indent))
+           (new-depth (cond
+                       ((symbolp depth) depth)
+                       ((and (numberp depth) (< 0 (1- depth))) (1- depth))
+                       ((and (numberp depth) (= 0 (1- depth))) nil)
+                       (t t)))
+           (uniq-links-in-node
+            (mapcar (lambda (x)
+                      (denote-tree--unique-nodes x (alist-get x alist)))
+                    (save-excursion
+                      (denote-tree--collect-links (symbol-name node)))))
+           (last-children-node (caar (last uniq-links-in-node)))
+           (keys (mapcar #'car uniq-links-in-node))
+           (new-alist
+            (append
+             (mapcar (lambda (x)
+                       (denote-tree--node-plist
+                        x
+                        (denote-tree--next-sibling (car x) keys)
+                        (denote-tree--next-sibling (car x) (reverse keys))
+                        node
+                        indent
+                        (eq (car x) last-children-node)
+                        new-depth))
+                     uniq-links-in-node)
+             alist))
+           (new-children (append keys (cdr children))))
+      (setf (alist-get node alist)
+            (plist-put (alist-get node alist) :children keys))
+      (list (car new-children) new-alist new-children))))
 
 (defun denote-tree--unique-nodes (node existsp)
   "Return a pair new id of NODE and NODE symbol itself.
