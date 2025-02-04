@@ -381,7 +381,9 @@ t, use it's UI."
         ;; edit all occurences of that buffer
         (while (text-property-search-forward
                 'button-data identifier t)
-          (denote-tree--redraw-node buffer (point)))))))
+          (setq denote-tree--tree-alist
+                (denote-tree--redraw-node
+                 buffer denote-tree--tree-alist (point))))))))
 
 
 ;;;; Utilities for node editing
@@ -395,19 +397,21 @@ Return current buffer object."
       (call-interactively #'denote-rename-file)
       (current-buffer))))
 
-(defun denote-tree--redraw-node (buffer pos)
+(defun denote-tree--redraw-node (buffer alist pos)
   "Redraw node based on BUFFER's front matter at POS.
 
 Include only elements from `denote-tree-node-description'.  Preserve
 properties."
   (let ((inhibit-read-only t)
-        (props (text-properties-at (line-beginning-position))))
-    (save-excursion
-      (goto-char pos)
-      (delete-region pos (line-end-position))
-      (insert (denote-tree--collect-keywords-as-string
-               buffer denote-tree-node-description))
-      (add-text-properties pos (line-end-position) props))))
+        (node-name (get-text-property pos 'denote-tree--identifier))
+        (new-alist alist)
+        (new-descp (denote-tree--collect-keywords-as-string
+                    buffer denote-tree-node-description)))
+    (delete-region pos (line-end-position))
+    (insert new-descp)
+    (setf (alist-get node-name new-alist)
+          (plist-put (alist-get node-name new-alist) :descp new-descp))
+    new-alist))
 
 
 ;;;; Tree traversal
