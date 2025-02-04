@@ -483,6 +483,11 @@ return a list of four elements each."
            (cdr stack)))))
 
 (defun denote-tree--draw-node-list-helper (node alist node-plist stack)
+  "Set the current NODE in NODE-PLIST and advance the STACK.
+
+This function calls `denote-tree--draw-node-foo' to do an actual drawing.
+Besides delegating the drawing part it also advances the stack
+and sets up everything for next iteration."
   (let ((point (denote-tree--draw-node-foo
                 node node-plist (denote-tree--nested-value
                                  alist node :parent :next-indent)))
@@ -496,6 +501,7 @@ return a list of four elements each."
             copy-stack))))
 
 (defun denote-tree--draw-node-foo (node plist next-indent)
+  "Draw NODE with NEXT-INDENT according to PLIST."
   (let ((point 0))
     (insert
      (or next-indent
