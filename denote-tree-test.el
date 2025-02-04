@@ -1337,5 +1337,46 @@ LST looks like (START PROP END)."
                    '((a12 :true-name a :children (d e))
                      (a :true-name a :children (d e)))))))
 
+(ert-deftest denote-tree-test--draw-node-foo ()
+  "Tests for `denote-tree--draw-node-foo'."
+  (with-temp-buffer
+    (should (= (denote-tree--draw-node-foo
+                'a '(:true-name a :descp "a" :last nil :pos nil) "")
+               3)))
+  (with-temp-buffer
+    (denote-tree--draw-node-foo
+     'a '(:true-name a :descp "a" :last nil :pos nil) "")
+    (should (equal (buffer-substring-no-properties (point-min) (point-max))
+                   "+-* a\n")))
+  (with-temp-buffer
+    (denote-tree--draw-node-foo
+     'a '(:true-name a :descp "a" :last nil :pos nil) "")
+    (should
+     (equal (get-text-property (point-min) 'denote-tree--identifier) 'a))
+    (should
+     (equal (get-text-property
+             (next-single-property-change (point-min) 'face)
+             'face)
+            'denote-tree-node)))
+  (with-temp-buffer
+    (should (= (denote-tree--draw-node-foo
+                'a '(:true-name b :descp "a" :last nil :pos nil) "|")
+               4)))
+  (with-temp-buffer
+    (denote-tree--draw-node-foo
+     'a '(:true-name b :descp "a" :last nil :pos nil) "|")
+    (should (equal (buffer-substring-no-properties (point-min) (point-max))
+                   "|+-* a\n")))
+  (with-temp-buffer
+    (denote-tree--draw-node-foo
+     'a '(:true-name b :descp "a" :last nil :pos nil) "|")
+    (should
+     (equal (get-text-property (point-min) 'denote-tree--identifier) 'a))
+    (should
+     (equal (get-text-property
+             (next-single-property-change (point-min) 'face)
+             'face)
+            'denote-tree-circular-node))))
+
 (provide 'denote-tree-test)
 ;;; denote-tree-test.el ends here
