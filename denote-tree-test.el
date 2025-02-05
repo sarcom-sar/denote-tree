@@ -1378,5 +1378,44 @@ LST looks like (START PROP END)."
              'face)
             'denote-tree-circular-node))))
 
+(ert-deftest denote-tree-test--next-node ()
+  "Tests for `denote-tree-next-node'."
+  (with-temp-buffer
+    (let ((alist '((a :next-indent "|" :children (b c d)
+                      :last t :depth t
+                      :true-name a :descp "a"
+                      :parent a :next a :prev a)
+                   (b :next-indent "||" :children nil
+                      :last t :depth t
+                      :true-name d :descp "b"
+                      :parent a :next c :prev d)
+                   (c :next-indent "||" :children nil
+                      :last t :depth t
+                      :true-name c :descp "c"
+                      :parent a :next d :prev b)
+                   (d :next-indent "||" :children nil
+                      :last t :depth t
+                      :true-name d :descp "d"
+                      :parent a :next b :prev c))))
+      (setq denote-tree--tree-alist
+            (denote-tree--draw-node-list alist 'a))
+      (goto-char (point-min))
+      (forward-line)
+      (denote-tree-next-node)
+      (should
+       (equal (get-text-property (point) 'denote-tree--identifier) 'c))
+      (denote-tree-next-node)
+      (should
+       (equal (get-text-property (point) 'denote-tree--identifier) 'd))
+      (denote-tree-next-node)
+      (should
+       (equal (get-text-property (point) 'denote-tree--identifier) 'b))
+      (denote-tree-next-node -1)
+      (should
+       (equal (get-text-property (point) 'denote-tree--identifier) 'd))
+      (denote-tree-next-node 2)
+      (should
+       (equal (get-text-property (point) 'denote-tree--identifier) 'c)))))
+
 (provide 'denote-tree-test)
 ;;; denote-tree-test.el ends here
