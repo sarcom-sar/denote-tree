@@ -1486,5 +1486,75 @@ LST looks like (START PROP END)."
       (should
        (equal (get-text-property (point) 'denote-tree--identifier) 'b123)))))
 
+(ert-deftest denote-tree-test--parent-node ()
+  "Tests for `denote-tree-next-node'."
+  (with-temp-buffer
+    (let ((alist '((a :next-indent "|" :children (b)
+                      :last t :depth t
+                      :true-name a :descp "a"
+                      :parent nil :next a :prev a)
+                   (b :next-indent "||" :children (c)
+                      :last t :depth t
+                      :true-name b :descp "b"
+                      :parent a :next c :prev d)
+                   (c :next-indent "|||" :children (d)
+                      :last t :depth t
+                      :true-name c :descp "c"
+                      :parent b :next c :prev c)
+                   (d :next-indent "||||" :children nil
+                      :last t :depth t
+                      :true-name d :descp "d"
+                      :parent c :next d :prev d))))
+      (setq denote-tree--tree-alist
+            (denote-tree--draw-node-list alist 'a))
+      (goto-char (point-max))
+      (forward-line -1)
+      (denote-tree-parent-node)
+      (should
+       (equal (get-text-property (point) 'denote-tree--identifier) 'c))
+      (denote-tree-parent-node)
+      (should
+       (equal (get-text-property (point) 'denote-tree--identifier) 'b))
+      (denote-tree-parent-node)
+      (should
+       (equal (get-text-property (point) 'denote-tree--identifier) 'a))
+      (denote-tree-parent-node -1)
+      (should
+       (equal (get-text-property (point) 'denote-tree--identifier) 'b))
+      (denote-tree-parent-node -2)
+      (should
+       (equal (get-text-property (point) 'denote-tree--identifier) 'd))))
+  (with-temp-buffer
+    (let ((alist '((a :next-indent "|" :children (b c)
+                      :last t :depth t
+                      :true-name a :descp "a"
+                      :parent nil :next a :prev a)
+                   (b :next-indent "||" :children (d)
+                      :last t :depth t
+                      :true-name b :descp "b"
+                      :parent a :next b :prev b)
+                   (d :next-indent "||||" :children nil
+                      :last t :depth t
+                      :true-name d :descp "d"
+                      :parent b :next d :prev d)
+                   (c :next-indent "||" :children (b123)
+                      :last t :depth t
+                      :true-name c :descp "c"
+                      :parent a :next c :prev c)
+                   (b123 :next-indent "||" :children (d)
+                         :last t :depth t
+                         :true-name b :descp "b"
+                         :parent c :next b123 :prev b123))))
+      (setq denote-tree--tree-alist
+            (denote-tree--draw-node-list alist 'a))
+      (goto-char (point-max))
+      (forward-line -1)
+      (denote-tree-parent-node -1)
+      (should
+       (equal (get-text-property (point) 'denote-tree--identifier) 'd))
+      (denote-tree-parent-node)
+      (should
+       (equal (get-text-property (point) 'denote-tree--identifier) 'b123)))))
+
 (provide 'denote-tree-test)
 ;;; denote-tree-test.el ends here
