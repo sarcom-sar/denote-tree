@@ -869,47 +869,56 @@ Non cyclical nodes are removed from `denote-tree--visited-buffers' and
   ;;     (list visited-buffers cyclic-buffers)))
   )
 
-(defun denote-tree--determine-node-bounds (node-pos marker-alist)
-  "Determine bounds of current node at NODE-POS with MARKER-ALIST.
+(defun denote-tree--determine-node-bounds (node alist)
+  "Return bounds of current NODE with ALIST as a cons.
 
-MARKER-ALIST contains information about neighbors of the node.  Return
-cons of node's start and node's end.
-
-If \\='denote-tree--next doesn't exist, the situation is trivial.  If it
-is further along the buffer than NODE-POS, then just jump to it and
-return EoL of previous line.  If NODE-POS and \\='denote-tree--next
-point to the same location \\='denote-tree--next precedes the NODE-POS,
-then we can have arbitrary \"deepness\", iterate until you find parent
-node which next node is grater than node to be redrawn.  If you ran out
-of nodes to check, you are at the top and the last node is your target.
-If nothing matches, signal an error."
-  ;; (list
-  ;;  (line-beginning-position)
-  ;;  (let-alist marker-alist
-  ;;    (cond
-  ;;     ((not (marker-position (car .denote-tree--next)))
-  ;;      ;; do not kill the last newline
-  ;;      (1- (point-max)))
-  ;;     ((< node-pos (car .denote-tree--next))
-  ;;      (save-excursion
-  ;;        (goto-char (car .denote-tree--next))
-  ;;        (forward-line -1)
-  ;;        (line-end-position)))
-  ;;     ((>= node-pos (car .denote-tree--next))
-  ;;      (save-excursion
-  ;;        (goto-char (car .denote-tree--parent))
-  ;;        (let (next)
-  ;;          (while (and (setq next (get-text-property (point) 'denote-tree--next))
-  ;;                      (> node-pos next))
-  ;;            (goto-char (get-text-property (point) 'denote-tree--parent))))
-  ;;        (if (> node-pos (or (get-text-property (point) 'denote-tree--next) 1))
-  ;;            ;; ditto
-  ;;            (1- (point-max))
-  ;;          (goto-char (get-text-property (point) 'denote-tree--next))
-  ;;          (forward-line -1)
-  ;;          (line-end-position))))
-  ;;     (t (error "Denote tree buffer is malformed")))))
-  )
+If :next node doesn't exist, the situation is trivial.  If it is further
+along the buffer than NODE, then just jump to it and return EoL of
+previous line.  If NODE and :next node point to the same location and
+:next node precedes the NODE-POS, then we can have arbitrary
+\"deepness\", iterate until you find parent node which next node is
+grater than node to be redrawn.  If you ran out of nodes to check, you
+are at the top and the last node is your target.  If nothing matches,
+signal an error."
+  (list
+   (save-excursion
+     (goto-char (denote-tree--nested-value alist node :pos))
+     (line-beginning-position))
+   (let ((now-pos (denote-tree--nested-value alist node :pos))
+         (next-pos (denote-tree--nested-value alist node :next :pos))
+         (prev-pos (denote-tree--nested-value alist node :prev :pos)))
+     (cond
+      ((not (denote-tree--nested-value alist node :parent :pos))
+       (1- (point-max)))
+      ((< now-pos next-pos)
+       (save-excursion
+         (goto-char next-pos)
+         (forward-line -1)
+         (line-end-position)))
+      ((>= now-pos next-pos)
+       (save-excursion
+         (goto-char (denote-tree--nested-value alist node :parent :pos))
+         (let (next)
+           (while (and (setq next (denote-tree--nested-value
+                                   alist
+                                   (get-text-property
+                                    (point) 'denote-tree--identifier)
+                                   :next :pos))
+                       (> now-pos next))
+             (goto-char (denote-tree--nested-value alist
+                                        (get-text-property
+                                         (point) 'denote-tree--identifier)
+                                        :parent :pos)))
+           (if (> now-pos (or next 1))
+               (1- (point-max))
+             (goto-char (denote-tree--nested-value
+                         alist
+                         (get-text-property
+                          (point) 'denote-tree--identifier)
+                         :next :pos))
+             (forward-line -1)
+             (line-end-position)))))
+      (t (error "Denote tree buffer %s is malformed" (buffer-name)))))))
 
 (defmacro denote-tree--build-marker-alist (pos)
   "Return alist of KEY MARKER NEXT-PROP at POS.
