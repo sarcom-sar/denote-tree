@@ -619,60 +619,48 @@ Argument INDENT - next indent
                     'action #'denote-tree-enter-node
                     'button-data buffer))
 
-(defun denote-tree--deepen-traversal ()
-  "Retraverse current node under point.
+(defun denote-tree--deepen-traversal (alist)
+  "Retraverse current node under point with ALIST.
 
 Especially useful, if `denote-tree-max-traversal-depth' is set to very
 low value."
-  ;; (let* ((inhibit-read-only t)
-  ;;        ;; pos of current node
-  ;;        (old-buffer (buffer-name))
-  ;;        (node-pos (denote-tree--get-node-pos))
-  ;;        (marker-alist (denote-tree--build-marker-alist node-pos))
-  ;;        (id (denote-tree--get-prop 'button-data))
-  ;;        (indent (buffer-substring-no-properties
-  ;;                 (line-beginning-position)
-  ;;                 (- node-pos (length denote-tree-node))))
-  ;;        (lastp (save-excursion
-  ;;                 (goto-char (line-beginning-position))
-  ;;                 (search-forward
-  ;;                  denote-tree-lower-knee (line-end-position) t)))
-  ;;        (reg-beg) (reg-end)
-  ;;        (_ (seq-setq (reg-beg reg-end)
-  ;;                     (denote-tree--determine-node-bounds
-  ;;                      node-pos marker-alist))))
-  ;;   (seq-let (visited-buffers cyclic-buffers)
-  ;;       (denote-tree--nuke-props-in-region reg-beg reg-end)
-  ;;     (with-temp-buffer ;; new-buffer
-  ;;       (let ((new-buffer (buffer-name)))
-  ;;         (setq denote-tree--visited-buffers visited-buffers
-  ;;               denote-tree--cyclic-buffers cyclic-buffers)
-  ;;         (unwind-protect
-  ;;             (let ((progress (make-progress-reporter
-  ;;                              "Rebuilding denote-tree buffer...")))
-  ;;               (denote-tree--walk-links
-  ;;                id indent lastp denote-tree-max-traversal-depth progress)
-  ;;               (progress-reporter-done progress))
-  ;;           (denote-tree--clean-up))
-  ;;         (setq visited-buffers denote-tree--visited-buffers
-  ;;               cyclic-buffers denote-tree--cyclic-buffers)
-  ;;         (with-current-buffer old-buffer
-  ;;           (save-restriction
-  ;;             (narrow-to-region reg-beg (1+ reg-end))
-  ;;             (with-current-buffer new-buffer
-  ;;               (denote-tree--compare-and-insert-new-to old-buffer (point-min) 1))
-  ;;             (goto-char (point-min))
-  ;;             (denote-tree--set-positions-to-markers)
-  ;;             (goto-char (point-min))))))
-  ;;     (setq denote-tree--visited-buffers
-  ;;           (seq-union denote-tree--visited-buffers
-  ;;                      visited-buffers))
-  ;;     (setq denote-tree--cyclic-buffers
-  ;;           (seq-union denote-tree--cyclic-buffers
-  ;;                      cyclic-buffers)))
-  ;;   (denote-tree--add-props-to-cycles)
-  ;;   (goto-char node-pos))
-  )
+  (let* ((inhibit-read-only t)
+         (current-pos (point))
+         (current-node (get-text-property (point) 'denote-tree--identifier))
+         (node-name (denote-tree--nested-value alist current-node :true-name))
+         (indent (buffer-substring-no-properties
+                  (line-beginning-position)
+                  (- (denote-tree--get-node-pos) (length denote-tree-node))))
+         (lastp (denote-tree--nested-value alist current-node :last))
+         (depth denote-tree-max-traversal-depth)
+         (reg-beg) (reg-end)
+         (_ (seq-setq (reg-beg reg-end)
+                      (denote-tree--determine-node-bounds
+                       current-node alist)))
+         (old-alist (copy-sequence alist))
+         (new-alist '()))
+    (unwind-protect
+        (save-restriction
+          (setq new-alist
+                (denote-tree--fix-children-in-alist
+                 (denote-tree--walk-links-iteratively
+                  (symbol-name node-name) indent lastp depth)))
+          (narrow-to-region reg-beg reg-end)
+          (goto-char (point-min))
+          (while (< (line-end-position) (point-max))
+            (plist-put
+             (alist-get
+              (get-text-property (point) 'denote-tree--identifier)
+              old-alist)
+             :pos nil)
+            (forward-line))
+          (setq new-alist (seq-union old-alist new-alist))
+          (delete-region reg-beg reg-end)
+          (goto-char (point-min))
+          (denote-tree--draw-node-list new-alist current-node)
+          (delete-region reg-end (1+ reg-end)))
+      (denote-tree--clean-up))
+    (list current-pos new-alist)))
 
 (defun denote-tree--sanitize-deleted-entries (buffer)
   "Remove all nodes in BUFFER not present during redrawing.
