@@ -639,7 +639,7 @@ low value."
          (_ (seq-setq (reg-beg reg-end)
                       (denote-tree--determine-node-bounds
                        current-node alist)))
-         (old-alist (copy-sequence alist))
+         (old-alist (copy-tree alist))
          (new-alist '()))
     (unwind-protect
         (save-restriction
