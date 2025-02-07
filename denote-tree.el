@@ -269,7 +269,9 @@ With \\[universal-argument] \\[universal-argument], redraw the entire tree."
    ((or (equal arg '(16)) (not (null arg)))
     (denote-tree (denote-tree--get-prop 'button-data 1)))
    (t
-    (denote-tree--deepen-traversal))))
+    (seq-let (pos alist) (denote-tree--deepen-traversal denote-tree--tree-alist)
+      (setq denote-tree--tree-alist alist)
+      (goto-char pos)))))
 
 (defun denote-tree-child-node (&optional arg)
   "Move the point to the child of a node ARG times.
