@@ -666,6 +666,18 @@ low value."
       (denote-tree--clean-up))
     (list current-pos new-alist)))
 
+(defun denote-tree--unite-alists (new-alist old-alist)
+  "Return modified OLD-ALIST with elements from NEW-ALIST."
+  (let ((new-new-alist (copy-sequence old-alist)))
+    (dolist (element new-alist)
+      (cond
+       ((assq (car element) new-new-alist)
+        (plist-put (alist-get (car element) new-new-alist)
+                   :children (plist-get (cdr element) :children)))
+       (t
+        (push element new-new-alist))))
+    new-new-alist))
+
 (defun denote-tree--link-next-and-prev-node (pos)
   "Nodes in vicinity of node at POS point at nearest neighbor.
 
