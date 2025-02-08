@@ -658,7 +658,7 @@ low value."
               old-alist)
              :pos nil)
             (forward-line))
-          (setq new-alist (seq-union old-alist new-alist))
+          (setq new-alist (denote-tree--unite-alists new-alist old-alist))
           (delete-region reg-beg reg-end)
           (goto-char (point-min))
           (denote-tree--draw-node-list new-alist current-node)
