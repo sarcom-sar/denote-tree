@@ -662,7 +662,7 @@ low value."
           (delete-region reg-beg reg-end)
           (goto-char (point-min))
           (denote-tree--draw-node-list new-alist current-node)
-          (delete-region reg-end (1+ reg-end)))
+          (delete-region (1- (point-max)) (point-max)))
       (denote-tree--clean-up))
     (list current-pos new-alist)))
 
