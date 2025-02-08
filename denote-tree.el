@@ -630,6 +630,7 @@ low value."
   (let* ((inhibit-read-only t)
          (current-pos (point))
          (current-node (get-text-property (point) 'denote-tree--identifier))
+         (parent (denote-tree--nested-value alist current-node :parent))
          (node-name (denote-tree--nested-value alist current-node :true-name))
          (indent (buffer-substring-no-properties
                   (line-beginning-position)
@@ -647,7 +648,7 @@ low value."
           (setq new-alist
                 (denote-tree--fix-children-in-alist
                  (denote-tree--walk-links-iteratively
-                  (symbol-name node-name) indent lastp depth)))
+                  (symbol-name node-name) indent lastp depth parent)))
           (narrow-to-region reg-beg reg-end)
           (goto-char (point-min))
           (while (< (line-end-position) (point-max))
