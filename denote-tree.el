@@ -446,14 +446,15 @@ return a list of four elements each."
                     (funcall other-fn new-alist info stack))))
     new-alist))
 
-(defun denote-tree--walk-links-iteratively (buffer indent lastp depth)
+(defun denote-tree--walk-links-iteratively
+    (buffer indent lastp depth &optional parent)
   "Walk links from BUFFER with starting INDENT."
   (let ((node (intern buffer)))
     (denote-tree--traverse-structure
      node
      (list
       (denote-tree--node-plist
-       (cons node node) node node nil indent  lastp depth))
+       (cons node node) node node parent indent lastp depth))
      nil
      (list node)
      #'denote-tree--grow-alist-and-stack
