@@ -676,6 +676,24 @@ low value."
       (denote-tree--clean-up))
     (list current-pos new-alist)))
 
+(defun denote-tree--args-for-walking (node alist)
+  "Return NODE information from ALIST.
+
+To be more specific, the function returns a list of:
+
+- true-name;
+- indent;
+- last;
+- traversal-depth;
+- parent."
+  (list (symbol-name (denote-tree--nested-value alist node :true-name))
+        (buffer-substring-no-properties
+         (line-beginning-position)
+         (- (denote-tree--get-node-pos) (length denote-tree-node)))
+        (denote-tree--nested-value alist node :last)
+        denote-tree-max-traversal-depth
+        (denote-tree--nested-value alist node :parent)))
+
 (defun denote-tree--unite-alists (new-alist old-alist)
   "Return modified OLD-ALIST with elements from NEW-ALIST."
   (let ((new-new-alist (copy-sequence old-alist)))
