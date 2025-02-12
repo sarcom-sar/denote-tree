@@ -661,6 +661,23 @@ low value."
         (denote-tree--clean-up)))
     (list current-pos new-alist)))
 
+(defun denote-tree--alist-sans-region (alist)
+  "Return ALIST without nodes from current region."
+  (let* ((nodes-in-region
+          (denote-tree--walk-region
+           (lambda ()
+             (get-text-property
+              (point) 'denote-tree--identifier))))
+         (alist-from-region
+          (seq-reduce
+           (lambda (payload el)
+             (setq payload (append (list (assq el alist)) payload)))
+           nodes-in-region
+           '()))
+         (alist-sans-region
+          (seq-difference alist alist-from-region)))
+    alist-sans-region))
+
 (defun denote-tree--args-for-walking (node alist)
   "Return NODE information from ALIST.
 
