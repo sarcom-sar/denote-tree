@@ -622,6 +622,16 @@ Argument INDENT - next indent
                     'action #'denote-tree-enter-node
                     'button-data buffer))
 
+(defun denote-tree--walk-region (func)
+  "Step through every line of region and apply FUNC to it.
+
+Return a payload."
+  (let ((payload '()))
+    (while (< (point) (point-max))
+      (setq payload (append (list (funcall func)) payload))
+      (forward-line))
+    payload))
+
 (defun denote-tree--deepen-traversal (alist)
   "Retraverse current node under point with ALIST.
 
