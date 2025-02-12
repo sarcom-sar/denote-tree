@@ -641,22 +641,24 @@ low value."
          (current-pos (point))
          (current-node (get-text-property (point) 'denote-tree--identifier))
          (args-for-walking (denote-tree--args-for-walking current-node alist))
-         (new-alist '()))
-    (unwind-protect
-        (setq new-alist
-              (denote-tree--fix-children-in-alist
-               (apply #'denote-tree--walk-links-iteratively
-                      args-for-walking)))
-      (save-restriction
-        (apply #'narrow-to-region
-               (denote-tree--determine-node-bounds
-                current-node alist))
-        (setq new-alist (denote-tree--unite-alists new-alist alist))
-        (delete-region (point-min) (point-max))
-        (goto-char (point-min))
-        (denote-tree--draw-node-list new-alist current-node)
-        (delete-region (1- (point-max)) (point-max)))
-      (denote-tree--clean-up))
+         (new-alist alist))
+    ;; trying to redraw from cyclical node, wth?
+    (when (car args-for-walking)
+      (unwind-protect
+          (setq new-alist
+                (denote-tree--fix-children-in-alist
+                 (apply #'denote-tree--walk-links-iteratively
+                        args-for-walking)))
+        (save-restriction
+          (apply #'narrow-to-region
+                 (denote-tree--determine-node-bounds
+                  current-node alist))
+          (setq new-alist (denote-tree--unite-alists new-alist alist))
+          (delete-region (point-min) (point-max))
+          (goto-char (point-min))
+          (denote-tree--draw-node-list new-alist current-node)
+          (delete-region (1- (point-max)) (point-max)))
+        (denote-tree--clean-up)))
     (list current-pos new-alist)))
 
 (defun denote-tree--args-for-walking (node alist)
