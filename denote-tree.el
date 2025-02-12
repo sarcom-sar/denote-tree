@@ -647,19 +647,20 @@ low value."
     ;; trying to redraw from cyclical node, wth?
     (when (car args-for-walking)
       (unwind-protect
-          (setq new-alist
-                (denote-tree--fix-children-in-alist
-                 (apply #'denote-tree--walk-links-iteratively
-                        args-for-walking)))
-        (save-restriction
-          (apply #'narrow-to-region
-                 (denote-tree--determine-node-bounds
-                  current-node alist))
-          (setq new-alist (denote-tree--unite-alists new-alist alist))
-          (delete-region (point-min) (point-max))
-          (goto-char (point-min))
-          (denote-tree--draw-node-list new-alist current-node)
-          (delete-region (1- (point-max)) (point-max)))
+          (save-restriction
+            (apply #'narrow-to-region
+                   (denote-tree--determine-node-bounds
+                    current-node alist))
+            (setq new-alist (denote-tree--fix-children-in-alist
+                             (apply #'denote-tree--walk-links-iteratively
+                                    (append
+                                     args-for-walking
+                                     (list
+                                      (denote-tree--alist-sans-region alist))))))
+            (delete-region (point-min) (point-max))
+            (goto-char (point-min))
+            (denote-tree--draw-node-list new-alist current-node)
+            (delete-region (1- (point-max)) (point-max)))
         (denote-tree--clean-up)))
     (list current-pos new-alist)))
 
