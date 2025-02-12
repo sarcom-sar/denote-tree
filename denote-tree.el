@@ -669,13 +669,16 @@ To be more specific, the function returns a list of:
 - last;
 - traversal-depth;
 - parent."
-  (list (symbol-name (denote-tree--nested-value alist node :true-name))
-        (buffer-substring-no-properties
-         (line-beginning-position)
-         (- (denote-tree--get-node-pos) (length denote-tree-node)))
-        (denote-tree--nested-value alist node :last)
-        denote-tree-max-traversal-depth
-        (denote-tree--nested-value alist node :parent)))
+  (let ((name (if (eq node (denote-tree--nested-value alist node :true-name))
+                  (symbol-name node)
+                nil)))
+    (list name
+          (buffer-substring-no-properties
+           (line-beginning-position)
+           (- (denote-tree--get-node-pos) (length denote-tree-node)))
+          (denote-tree--nested-value alist node :last)
+          denote-tree-max-traversal-depth
+          (denote-tree--nested-value alist node :parent))))
 
 (defun denote-tree--unite-alists (new-alist old-alist)
   "Return modified OLD-ALIST with elements from NEW-ALIST."
