@@ -450,10 +450,11 @@ return a list of four elements each."
     (buffer indent lastp depth &optional parent suppl-alist)
   "Walk links from BUFFER with starting INDENT."
   (let* ((node (intern buffer))
-         (alist (or suppl-alist
-                    (list
-                     (denote-tree--node-plist
-                      (cons node node) node node parent indent lastp depth)))))
+         (alist (append
+                 (list
+                  (denote-tree--node-plist
+                   (cons node node) node node parent indent lastp depth))
+                 suppl-alist)))
     (denote-tree--traverse-structure
      node
      alist
