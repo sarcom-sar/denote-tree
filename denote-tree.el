@@ -640,39 +640,22 @@ low value."
   (let* ((inhibit-read-only t)
          (current-pos (point))
          (current-node (get-text-property (point) 'denote-tree--identifier))
-         (parent (denote-tree--nested-value alist current-node :parent))
-         (node-name (denote-tree--nested-value alist current-node :true-name))
-         (indent (buffer-substring-no-properties
-                  (line-beginning-position)
-                  (- (denote-tree--get-node-pos) (length denote-tree-node))))
-         (lastp (denote-tree--nested-value alist current-node :last))
-         (depth denote-tree-max-traversal-depth)
-         (reg-beg) (reg-end)
-         (_ (seq-setq (reg-beg reg-end)
-                      (denote-tree--determine-node-bounds
-                       current-node alist)))
-         (old-alist (copy-tree alist))
+         (args-for-walking (denote-tree--args-for-walking current-node alist))
          (new-alist '()))
     (unwind-protect
-        (save-restriction
-          (setq new-alist
-                (denote-tree--fix-children-in-alist
-                 (denote-tree--walk-links-iteratively
-                  (symbol-name node-name) indent lastp depth parent)))
-          (narrow-to-region reg-beg reg-end)
-          (goto-char (point-min))
-          (while (< (line-end-position) (point-max))
-            (plist-put
-             (alist-get
-              (get-text-property (point) 'denote-tree--identifier)
-              old-alist)
-             :pos nil)
-            (forward-line))
-          (setq new-alist (denote-tree--unite-alists new-alist old-alist))
-          (delete-region reg-beg reg-end)
-          (goto-char (point-min))
-          (denote-tree--draw-node-list new-alist current-node)
-          (delete-region (1- (point-max)) (point-max)))
+        (setq new-alist
+              (denote-tree--fix-children-in-alist
+               (apply #'denote-tree--walk-links-iteratively
+                      args-for-walking)))
+      (save-restriction
+        (apply #'narrow-to-region
+               (denote-tree--determine-node-bounds
+                current-node alist))
+        (setq new-alist (denote-tree--unite-alists new-alist alist))
+        (delete-region (point-min) (point-max))
+        (goto-char (point-min))
+        (denote-tree--draw-node-list new-alist current-node)
+        (delete-region (1- (point-max)) (point-max)))
       (denote-tree--clean-up))
     (list current-pos new-alist)))
 
