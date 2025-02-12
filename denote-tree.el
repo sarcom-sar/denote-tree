@@ -702,23 +702,6 @@ To be more specific, the function returns a list of:
           denote-tree-max-traversal-depth
           (denote-tree--nested-value alist node :parent))))
 
-(defun denote-tree--unite-alists (new-alist old-alist)
-  "Return modified OLD-ALIST with elements from NEW-ALIST."
-  (let* ((nodes-in-region
-          (denote-tree--walk-region
-           (lambda ()
-             (get-text-property
-              (point) 'denote-tree--identifier))))
-         (alist-from-region
-          (seq-reduce
-           (lambda (payload el)
-             (setq payload (append (assq el old-alist) payload)))
-           nodes-in-region
-           '()))
-         (alist-sans-region
-          (seq-difference old-alist alist-from-region)))
-    (seq-union new-alist old-alist)))
-
 (defun denote-tree--link-next-and-prev-node (pos)
   "Nodes in vicinity of node at POS point at nearest neighbor.
 
