@@ -696,15 +696,20 @@ To be more specific, the function returns a list of:
 
 (defun denote-tree--unite-alists (new-alist old-alist)
   "Return modified OLD-ALIST with elements from NEW-ALIST."
-  (let ((new-new-alist (copy-sequence old-alist)))
-    (dolist (element new-alist)
-      (cond
-       ((assq (car element) new-new-alist)
-        (plist-put (alist-get (car element) new-new-alist)
-                   :children (plist-get (cdr element) :children)))
-       (t
-        (push element new-new-alist))))
-    new-new-alist))
+  (let* ((nodes-in-region
+          (denote-tree--walk-region
+           (lambda ()
+             (get-text-property
+              (point) 'denote-tree--identifier))))
+         (alist-from-region
+          (seq-reduce
+           (lambda (payload el)
+             (setq payload (append (assq el old-alist) payload)))
+           nodes-in-region
+           '()))
+         (alist-sans-region
+          (seq-difference old-alist alist-from-region)))
+    (seq-union new-alist old-alist)))
 
 (defun denote-tree--link-next-and-prev-node (pos)
   "Nodes in vicinity of node at POS point at nearest neighbor.
