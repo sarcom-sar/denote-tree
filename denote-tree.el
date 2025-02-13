@@ -642,29 +642,28 @@ Return a payload."
 Especially useful, if `denote-tree-max-traversal-depth' is set to very
 low value."
   (let* ((inhibit-read-only t)
-         (current-pos (point))
-         (current-node (get-text-property (point) 'denote-tree--identifier))
-         (args-for-walking (denote-tree--args-for-walking current-node alist))
+         (curr-pos (point))
+         (curr-node (get-text-property (point) 'denote-tree--identifier))
          (new-alist alist))
     ;; trying to redraw from cyclical node, wth?
-    (when (car args-for-walking)
+    (when (eq curr-node (denote-tree--nested-value alist curr-node :true-name))
       (unwind-protect
           (save-restriction
             (apply #'narrow-to-region
                    (denote-tree--determine-node-bounds
-                    current-node alist))
+                    curr-node alist))
             (setq new-alist (denote-tree--fix-children-in-alist
                              (apply #'denote-tree--walk-links-iteratively
                                     (append
-                                     args-for-walking
+                                     (denote-tree--args-for-walking curr-node alist)
                                      (list
                                       (denote-tree--alist-sans-region alist))))))
             (delete-region (point-min) (point-max))
             (goto-char (point-min))
-            (denote-tree--draw-node-list new-alist current-node)
+            (denote-tree--draw-node-list new-alist curr-node)
             (delete-region (1- (point-max)) (point-max)))
         (denote-tree--clean-up)))
-    (list current-pos new-alist)))
+    (list curr-pos new-alist)))
 
 (defun denote-tree--alist-sans-region (alist)
   "Return ALIST without nodes from current region."
