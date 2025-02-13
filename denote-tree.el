@@ -771,10 +771,11 @@ signal an error."
                                     (point) 'denote-tree--identifier)
                                    :next :pos))
                        (> now-pos next))
-             (goto-char (denote-tree--nested-value alist
-                                        (get-text-property
-                                         (point) 'denote-tree--identifier)
-                                        :parent :pos)))
+             (goto-char (or (denote-tree--nested-value alist
+                                            (get-text-property
+                                             (point) 'denote-tree--identifier)
+                                            :parent :pos)
+                            1)))
            (if (> now-pos (or next 1))
                (1- (point-max))
              (goto-char (denote-tree--nested-value
