@@ -692,7 +692,9 @@ To be more specific, the function returns a list of:
 - indent;
 - last;
 - traversal-depth;
-- parent."
+- parent;
+- next-node;
+- prev-node."
   (let ((name (if (eq node (denote-tree--nested-value alist node :true-name))
                   (symbol-name node)
                 nil)))
@@ -702,7 +704,9 @@ To be more specific, the function returns a list of:
            (- (denote-tree--get-node-pos) (length denote-tree-node)))
           (denote-tree--nested-value alist node :last)
           denote-tree-max-traversal-depth
-          (denote-tree--nested-value alist node :parent))))
+          (denote-tree--nested-value alist node :parent)
+          (denote-tree--nested-value alist node :next)
+          (denote-tree--nested-value alist node :prev))))
 
 (defun denote-tree--link-next-and-prev-node (pos)
   "Nodes in vicinity of node at POS point at nearest neighbor.
