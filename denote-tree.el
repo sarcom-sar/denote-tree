@@ -687,7 +687,7 @@ low value."
 
 To be more specific, the function returns a list of:
 
-- true-name;
+- name;
 - indent;
 - last;
 - traversal-depth;
