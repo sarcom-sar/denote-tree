@@ -654,8 +654,6 @@ low value."
             (apply #'narrow-to-region
                    (denote-tree--determine-node-bounds
                     current-node alist))
-            ;; do not remove root node
-            (forward-line)
             (setq new-alist (denote-tree--fix-children-in-alist
                              (apply #'denote-tree--walk-links-iteratively
                                     (append
