@@ -447,19 +447,18 @@ return a list of four elements each."
     new-alist))
 
 (defun denote-tree--walk-links-iteratively
-    (buffer indent lastp depth &optional parent suppl-alist)
+    (buffer indent lastp depth &optional parent next prev suppl-alist)
   "Walk links from BUFFER with starting INDENT."
-  (let* ((node (intern buffer))
-         (alist (if (assq node suppl-alist)
-                    suppl-alist
-                  (append
-                   (list
-                    (denote-tree--node-plist
-                     (cons node node) node node parent indent lastp depth))
-                   suppl-alist))))
+  (let ((node (intern buffer)))
+    (setq next (or next node))
+    (setq prev (or prev node))
     (denote-tree--traverse-structure
      node
-     alist
+     (append
+      (list
+       (denote-tree--node-plist
+        (cons node node) next prev parent indent lastp depth))
+      suppl-alist)
      nil
      (list node)
      #'denote-tree--grow-alist-and-stack
