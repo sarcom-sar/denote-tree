@@ -764,13 +764,15 @@ signal an error."
       ((>= now-pos next-pos)
        (save-excursion
          (goto-char (denote-tree--nested-value alist node :parent :pos))
-         (let (next)
+         (let (prev-next next)
            (while (and (setq next (denote-tree--nested-value
                                    alist
                                    (get-text-property
                                     (point) 'denote-tree--identifier)
                                    :next :pos))
+                       (not (equal prev-next next))
                        (> now-pos next))
+             (setq prev-next next)
              (goto-char (or (denote-tree--nested-value alist
                                             (get-text-property
                                              (point) 'denote-tree--identifier)
