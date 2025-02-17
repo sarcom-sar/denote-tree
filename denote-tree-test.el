@@ -1585,5 +1585,61 @@ LST looks like (START PROP END)."
            (denote-tree--clean-up)))
      tree-alist))
 
+(ert-deftest denote-tree-test--determine-node-bounds ()
+  "Tests for `denote-tree--determine-node-bounds'."
+  (with-temp-buffer
+    (let ((alist (denote-tree-test-mock-draw-tree
+                  '(("a") (b c d) (b1 b2) nil nil (c1 c2) nil nil (d1 d2)))))
+      (denote-tree--draw-node-list alist 'a)
+      (goto-char (point-min))
+      ;; at b1
+      (forward-line 2)
+      (should
+       (equal '(15 25)
+              (denote-tree--determine-node-bounds
+               (get-text-property (point) 'denote-tree--identifier) alist)))
+      (goto-char (point-min))
+      ;; at b2
+      (forward-line 3)
+      (should
+       (equal '(26 36)
+              (denote-tree--determine-node-bounds
+               (get-text-property (point) 'denote-tree--identifier) alist)))
+      (goto-char (point-min))
+      ;; at b
+      (forward-line 1)
+      (should
+       (equal '(7 36)
+              (denote-tree--determine-node-bounds
+               (get-text-property (point) 'denote-tree--identifier) alist)))
+      (goto-char (point-min))
+      ;; at a
+      (should
+       (equal '(1 96)
+              (denote-tree--determine-node-bounds
+               (get-text-property (point) 'denote-tree--identifier) alist)))))
+  (with-temp-buffer
+    (let ((alist (denote-tree-test-mock-draw-tree
+                  '(("a") (b c d) (b1) (b2) (b3) nil (c1 c2) nil nil (d1 d2)))))
+      (denote-tree--draw-node-list alist 'a)
+      (goto-char (point-min))
+      ;; at b3
+      (forward-line 4)
+      (should
+       (equal '(39 53)
+              (denote-tree--determine-node-bounds
+               (get-text-property (point) 'denote-tree--identifier) alist)))))
+  (with-temp-buffer
+    (let ((alist (denote-tree-test-mock-draw-tree
+                  '(("a") (b c d) (b1) nil (c1) nil (d1 d2 d3)))))
+      (denote-tree--draw-node-list alist 'a)
+      (goto-char (point-min))
+      ;; at b3
+      (forward-line 8)
+      (should
+       (equal '(75 85)
+              (denote-tree--determine-node-bounds
+               (get-text-property (point) 'denote-tree--identifier) alist))))))
+
 (provide 'denote-tree-test)
 ;;; denote-tree-test.el ends here
