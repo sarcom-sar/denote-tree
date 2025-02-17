@@ -1556,5 +1556,34 @@ LST looks like (START PROP END)."
       (should
        (equal (get-text-property (point) 'denote-tree--identifier) 'b123)))))
 
+(defun denote-tree-test-mock-make-next-links (lst-of-links)
+  "Closure returning next element from LST-OF-LINKS."
+  (let ((x lst-of-links))
+    (lambda ()
+      (prog1 x
+        (setq x (cdr x))))))
+
+(defmacro denote-tree-test-mock-draw-tree (lst-of-links)
+  "Execute `denote-tree--walk-links-iteratively' over LST-OF-LINKS."
+  `(let ((denote-tree-max-traversal-depth t)
+         (tree-alist '())
+         (next (denote-tree-test-mock-make-next-links ,lst-of-links)))
+     (cl-letf (((symbol-function 'denote-tree--collect-links)
+                (lambda (x)
+                  (car (funcall next))))
+               ((symbol-function 'denote-tree--open-link-maybe)
+                (lambda (x)
+                  (intern x)))
+               ((symbol-function 'denote-tree--collect-keywords-as-string)
+                (lambda (x _)
+                  (propertize x 'denote-tree--type 'title))))
+       (unwind-protect
+           (setq tree-alist
+                 (denote-tree--fix-children-in-alist
+                  (denote-tree--walk-links-iteratively
+                   (caar (funcall next)) "" t t)))
+           (denote-tree--clean-up)))
+     tree-alist))
+
 (provide 'denote-tree-test)
 ;;; denote-tree-test.el ends here
