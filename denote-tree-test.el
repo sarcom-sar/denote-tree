@@ -1732,5 +1732,34 @@ LST looks like (START PROP END)."
         (should-not (denote-tree--nested-value tree-alist 'b3 :true-name))
         (should-not (denote-tree--nested-value tree-alist 'b1a :true-name))))))
 
+(ert-deftest denote-tree-test--deepen-traversal-circular-nodes ()
+  "Tests for `denote-tree--deepen-traversal'."
+  (with-temp-buffer
+    (let ((alist (denote-tree-test-mock-draw-tree
+                  '(("a") (b c d) (b1) (c) nil nil)))
+          (buffer-look))
+      (denote-tree--draw-node-list alist 'a)
+      (setq buffer-look (buffer-string))
+      (goto-char (point-min))
+      ;; at b
+      (forward-line 1)
+      (let ((denote-tree-max-traversal-depth t)
+            (tree-alist '())
+            (next (denote-tree-test-mock-make-next-links '((b1) (c) nil))))
+        (cl-letf (((symbol-function 'denote-tree--collect-links)
+                   (lambda (x)
+                     (car (funcall next))))
+                  ((symbol-function 'denote-tree--open-link-maybe)
+                   (lambda (x)
+                     (intern x)))
+                  ((symbol-function 'denote-tree--collect-keywords-as-string)
+                   (lambda (x _)
+                     (propertize x 'denote-tree--type 'title))))
+          (unwind-protect
+              (setq tree-alist (cadr (denote-tree--deepen-traversal alist)))
+            (denote-tree--clean-up)))
+        (should (equal buffer-look
+                       (buffer-string)))))))
+
 (provide 'denote-tree-test)
 ;;; denote-tree-test.el ends here
