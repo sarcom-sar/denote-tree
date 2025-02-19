@@ -1641,5 +1641,96 @@ LST looks like (START PROP END)."
               (denote-tree--determine-node-bounds
                (get-text-property (point) 'denote-tree--identifier) alist))))))
 
+(ert-deftest denote-tree-test--deepen-traversal-trivial-redraw ()
+  "Tests for `denote-tree--deepen-traversal'."
+  (with-temp-buffer
+    (let ((alist (denote-tree-test-mock-draw-tree
+                  '(("a") (b c d) (b1) nil nil nil)))
+          (buffer-look))
+      (denote-tree--draw-node-list alist 'a)
+      (setq buffer-look (buffer-string))
+      (goto-char (point-min))
+      ;; at b
+      (forward-line 1)
+      (let ((denote-tree-max-traversal-depth t)
+            (tree-alist '())
+            (next (denote-tree-test-mock-make-next-links '((b1) nil))))
+        (cl-letf (((symbol-function 'denote-tree--collect-links)
+                   (lambda (x)
+                     (car (funcall next))))
+                  ((symbol-function 'denote-tree--open-link-maybe)
+                   (lambda (x)
+                     (intern x)))
+                  ((symbol-function 'denote-tree--collect-keywords-as-string)
+                   (lambda (x _)
+                     (propertize x 'denote-tree--type 'title))))
+          (unwind-protect
+              (setq tree-alist (denote-tree--deepen-traversal alist))
+            (denote-tree--clean-up)))
+        (should (equal buffer-look
+                       (buffer-string)))))))
+
+(ert-deftest denote-tree-test--deepen-traversal-add-nodes ()
+  "Tests for `denote-tree--deepen-traversal'."
+  (with-temp-buffer
+    (let ((alist (denote-tree-test-mock-draw-tree
+                  '(("a") (b c d) (b1) nil nil nil)))
+          (buffer-look))
+      (denote-tree--draw-node-list alist 'a)
+      (setq buffer-look (buffer-string))
+      (goto-char (point-min))
+      ;; at b
+      (forward-line 1)
+      (let ((denote-tree-max-traversal-depth t)
+            (tree-alist '())
+            (next (denote-tree-test-mock-make-next-links '((b1 b2 b3) (b1a) nil nil nil))))
+        (cl-letf (((symbol-function 'denote-tree--collect-links)
+                   (lambda (x)
+                     (car (funcall next))))
+                  ((symbol-function 'denote-tree--open-link-maybe)
+                   (lambda (x)
+                     (intern x)))
+                  ((symbol-function 'denote-tree--collect-keywords-as-string)
+                   (lambda (x _)
+                     (propertize x 'denote-tree--type 'title))))
+          (unwind-protect
+              (setq tree-alist (cadr (denote-tree--deepen-traversal alist)))
+            (denote-tree--clean-up)))
+        (should-not (equal buffer-look
+                           (buffer-string)))
+        (should (denote-tree--nested-value tree-alist 'b2 :true-name))
+        (should (denote-tree--nested-value tree-alist 'b1 :true-name))
+        (should (denote-tree--nested-value tree-alist 'b1a :true-name))))))
+
+(ert-deftest denote-tree-test--deepen-traversal-delete-nodes ()
+  "Tests for `denote-tree--deepen-traversal'."
+  (with-temp-buffer
+    (let ((alist (denote-tree-test-mock-draw-tree
+                  '(("a") (b c d) (b1 b2 b3) (b1a) nil nil nil nil nil nil)))
+          (buffer-look))
+      (denote-tree--draw-node-list alist 'a)
+      (setq buffer-look (buffer-string))
+      (goto-char (point-min))
+      ;; at b
+      (forward-line 1)
+      (let ((denote-tree-max-traversal-depth t)
+            (tree-alist '())
+            (next (denote-tree-test-mock-make-next-links '((b1) nil))))
+        (cl-letf (((symbol-function 'denote-tree--collect-links)
+                   (lambda (x)
+                     (car (funcall next))))
+                  ((symbol-function 'denote-tree--open-link-maybe)
+                   (lambda (x)
+                     (intern x)))
+                  ((symbol-function 'denote-tree--collect-keywords-as-string)
+                   (lambda (x _)
+                     (propertize x 'denote-tree--type 'title))))
+          (unwind-protect
+              (setq tree-alist (cadr (denote-tree--deepen-traversal alist)))
+            (denote-tree--clean-up)))
+        (should-not (denote-tree--nested-value tree-alist 'b2 :true-name))
+        (should-not (denote-tree--nested-value tree-alist 'b3 :true-name))
+        (should-not (denote-tree--nested-value tree-alist 'b1a :true-name))))))
+
 (provide 'denote-tree-test)
 ;;; denote-tree-test.el ends here
