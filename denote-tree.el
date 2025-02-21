@@ -619,6 +619,7 @@ Argument INDENT - next indent
        (if (listp value) value (list value))))))
 
 (defun denote-tree--calculate-indent (indent lastp)
+  "Concat INDENT and either denote-tree-space or denote-tree-pipe."
   (concat indent (if lastp denote-tree-space denote-tree-pipe)))
 
 (defun denote-tree--set-button (position buffer)
