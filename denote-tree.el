@@ -423,7 +423,8 @@ properties."
         (denote-tree--fix-children-in-alist
          (denote-tree--walk-links-iteratively
           buffer "" t denote-tree-max-traversal-depth)))
-  (denote-tree--draw-node-list denote-tree--tree-alist (intern buffer)))
+  (when denote-tree--tree-alist
+    (denote-tree--draw-node-list denote-tree--tree-alist (intern buffer))))
 
 (defun denote-tree--traverse-structure
     (element alist info stack call-fn &optional other-fn)
