@@ -239,7 +239,6 @@ a BUFFER provided by the user."
             (with-current-buffer (get-buffer-create buffer-name)
               (erase-buffer)
               (denote-tree-mode)
-              (denote-tree--open-link-maybe buffer)
               (denote-tree--draw-tree buffer)
               (setq denote-tree--buffer-name buffer-name)))
           (pop-to-buffer buffer-name)
