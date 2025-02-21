@@ -419,13 +419,11 @@ properties."
 
 (defun denote-tree--draw-tree (buffer)
   "Draw and propertize a tree in current buffer starting with BUFFER."
-  (let ((progress (make-progress-reporter "Building denote-tree buffer...")))
-    (setq denote-tree--tree-alist
-          (denote-tree--fix-children-in-alist
-           (denote-tree--walk-links-iteratively
-            buffer "" t denote-tree-max-traversal-depth)))
-    (denote-tree--draw-node-list denote-tree--tree-alist (intern buffer))
-    (progress-reporter-done progress)))
+  (setq denote-tree--tree-alist
+        (denote-tree--fix-children-in-alist
+         (denote-tree--walk-links-iteratively
+          buffer "" t denote-tree-max-traversal-depth)))
+  (denote-tree--draw-node-list denote-tree--tree-alist (intern buffer)))
 
 (defun denote-tree--traverse-structure
     (element alist info stack call-fn &optional other-fn)
@@ -438,11 +436,14 @@ specific information, while STACK maintains the elements to traverse further.
 
 If CALL-FN returns nil, OTHER-FN is called instead.  These functions should
 return a list of four elements each."
-  (let ((new-alist (copy-sequence alist)))
+  (let ((progress (make-progress-reporter "Building denote-tree buffer..."))
+        (new-alist (copy-sequence alist)))
     (while element
       (seq-setq (element new-alist info stack)
                 (or (funcall call-fn element new-alist info stack)
-                    (funcall other-fn new-alist info stack))))
+                    (funcall other-fn new-alist info stack)))
+      (progress-reporter-update progress))
+    (progress-reporter-done progress)
     new-alist))
 
 (defun denote-tree--walk-links-iteratively
