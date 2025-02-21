@@ -538,8 +538,7 @@ and sets up everything for next iteration."
   "Add NODE to ALIST, fetch more nodes for STACK."
   (when-let* (((eq node (denote-tree--nested-value alist node :true-name)))
               (depth (denote-tree--nested-value alist node :depth)))
-    (let* ((node (denote-tree--open-link-maybe (symbol-name node)))
-           (indent (denote-tree--nested-value alist node :next-indent))
+    (let* ((indent (denote-tree--nested-value alist node :next-indent))
            (new-depth (cond
                        ((symbolp depth) depth)
                        ((and (numberp depth) (< 0 (1- depth))) (1- depth))
