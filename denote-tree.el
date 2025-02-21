@@ -551,14 +551,15 @@ and sets up everything for next iteration."
                       (denote-tree--unique-nodes x (alist-get x alist)))
                     (save-excursion
                       (denote-tree--collect-links (symbol-name node)))))
+           (supposed-children (mapcar #'car uniq-links-in-node))
            (last-children-node (caar (last uniq-links-in-node)))
            (keys (mapcar #'car uniq-links-in-node))
            (new-alist
             (mapcar (lambda (x)
                       (denote-tree--node-plist
                        x
-                       (denote-tree--next-sibling (car x) keys)
-                       (denote-tree--next-sibling (car x) (reverse keys))
+                       (denote-tree--next-sibling (car x) supposed-children)
+                       (denote-tree--next-sibling (car x) (reverse supposed-children))
                        node
                        indent
                        (eq (car x) last-children-node)
