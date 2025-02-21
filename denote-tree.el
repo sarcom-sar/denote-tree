@@ -705,37 +705,6 @@ To be more specific, the function returns a list of:
         (denote-tree--nested-value alist node :next)
         (denote-tree--nested-value alist node :prev)))
 
-(defun denote-tree--link-next-and-prev-node (pos)
-  "Nodes in vicinity of node at POS point at nearest neighbor.
-
-If node points at node at POS with \\='denote-tree--child prop set
-marker to nil."
-  ;; (when-let* ((next (get-text-property pos 'denote-tree--next))
-  ;;             (next-prev (get-text-property next 'denote-tree--prev))
-  ;;             (prev (get-text-property pos 'denote-tree--prev))
-  ;;             (prev-next (get-text-property prev 'denote-tree--next))
-  ;;             (parent (get-text-property pos 'denote-tree--parent))
-  ;;             (parent-child (get-text-property parent 'denote-tree--child)))
-  ;;   ;; handle neighbors
-  ;;   (cond
-  ;;    ;; there are /at max/ two nodes
-  ;;    ((equal next prev)
-  ;;     (set-marker next-prev next)
-  ;;     (set-marker prev-next prev))
-  ;;    ;; there is more than two nodes
-  ;;    (t
-  ;;     (set-marker next-prev prev)
-  ;;     (set-marker prev-next next)))
-  ;;   ;; handle parent
-  ;;   (let ((next-next (get-text-property next 'denote-tree--next)))
-  ;;     (cond
-  ;;      ((and (= next-next pos)
-  ;;            (= parent-child pos))
-  ;;       (set-marker parent-child nil))
-  ;;      ((= parent-child pos)
-  ;;       (set-marker parent-child next)))))
-  )
-
 (defun denote-tree--determine-node-bounds (node alist)
   "Return bounds of current NODE with ALIST as a cons.
 
