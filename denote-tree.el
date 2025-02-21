@@ -790,27 +790,6 @@ signal an error."
              (line-end-position)))))
       (t (error "Denote tree buffer %s is malformed" (buffer-name)))))))
 
-(defmacro denote-tree--build-marker-alist (pos)
-  "Return alist of KEY MARKER NEXT-PROP at POS.
-
-The alist is made out of identifier of a marker, the marker itself and
-the opposite identifier.  It's used when referencing the node under the
-marker in order to set it's opposite to the current node."
-  ;; `(list
-  ;;   (list 'denote-tree--prev
-  ;;         (copy-marker
-  ;;          (get-text-property ,pos 'denote-tree--prev))
-  ;;         'denote-tree--next)
-  ;;   (list 'denote-tree--next
-  ;;         (copy-marker
-  ;;          (get-text-property ,pos 'denote-tree--next))
-  ;;         'denote-tree--prev)
-  ;;   (list 'denote-tree--parent
-  ;;         (copy-marker
-  ;;          (get-text-property ,pos 'denote-tree--parent))
-  ;;         'denote-tree--child))
-  )
-
 
 ;;;; Helpers for Links and Buffers
 
