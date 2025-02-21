@@ -437,15 +437,16 @@ specific information, while STACK maintains the elements to traverse further.
 
 If CALL-FN returns nil, OTHER-FN is called instead.  These functions should
 return a list of four elements each."
-  (let ((progress (make-progress-reporter "Building denote-tree buffer..."))
-        (new-alist (copy-sequence alist)))
-    (while element
-      (seq-setq (element new-alist info stack)
-                (or (funcall call-fn element new-alist info stack)
-                    (funcall other-fn new-alist info stack)))
-      (progress-reporter-update progress))
-    (progress-reporter-done progress)
-    new-alist))
+  (when (car alist)
+    (let ((progress (make-progress-reporter "Building denote-tree buffer..."))
+          (new-alist (copy-sequence alist)))
+      (while element
+        (seq-setq (element new-alist info stack)
+                  (or (funcall call-fn element new-alist info stack)
+                      (funcall other-fn new-alist info stack)))
+        (progress-reporter-update progress))
+      (progress-reporter-done progress)
+      new-alist)))
 
 (defun denote-tree--walk-links-iteratively
     (buffer indent lastp depth &optional parent next prev suppl-alist)
