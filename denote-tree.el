@@ -605,7 +605,8 @@ Argument INDENT - next indent
 
 (defun denote-tree--next-sibling (x siblings)
   "Return the :next SIBLING of X."
-  (let ((next (copy-tree siblings)))
+  (when-let* (((seq-contains siblings x))
+              (next (copy-tree siblings)))
     (setcdr (last next) next)
     (cadr (memq x next))))
 
