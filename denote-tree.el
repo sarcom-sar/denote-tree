@@ -569,7 +569,7 @@ and sets up everything for next iteration."
       (setq new-alist (append new-alist alist))
       (setf (alist-get node new-alist)
             (plist-put (alist-get node new-alist) :children nodes))
-      (list (car new-stack) new-alist info new-stack))))
+      (list (car new-stack) (seq-drop-while #'null new-alist) info new-stack))))
 
 (defun denote-tree--unique-nodes (node existsp)
   "Return a pair new id of NODE and NODE symbol itself.
