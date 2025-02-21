@@ -870,5 +870,97 @@ and it's value in plist is a string."
         (should (equal buffer-look
                        (buffer-string)))))))
 
+(ert-deftest denote-tree-test--calculate-indent ()
+  "Tests for `denote-tree--calculate-indent'."
+  (should (equal
+           (denote-tree--calculate-indent "" t)
+           "  "))
+  (should (equal
+           (denote-tree--calculate-indent "" nil)
+           "| "))
+  (should (equal
+           (denote-tree--calculate-indent "xx" t)
+           "xx  "))
+  (should (equal
+           (denote-tree--calculate-indent "xx" nil)
+           "xx| ")))
+
+(ert-deftest denote-tree-test--next-sibling ()
+  "Tests for `denote-tree--next-sibling'."
+  (should (equal (denote-tree--next-sibling 'a '(a b c))
+                 'b))
+  (should (equal (denote-tree--next-sibling 'c '(a b c))
+                 'a))
+  (should (equal (denote-tree--next-sibling 'b '(a b c))
+                 'c))
+  (should (equal (denote-tree--next-sibling 'a '(a))
+                 'a))
+  (should-not (denote-tree--next-sibling 'a '(b c d)))
+  (should-not (denote-tree--next-sibling nil '())))
+
+(ert-deftest denote-tree-test--walk-region ()
+  "Tests for `denote-tree--walk-region'."
+  (let ((alist
+         (denote-tree-test-mock-draw-tree
+          '(("a") (b c d) (b1 b2) (b3) nil nil nil))))
+    (with-temp-buffer
+      (denote-tree--draw-node-list alist 'a)
+      (save-restriction
+        (apply #'narrow-to-region (denote-tree--determine-node-bounds 'b alist))
+        (goto-char (point-min))
+        (should-not
+         (seq-difference
+            (denote-tree--walk-region
+             (lambda () (get-text-property (point) 'denote-tree--identifier)))
+            '(b2 b3 b1 b))))))
+  (let ((alist
+         (denote-tree-test-mock-draw-tree
+          '(("a") (b c d) (b1 b2) (c) nil nil nil))))
+    (with-temp-buffer
+      (denote-tree--draw-node-list alist 'a)
+      (save-restriction
+        (apply #'narrow-to-region (denote-tree--determine-node-bounds 'b alist))
+        (goto-char (point-min))
+        ;; should have one element = gensymed c
+        (should
+         (= 1
+            (length
+             (seq-difference
+              (denote-tree--walk-region
+               (lambda () (get-text-property (point) 'denote-tree--identifier)))
+              '(b2 b1 b))))))))
+  (let ((alist
+         (denote-tree-test-mock-draw-tree
+          '(("a") (b c d) (b1 b2) (c) nil nil nil))))
+    (with-temp-buffer
+      (denote-tree--draw-node-list alist 'a)
+      (save-restriction
+        (apply #'narrow-to-region (denote-tree--determine-node-bounds 'c alist))
+        (goto-char (point-min))
+        (should-not
+         (seq-difference
+          (denote-tree--walk-region
+           (lambda () (get-text-property (point) 'denote-tree--identifier)))
+          '(c)))))))
+
+(ert-deftest denote-tree-test--alist-sans-region ()
+  "Tests for `denote-tree--alist-sans-region'."
+  (let ((alist
+         (denote-tree-test-mock-draw-tree
+          '(("a") (b c d) nil (c1 c2) (c3) nil nil))))
+    (with-temp-buffer
+      (cl-letf (((symbol-function 'denote-tree--walk-region)
+                 (lambda (_)
+                   '(c1 c2 c3 c))))
+        (should-not
+         (seq-difference
+          '(c1 c2 c3 c)
+          ;; alist is a full set
+          ;; alist-sans-region = alist - region
+          ;; so alist - alist-sans-region = region
+          (mapcar #'car
+                  (seq-difference
+                   alist (denote-tree--alist-sans-region alist)))))))))
+
 (provide 'denote-tree-test)
 ;;; denote-tree-test.el ends here
