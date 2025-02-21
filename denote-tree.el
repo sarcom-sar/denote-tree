@@ -554,21 +554,20 @@ and sets up everything for next iteration."
            (last-children-node (caar (last uniq-links-in-node)))
            (keys (mapcar #'car uniq-links-in-node))
            (new-alist
-            (append
-             (mapcar (lambda (x)
-                       (denote-tree--node-plist
-                        x
-                        (denote-tree--next-sibling (car x) keys)
-                        (denote-tree--next-sibling (car x) (reverse keys))
-                        node
-                        indent
-                        (eq (car x) last-children-node)
-                        new-depth))
-                     uniq-links-in-node)
-             alist))
+            (mapcar (lambda (x)
+                      (denote-tree--node-plist
+                       x
+                       (denote-tree--next-sibling (car x) keys)
+                       (denote-tree--next-sibling (car x) (reverse keys))
+                       node
+                       indent
+                       (eq (car x) last-children-node)
+                       new-depth))
+                    uniq-links-in-node))
            (new-stack (append keys (cdr stack))))
+      (setq new-alist (append new-alist alist))
       (setf (alist-get node new-alist)
-            (plist-put (alist-get node alist) :children keys))
+            (plist-put (alist-get node new-alist) :children keys))
       (list (car new-stack) new-alist info new-stack))))
 
 (defun denote-tree--unique-nodes (node existsp)
