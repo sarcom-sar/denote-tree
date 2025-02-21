@@ -565,7 +565,7 @@ and sets up everything for next iteration."
                      uniq-links-in-node)
              alist))
            (new-stack (append keys (cdr stack))))
-      (setf (alist-get node alist)
+      (setf (alist-get node new-alist)
             (plist-put (alist-get node alist) :children keys))
       (list (car new-stack) new-alist info new-stack))))
 
