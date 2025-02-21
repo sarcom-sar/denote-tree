@@ -587,19 +587,19 @@ Argument INDENT - next indent
   (let* ((node (car x))
          (true-node (cdr x))
          (indent (denote-tree--calculate-indent indent lastp)))
-    (denote-tree--open-link-maybe (symbol-name true-node))
-    (list
-     node
-     :next-indent indent
-     :true-name true-node
-     :next next
-     :prev prev
-     :descp (denote-tree--collect-keywords-as-string
-             (symbol-name true-node) denote-tree-node-description)
-     :children nil
-     :parent parent
-     :last lastp
-     :depth depth)))
+    (when (denote-tree--open-link-maybe (symbol-name true-node))
+      (list
+       node
+       :next-indent indent
+       :true-name true-node
+       :next next
+       :prev prev
+       :descp (denote-tree--collect-keywords-as-string
+               (symbol-name true-node) denote-tree-node-description)
+       :children nil
+       :parent parent
+       :last lastp
+       :depth depth))))
 
 (defun denote-tree--next-sibling (x siblings)
   "Return the :next SIBLING of X."
