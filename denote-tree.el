@@ -384,7 +384,7 @@ t, use it's UI."
                 'button-data identifier t)
           (setq denote-tree--tree-alist
                 (denote-tree--redraw-node
-                 buffer denote-tree--tree-alist (point))))))))
+                 buffer denote-tree--tree-alist)))))))
 
 
 ;;;; Utilities for node editing
@@ -398,20 +398,29 @@ Return current buffer object."
       (call-interactively #'denote-rename-file)
       (current-buffer))))
 
-(defun denote-tree--redraw-node (buffer alist pos)
-  "Redraw node based on BUFFER's front matter at POS.
+(defun denote-tree--redraw-node (buffer alist)
+  "Redraw node based on BUFFER's, return updated ALIST.
 
 Include only elements from `denote-tree-node-description'.  Preserve
 properties."
   (let ((inhibit-read-only t)
-        (node-name (get-text-property pos 'denote-tree--identifier))
+        (node (get-text-property (point) 'denote-tree--identifier))
         (new-alist alist)
         (new-descp (denote-tree--collect-keywords-as-string
-                    buffer denote-tree-node-description)))
-    (delete-region pos (line-end-position))
-    (insert new-descp)
-    (setf (alist-get node-name new-alist)
-          (plist-put (alist-get node-name new-alist) :descp new-descp))
+                    buffer denote-tree-node-description))
+        (pos))
+    (setf (alist-get node new-alist)
+          (plist-put (alist-get node new-alist) :descp new-descp))
+    (delete-region (line-beginning-position) (line-end-position))
+    (setq pos
+          (denote-tree--draw-node-foo
+           node
+           (alist-get node new-alist)
+           (denote-tree--nested-value
+            alist node :parent :next-indent)))
+    (setf (alist-get node new-alist)
+          (plist-put (alist-get node new-alist) :pos pos))
+    (delete-char 1)
     new-alist))
 
 
