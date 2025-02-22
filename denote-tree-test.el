@@ -962,5 +962,50 @@ and it's value in plist is a string."
                   (seq-difference
                    alist (denote-tree--alist-sans-region alist)))))))))
 
+(ert-deftest denote-tree-test--redraw-node ()
+  "Tests for `denote-tree--redraw-node'."
+  (with-temp-buffer
+    (let ((alist
+           (denote-tree-test-mock-draw-tree
+            '(("a") (b c d)))))
+      (denote-tree--draw-node-list alist 'a)
+      (cl-letf (((symbol-function 'denote-tree--collect-keywords-as-string)
+                 (lambda (_ _)
+                   "Foo")))
+        (goto-char (point-min))
+        (should (string= (denote-tree--nested-value
+                          (denote-tree--redraw-node "a" alist) 'a :descp)
+                         "Foo")))))
+  (with-temp-buffer
+    (let ((alist
+           (denote-tree-test-mock-draw-tree
+            '(("a") (b c d))))
+          (prev-buffer-string))
+      (denote-tree--draw-node-list alist 'a)
+      (setq prev-buffer-string (buffer-string))
+      (cl-letf (((symbol-function 'denote-tree--collect-keywords-as-string)
+                 (lambda (_ _)
+                   "a")))
+        (goto-char (point-min))
+        (denote-tree--redraw-node "a" alist)
+        (should (equal (buffer-string)
+                       prev-buffer-string)))))
+  (with-temp-buffer
+    (let ((alist
+           (denote-tree-test-mock-draw-tree
+            '(("a") (b c d))))
+          (prev-mark))
+      (denote-tree--draw-node-list alist 'a)
+      (setq prev-mark
+            (marker-position (denote-tree--nested-value alist 'a :pos)))
+      (cl-letf (((symbol-function 'denote-tree--collect-keywords-as-string)
+                 (lambda (_ _)
+                   "a")))
+        (goto-char (point-min))
+        (should (equal (marker-position
+                        (denote-tree--nested-value
+                         (denote-tree--redraw-node "a" alist) 'a :pos))
+                       prev-mark))))))
+
 (provide 'denote-tree-test)
 ;;; denote-tree-test.el ends here
