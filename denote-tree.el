@@ -560,31 +560,27 @@ and sets up everything for next iteration."
                       (denote-tree--unique-nodes x (alist-get x alist)))
                     (save-excursion
                       (denote-tree--collect-links (symbol-name node)))))
-           (supposed-children
-            (seq-filter (lambda (x)
-                          (denote-tree--open-link-maybe (symbol-name x)))
-                        (mapcar #'car uniq-links-in-node)))
            (true-children
             (seq-filter (lambda (x)
-                          (seq-contains supposed-children (car x)))
+                          (denote-tree--open-link-maybe (symbol-name (cdr x))))
                         uniq-links-in-node))
-           (last-children-node (car (last supposed-children)))
+           (true-children-list (mapcar #'car true-children))
+           (last-children-node (car (last true-children-list)))
            (new-alist
             (mapcar (lambda (x)
                       (denote-tree--node-plist
                        x
-                       (denote-tree--next-sibling (car x) supposed-children)
-                       (denote-tree--next-sibling (car x) (reverse supposed-children))
+                       (denote-tree--next-sibling (car x) true-children-list)
+                       (denote-tree--next-sibling (car x) (reverse true-children-list))
                        node
                        indent
                        (eq (car x) last-children-node)
                        new-depth))
                     true-children))
-           (nodes (mapcar #'car true-children))
-           (new-stack (append nodes (cdr stack))))
+           (new-stack (append true-children-list (cdr stack))))
       (setq new-alist (append new-alist alist))
       (setf (alist-get node new-alist)
-            (plist-put (alist-get node new-alist) :children nodes))
+            (plist-put (alist-get node new-alist) :children true-children-list))
       (list (car new-stack) new-alist info new-stack))))
 
 (defun denote-tree--unique-nodes (node existsp)
