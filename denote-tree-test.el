@@ -1007,5 +1007,60 @@ and it's value in plist is a string."
                          (denote-tree--redraw-node "a" alist) 'a :pos))
                        prev-mark))))))
 
+(ert-deftest denote-tree-test--grow-alist-and-stack ()
+  "Tests for `denote-tree--grow-alist-and-stack'."
+  (cl-letf (((symbol-function 'denote-tree--collect-links)
+             (lambda (x)
+               '(b c d)))
+            ((symbol-function 'denote-tree--open-link-maybe)
+             (lambda (x)
+               t))
+            ((symbol-function 'denote-tree--collect-keywords-as-string)
+             (lambda (x y)
+               x)))
+    (let* ((alist (list (denote-tree--node-plist
+                         '(a . a) 'a 'a nil "" t t)))
+           (ret (denote-tree--grow-alist-and-stack 'a alist nil (list 'a)))
+           (new-alist (cadr ret))
+           (new-stack (cadddr ret))
+           (new-node (car ret)))
+      (should-not
+       (equal alist new-alist))
+      (should
+       (equal '(b c d) (denote-tree--nested-value new-alist 'a :children)))
+      (should
+       (equal '(b c d) new-stack))
+      (should
+       (equal 'b new-node))))
+  (cl-letf (((symbol-function 'denote-tree--collect-links)
+             (lambda (x)
+               '(b c d)))
+            ((symbol-function 'denote-tree--open-link-maybe)
+             (lambda (x)
+               (unless (equal x "c") t)))
+            ((symbol-function 'denote-tree--collect-keywords-as-string)
+             (lambda (x y)
+               x)))
+    (let* ((alist (list (denote-tree--node-plist
+                         '(a . a) 'a 'a nil "" t t)))
+           (ret (denote-tree--grow-alist-and-stack 'a alist nil (list 'a)))
+           (new-alist (cadr ret))
+           (new-stack (cadddr ret))
+           (new-node (car ret)))
+      (should-not
+       (equal alist new-alist))
+      (should-not
+       (alist-get 'c new-alist))
+      (should
+       (equal '(b d) (denote-tree--nested-value new-alist 'a :children)))
+      (should
+       (equal 'd (denote-tree--nested-value new-alist 'b :next)))
+      (should
+       (equal 'd (denote-tree--nested-value new-alist 'b :prev)))
+      (should
+       (equal '(b d) new-stack))
+      (should
+       (equal 'b new-node)))))
+
 (provide 'denote-tree-test)
 ;;; denote-tree-test.el ends here
