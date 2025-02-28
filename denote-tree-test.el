@@ -1062,5 +1062,21 @@ and it's value in plist is a string."
       (should
        (equal 'b new-node)))))
 
+(ert-deftest denote-tree-test--draw-node-list-helper ()
+  "Tests for `denote-tree--draw-node-list-helper'."
+  (with-temp-buffer
+    (let* ((alist (denote-tree-test-mock-draw-tree
+                   '(("a") (b c d))))
+           (ret (denote-tree--draw-node-list-helper
+                 'a alist (alist-get 'a alist) '(a)))
+           (new-node (car ret))
+           (new-alist (cadr ret))
+           (new-info (caddr ret))
+           (new-stack (cadddr ret)))
+      (should (equal 'b new-node))
+      (should (equal new-alist alist))
+      (should (equal new-info (alist-get 'b alist)))
+      (should (equal new-stack '(b c d))))))
+
 (provide 'denote-tree-test)
 ;;; denote-tree-test.el ends here
