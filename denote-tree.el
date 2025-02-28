@@ -560,8 +560,15 @@ and sets up everything for next iteration."
                       (denote-tree--unique-nodes x (alist-get x alist)))
                     (save-excursion
                       (denote-tree--collect-links (symbol-name node)))))
-           (supposed-children (mapcar #'car uniq-links-in-node))
-           (last-children-node (caar (last uniq-links-in-node)))
+           (supposed-children
+            (seq-filter (lambda (x)
+                          (denote-tree--open-link-maybe (symbol-name x)))
+                        (mapcar #'car uniq-links-in-node)))
+           (true-children
+            (seq-filter (lambda (x)
+                          (seq-contains supposed-children (car x)))
+                        uniq-links-in-node))
+           (last-children-node (car (last supposed-children)))
            (new-alist
             (mapcar (lambda (x)
                       (denote-tree--node-plist
@@ -572,13 +579,13 @@ and sets up everything for next iteration."
                        indent
                        (eq (car x) last-children-node)
                        new-depth))
-                    uniq-links-in-node))
-           (nodes (mapcar #'car new-alist))
+                    true-children))
+           (nodes (mapcar #'car true-children))
            (new-stack (append nodes (cdr stack))))
       (setq new-alist (append new-alist alist))
       (setf (alist-get node new-alist)
             (plist-put (alist-get node new-alist) :children nodes))
-      (list (car new-stack) (seq-drop-while #'null new-alist) info new-stack))))
+      (list (car new-stack) new-alist info new-stack))))
 
 (defun denote-tree--unique-nodes (node existsp)
   "Return a pair new id of NODE and NODE symbol itself.
