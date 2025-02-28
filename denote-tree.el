@@ -560,27 +560,27 @@ and sets up everything for next iteration."
                       (denote-tree--unique-nodes x (alist-get x alist)))
                     (save-excursion
                       (denote-tree--collect-links (symbol-name node)))))
-           (true-children
+           (children
             (seq-filter (lambda (x)
                           (denote-tree--open-link-maybe (symbol-name (cdr x))))
                         uniq-links-in-node))
-           (true-children-list (mapcar #'car true-children))
-           (last-children-node (car (last true-children-list)))
+           (children-list (mapcar #'car children))
+           (last-children-node (car (last children-list)))
            (new-alist
             (mapcar (lambda (x)
                       (denote-tree--node-plist
                        x
-                       (denote-tree--next-sibling (car x) true-children-list)
-                       (denote-tree--next-sibling (car x) (reverse true-children-list))
+                       (denote-tree--next-sibling (car x) children-list)
+                       (denote-tree--next-sibling (car x) (reverse children-list))
                        node
                        indent
                        (eq (car x) last-children-node)
                        new-depth))
-                    true-children))
-           (new-stack (append true-children-list (cdr stack))))
+                    children))
+           (new-stack (append children-list (cdr stack))))
       (setq new-alist (append new-alist alist))
       (setf (alist-get node new-alist)
-            (plist-put (alist-get node new-alist) :children true-children-list))
+            (plist-put (alist-get node new-alist) :children children-list))
       (list (car new-stack) new-alist info new-stack))))
 
 (defun denote-tree--unique-nodes (node existsp)
