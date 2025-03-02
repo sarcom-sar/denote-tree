@@ -659,7 +659,8 @@ low value."
   (let* ((inhibit-read-only t)
          (curr-pos (point))
          (curr-node (get-text-property (point) 'denote-tree--identifier))
-         (new-alist alist))
+         (new-alist alist)
+         (orphans '()))
     ;; trying to redraw from cyclical node, wth?
     (when (eq curr-node (denote-tree--nested-value alist curr-node :true-name))
       (unwind-protect
@@ -667,12 +668,18 @@ low value."
             (apply #'narrow-to-region
                    (denote-tree--determine-node-bounds
                     curr-node alist))
-            (setq new-alist (denote-tree--fix-children-in-alist
-                             (apply #'denote-tree--walk-links-iteratively
-                                    (append
-                                     (denote-tree--args-for-walking curr-node alist)
-                                     (list
-                                      (denote-tree--alist-sans-region alist))))))
+            (let* ((alist-in-region
+                    (save-excursion
+                      (denote-tree--alist-in-region alist)))
+                   (alist-sans-region
+                    (list (seq-difference alist alist-in-region)))
+                   (args-for-walking
+                    (denote-tree--args-for-walking curr-node alist)))
+              (setq new-alist (denote-tree--fix-children-in-alist
+                               (apply #'denote-tree--walk-links-iteratively
+                                      (append args-for-walking
+                                              alist-sans-region))))
+              (setq orphans (seq-difference alist-in-region new-alist)))
             (delete-region (point-min) (point-max))
             (goto-char (point-min))
             (denote-tree--draw-node-list new-alist curr-node)
@@ -680,22 +687,20 @@ low value."
         (denote-tree--clean-up)))
     (list curr-pos new-alist)))
 
-(defun denote-tree--alist-sans-region (alist)
-  "Return ALIST without nodes from current region."
+(defun denote-tree--alist-in-region (alist)
+  "Return ALIST of nodes from the current region."
   (let* ((nodes-in-region
           (denote-tree--walk-region
            (lambda ()
              (get-text-property
               (point) 'denote-tree--identifier))))
-         (alist-from-region
+         (alist-in-region
           (seq-reduce
            (lambda (payload el)
              (setq payload (append (list (assq el alist)) payload)))
            nodes-in-region
-           '()))
-         (alist-sans-region
-          (seq-difference alist alist-from-region)))
-    alist-sans-region))
+           '())))
+    alist-in-region))
 
 (defun denote-tree--args-for-walking (node alist)
   "Return NODE information from ALIST.
