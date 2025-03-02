@@ -687,6 +687,24 @@ low value."
         (denote-tree--clean-up)))
     (list curr-pos new-alist)))
 
+(defun denote-tree--find-orphans (orphaned alist)
+  "Find ORPHANED nodes in an ALIST.
+
+If a node is deleted during rescan of a tree, then there is
+a possibility, that that node had cyclical buffers associated
+with it.  Children of that node become effectively lost."
+  (seq-reduce
+   (lambda (acc orp-el)
+     (push (seq-find
+            (lambda (alist-el)
+              (string-prefix-p
+               (symbol-name orp-el)
+               (symbol-name (car alist-el))))
+            alist)
+           acc))
+   orphaned
+   '()))
+
 (defun denote-tree--alist-in-region (alist)
   "Return ALIST of nodes from the current region."
   (let* ((nodes-in-region
