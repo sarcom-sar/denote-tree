@@ -709,9 +709,10 @@ with it.  Children of that node become effectively lost."
    (lambda (acc orp-el)
      (push (seq-find
             (lambda (alist-el)
-              (string-prefix-p
-               (symbol-name orp-el)
-               (symbol-name (car alist-el))))
+              (let ((el-name (symbol-name orp-el))
+                    (alist-key (symbol-name (car alist-el))))
+                (and (not (string= el-name alist-key))
+                     (string-prefix-p el-name alist-key))))
             alist)
            acc))
    orphaned
