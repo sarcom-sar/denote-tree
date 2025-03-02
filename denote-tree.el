@@ -679,7 +679,19 @@ low value."
                                (apply #'denote-tree--walk-links-iteratively
                                       (append args-for-walking
                                               alist-sans-region))))
-              (setq orphans (seq-difference alist-in-region new-alist)))
+              (setq orphans
+                    (mapcar #'car (seq-difference alist-in-region new-alist)))
+              (when orphans
+                (let ((move-orphans-to
+                       (denote-tree--find-orphans orphans alist)))
+                  ;; iterate over move-orphans-to
+                  ;; regenerate their children via
+                  ;; `denote-tree--walk-links-iteratively'
+                  ;; add them onto (previously)
+                  ;; cyclical node, rename that node
+                  ;; to :true-name, widen the region
+                  ;; redraw all of them
+                  )))
             (delete-region (point-min) (point-max))
             (goto-char (point-min))
             (denote-tree--draw-node-list new-alist curr-node)
