@@ -762,7 +762,6 @@ and it's value in plist is a string."
       ;; at b
       (forward-line 1)
       (let ((denote-tree-max-traversal-depth t)
-            (tree-alist '())
             (next (denote-tree-test-mock-make-next-links '((b1) nil))))
         (cl-letf (((symbol-function 'denote-tree--collect-links)
                    (lambda (x)
@@ -774,7 +773,7 @@ and it's value in plist is a string."
                    (lambda (x _)
                      (propertize x 'denote-tree--type 'title))))
           (unwind-protect
-              (setq tree-alist (denote-tree--deepen-traversal alist))
+              (denote-tree--deepen-traversal alist)
             (denote-tree--clean-up)))
         (should (equal buffer-look
                        (buffer-string)))))))
