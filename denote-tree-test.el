@@ -943,8 +943,8 @@ and it's value in plist is a string."
            (lambda () (get-text-property (point) 'denote-tree--identifier)))
           '(c)))))))
 
-(ert-deftest denote-tree-test--alist-sans-region ()
-  "Tests for `denote-tree--alist-sans-region'."
+(ert-deftest denote-tree-test--alist-in-region ()
+  "Tests for `denote-tree--alist-in-region'."
   (let ((alist
          (denote-tree-test-mock-draw-tree
           '(("a") (b c d) nil (c1 c2) (c3) nil nil))))
@@ -952,15 +952,9 @@ and it's value in plist is a string."
       (cl-letf (((symbol-function 'denote-tree--walk-region)
                  (lambda (_)
                    '(c1 c2 c3 c))))
-        (should-not
-         (seq-difference
-          '(c1 c2 c3 c)
-          ;; alist is a full set
-          ;; alist-sans-region = alist - region
-          ;; so alist - alist-sans-region = region
-          (mapcar #'car
-                  (seq-difference
-                   alist (denote-tree--alist-sans-region alist)))))))))
+        (should
+         (equal '(c c3 c2 c1)
+                (mapcar #'car (denote-tree--alist-in-region alist))))))))
 
 (ert-deftest denote-tree-test--redraw-node ()
   "Tests for `denote-tree--redraw-node'."
