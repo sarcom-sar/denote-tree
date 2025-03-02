@@ -1072,5 +1072,18 @@ and it's value in plist is a string."
       (should (equal new-info (alist-get 'b alist)))
       (should (equal new-stack '(b c d))))))
 
+(ert-deftest denote-tree-test--find-orphans ()
+  "Tests for `denote-tree--find-orphans'."
+  (should
+   (equal (denote-tree--find-orphans '(a) '((a5 foo) (b bar)))
+          '((a5 foo))))
+  (should
+   (equal (denote-tree--find-orphans '(a c) '((a5 foo) (b bar) (c4 baz)))
+          '((c4 baz)
+            (a5 foo))))
+  (should
+   (equal (denote-tree--find-orphans '(a) '((a baz) (a5 foo) (b bar)))
+          '((a5 foo)))))
+
 (provide 'denote-tree-test)
 ;;; denote-tree-test.el ends here
