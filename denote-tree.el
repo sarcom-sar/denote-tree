@@ -660,42 +660,50 @@ low value."
          (curr-pos (point))
          (curr-node (get-text-property (point) 'denote-tree--identifier))
          (new-alist alist)
-         (orphans '()))
+         (orphans '())
+         (move-orphans-to '()))
     ;; trying to redraw from cyclical node, wth?
     (when (eq curr-node (denote-tree--nested-value alist curr-node :true-name))
       (unwind-protect
-          (save-restriction
-            (apply #'narrow-to-region
-                   (denote-tree--determine-node-bounds
-                    curr-node alist))
-            (let* ((alist-in-region
-                    (save-excursion
-                      (denote-tree--alist-in-region alist)))
-                   (alist-sans-region
-                    (list (seq-difference alist alist-in-region)))
-                   (args-for-walking
-                    (denote-tree--args-for-walking curr-node alist)))
-              (setq new-alist (denote-tree--fix-children-in-alist
-                               (apply #'denote-tree--walk-links-iteratively
-                                      (append args-for-walking
-                                              alist-sans-region))))
-              (setq orphans
-                    (mapcar #'car (seq-difference alist-in-region new-alist)))
-              (when orphans
-                (let ((move-orphans-to
-                       (denote-tree--find-orphans orphans alist)))
-                  ;; iterate over move-orphans-to
-                  ;; regenerate their children via
-                  ;; `denote-tree--walk-links-iteratively'
-                  ;; add them onto (previously)
-                  ;; cyclical node, rename that node
-                  ;; to :true-name, widen the region
-                  ;; redraw all of them
-                  )))
-            (delete-region (point-min) (point-max))
-            (goto-char (point-min))
-            (denote-tree--draw-node-list new-alist curr-node)
-            (delete-region (1- (point-max)) (point-max)))
+          (progn
+            (save-restriction
+              (apply #'narrow-to-region
+                     (denote-tree--determine-node-bounds
+                      curr-node alist))
+              (let* ((alist-in-region
+                      (save-excursion
+                        (denote-tree--alist-in-region alist)))
+                     (alist-sans-region
+                      (list (seq-difference alist alist-in-region)))
+                     (args-for-walking
+                      (denote-tree--args-for-walking curr-node alist)))
+                (setq new-alist (denote-tree--fix-children-in-alist
+                                 (apply #'denote-tree--walk-links-iteratively
+                                        (append args-for-walking
+                                                alist-sans-region))))
+                (setq orphans
+                      (seq-difference (mapcar #'car alist-in-region)
+                                      (mapcar #'car new-alist)))
+                (when orphans
+                  (setq move-orphans-to
+                        (seq-uniq
+                         (seq-remove
+                          #'null (denote-tree--find-orphans orphans alist))))
+                  (setq new-alist
+                        (seq-remove
+                         (lambda (x)
+                           (memq (car x) (mapcar #'car move-orphans-to)))
+                         new-alist))))
+              (delete-region (point-min) (point-max))
+              (goto-char (point-min))
+              (denote-tree--draw-node-list new-alist curr-node)
+              (delete-region (1- (point-max)) (point-max)))
+            (when move-orphans-to
+              (dolist (el move-orphans-to)
+                (goto-char (denote-tree--nested-value
+                            new-alist (plist-get (cdr el) :parent) :pos))
+                (seq-let (pos alist) (denote-tree--deepen-traversal new-alist)
+                  (setq new-alist alist)))))
         (denote-tree--clean-up)))
     (list curr-pos new-alist)))
 
