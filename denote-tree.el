@@ -689,11 +689,12 @@ low value."
                         (seq-uniq
                          (seq-remove
                           #'null (denote-tree--find-orphans orphans alist))))
-                  (setq new-alist
-                        (seq-remove
-                         (lambda (x)
-                           (memq (car x) (mapcar #'car move-orphans-to)))
-                         new-alist))))
+                  (let ((mapcared-move-orphans (mapcar #'car move-orphans-to)))
+                    (setq new-alist
+                          (seq-remove
+                           (lambda (x)
+                             (memq (car x) mapcared-move-orphans))
+                           new-alist)))))
               (delete-region (point-min) (point-max))
               (goto-char (point-min))
               (denote-tree--draw-node-list new-alist curr-node)
@@ -702,7 +703,7 @@ low value."
               (dolist (el move-orphans-to)
                 (goto-char (denote-tree--nested-value
                             new-alist (plist-get (cdr el) :parent) :pos))
-                (seq-let (pos alist) (denote-tree--deepen-traversal new-alist)
+                (seq-let (_ alist) (denote-tree--deepen-traversal new-alist)
                   (setq new-alist alist)))))
         (denote-tree--clean-up)))
     (list curr-pos new-alist)))
