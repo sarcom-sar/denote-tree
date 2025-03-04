@@ -895,6 +895,15 @@ and it's value in plist is a string."
               (setq tree-alist (cadr (denote-tree--deepen-traversal alist)))
             (denote-tree--clean-up)))
         (should
+         (equal (denote-tree--nested-value alist 'c :true-name)
+                (denote-tree--nested-value tree-alist 'c :true-name)))
+        (should
+         (equal (denote-tree--nested-value alist 'c :children)
+                (denote-tree--nested-value tree-alist 'c :children)))
+        (should
+         (equal (denote-tree--nested-value tree-alist 'c :parent)
+                'd))
+        (should
          (equal (denote-tree--nested-value alist 'c1 :true-name)
                 (denote-tree--nested-value tree-alist 'c1 :true-name)))
         (should
