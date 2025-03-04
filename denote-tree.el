@@ -688,7 +688,7 @@ low value."
                   (setq move-orphans-to
                         (seq-uniq
                          (seq-remove
-                          #'null (denote-tree--find-orphans orphans alist))))
+                          #'null (reverse (denote-tree--find-orphans orphans alist)))))
                   (let ((mapcared-move-orphans (mapcar #'car move-orphans-to)))
                     (setq new-alist
                           (seq-remove
