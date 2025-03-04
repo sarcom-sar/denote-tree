@@ -920,7 +920,36 @@ and it's value in plist is a string."
                 (denote-tree--nested-value tree-alist 'c2 :children)))
         (should
          (equal (denote-tree--nested-value alist 'c2 :parent)
-                (denote-tree--nested-value tree-alist 'c2 :parent)))))))
+                (denote-tree--nested-value tree-alist 'c2 :parent))))))
+  (with-temp-buffer
+    (let ((alist (denote-tree-test-mock-draw-tree
+                  '(("a") (b e f) (c d) (c1 c2) nil nil (d1 d2) nil nil (c) (d))))
+          (buffer-look))
+      (denote-tree--draw-node-list alist 'a)
+      (goto-char (point-min))
+      ;; at b
+      (forward-line 1)
+      (let ((denote-tree-max-traversal-depth t)
+            (tree-alist '())
+            (next (denote-tree-test-mock-make-next-links '((nil) (c) (c1 c2) nil nil (d) (d1 d2)))))
+        (cl-letf (((symbol-function 'denote-tree--collect-links)
+                   (lambda (x)
+                     (car (funcall next))))
+                  ((symbol-function 'denote-tree--open-link-maybe)
+                   (lambda (x)
+                     (intern x)))
+                  ((symbol-function 'denote-tree--collect-keywords-as-string)
+                   (lambda (x _)
+                     (propertize x 'denote-tree--type 'title))))
+          (unwind-protect
+              (setq tree-alist (cadr (denote-tree--deepen-traversal alist)))
+            (denote-tree--clean-up)))
+        (should
+         (equal (denote-tree--nested-value tree-alist 'c :parent)
+                'e))
+        (should
+         (equal (denote-tree--nested-value tree-alist 'd :parent)
+                'f))))))
 
 (ert-deftest denote-tree-test--calculate-indent ()
   "Tests for `denote-tree--calculate-indent'."
