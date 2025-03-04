@@ -881,7 +881,7 @@ and it's value in plist is a string."
       (forward-line 1)
       (let ((denote-tree-max-traversal-depth t)
             (tree-alist '())
-            (next (denote-tree-test-mock-make-next-links '())))
+            (next (denote-tree-test-mock-make-next-links '((nil) (c) (c1 c2)))))
         (cl-letf (((symbol-function 'denote-tree--collect-links)
                    (lambda (x)
                      (car (funcall next))))
