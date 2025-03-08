@@ -28,13 +28,11 @@ searching for any denote identifiers within it.
 
 It is able to handle cyclical notes and provides a mechanism to move between
 those cyclical nodes by default.  The initial cost of drawing a full tree is
-paid once, at initialization.  After that =denote-tree= only redraws portions of
-current tree, when you ask it to via =denote-tree-redraw= command.  It handle
-both adding and deleting nodes, but sadly you have to do it yourself.  There are
-(currently) no plans to do it from within the application.  As of right now,
-there is on unsupported edge case while redrawing.  If you delete a node that is
-"root" node with children and at the same time cyclical nodes inherit it's
-children property.
+paid once, at initialization. If user is willing to do so, one can tweak the
+value of =denote-tree-max-traversal-depth=, so that the tree is drawn only
+partially.  That truncated tree can be then expanded via =denote-tree-redraw=.
+It handles both linking and unlinking nodes, but, as of right now, this has to
+be done by the user manually.
 
 *** Keybindings for =*denote-tree*= buffer
 
@@ -147,9 +145,10 @@ contributions.
 - [-] smarter redrawing of a tree,
   - [ ] collapsible tree  (with hierarchy.el);
   - [X] redraw parts of a buffer,
-    - [X] works while adding nodes;
-    - [X] works while deleting nodes.
+    - [X] works while linking nodes;
+    - [X] works while unlinking nodes;
+    - [X] move unlinked node to one of cyclical nodes who is still linked.
 - [X] ability to edit the front matter at point;
 - [X] edit front matter with widgets (as optional denote-tree-edit);
 - [X] multiple denote-tree buffers;
-- [ ] generate a child note from parent.
+- [ ] un/link new notes to a node.
