@@ -701,10 +701,12 @@ low value."
               (delete-region (1- (point-max)) (point-max)))
             (when move-orphans-to
               (dolist (el move-orphans-to)
-                (goto-char (denote-tree--nested-value
-                            new-alist (plist-get (cdr el) :parent) :pos))
-                (seq-let (_ alist) (denote-tree--deepen-traversal new-alist)
-                  (setq new-alist alist)))))
+                (when-let* ((goto
+                             (denote-tree--nested-value
+                              new-alist (plist-get (cdr el) :parent) :pos)))
+                  (goto-char goto)
+                  (seq-let (_ alist) (denote-tree--deepen-traversal new-alist)
+                    (setq new-alist alist))))))
         (denote-tree--clean-up)))
     (list curr-pos new-alist)))
 
