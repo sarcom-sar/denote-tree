@@ -951,6 +951,50 @@ and it's value in plist is a string."
          (equal (denote-tree--nested-value tree-alist 'd :parent)
                 'f))))))
 
+(ert-deftest denote-tree-test--deepen-traversal-circular-all-together ()
+  "Tests for `denote-tree--deepen-traversal'."
+  (with-temp-buffer
+    (let ((alist (denote-tree-test-mock-draw-tree
+                  '(("a") (b d) (c b1 b2) (c1 c2 a) nil nil nil (b2a) nil (c) nil nil)))
+          (buffer-look))
+      (denote-tree--draw-node-list alist 'a)
+      (goto-char (point-min))
+      ;; at b
+      (forward-line 1)
+      (let ((denote-tree-max-traversal-depth t)
+            (tree-alist '())
+            ;; this is weird notation, but trust me
+            ;; it allows us to feed '(c (c1 c2)) into
+            ;; correct place
+            (next (denote-tree-test-mock-make-next-links '((b1) (b1a b1b) (nil) (nil) (c) (c1 c2 a) nil))))
+        (cl-letf (((symbol-function 'denote-tree--collect-links)
+                   (lambda (x)
+                     (car (funcall next))))
+                  ((symbol-function 'denote-tree--open-link-maybe)
+                   (lambda (x)
+                     (intern x)))
+                  ((symbol-function 'denote-tree--collect-keywords-as-string)
+                   (lambda (x _)
+                     (propertize x 'denote-tree--type 'title))))
+          (unwind-protect
+              (setq tree-alist (cadr (denote-tree--deepen-traversal alist)))
+            (denote-tree--clean-up)))
+        (should-not (denote-tree--nested-value tree-alist 'b2 :true-name))
+        (should-not (denote-tree--nested-value tree-alist 'b2a :true-name))
+        (should (denote-tree--nested-value tree-alist 'c :true-name))
+        (should (denote-tree--nested-value tree-alist 'c1 :true-name))
+        (should (denote-tree--nested-value tree-alist 'c2 :true-name))
+        (should (denote-tree--nested-value tree-alist 'b1a :true-name))
+        (should (denote-tree--nested-value tree-alist 'b1b :true-name))
+        (should
+         (equal (length
+                 (denote-tree--nested-value tree-alist 'c :children))
+                3))
+        (should
+         (equal (length
+                 (denote-tree--nested-value tree-alist 'b :children))
+                1))))))
+
 (ert-deftest denote-tree-test--calculate-indent ()
   "Tests for `denote-tree--calculate-indent'."
   (should (equal
