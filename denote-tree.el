@@ -73,12 +73,10 @@
   :group 'faces)
 
 (defface denote-tree-node '((t :inherit link))
-  "Default face used for nodes."
-  :group 'denote-tree-faces)
+  "Default face used for nodes.")
 
 (defface denote-tree-circular-node '((t :inherit link-visited))
-  "Default face used for circular nodes."
-  :group 'denote-tree-faces)
+  "Default face used for circular nodes.")
 
 (defgroup denote-tree ()
   "Visualise your notes as a tree."
@@ -89,7 +87,6 @@
 
 Every `denote-tree' buffer has a unique name made from this prefix and
 root node of it's tree."
-  :group 'denote-tree
   :type 'string)
 
 (defcustom denote-tree-node-colorize-function #'denote-tree--default-props
@@ -98,13 +95,11 @@ root node of it's tree."
 Function accepts two arguments STR and TYPE.  Choosen string from
 front-matter is propertized according to type from
 `denote-tree-node-description'."
-  :group 'denote-tree
   :type 'function)
 
 (defcustom denote-tree-max-traversal-depth t
   "Maximum traversal depth of `denote-tree'.
 If t traverse all the way, if num, traverse num nodes deep."
-  :group 'denote-tree
   :type '(choice symbol natnum))
 
 (defcustom denote-tree-node-description '(title)
@@ -123,7 +118,6 @@ Denote's default front matter elements:
 - date
 - symbol
 - string"
-  :group 'denote-tree
   :type '(set (choice (const title)
                       (const identifier)
                       (const keywords)
@@ -135,13 +129,11 @@ Denote's default front matter elements:
 (defcustom denote-tree-preserve-teleports-p t
   "Teleport back when accessing cyclical node from it's child.
 When nil, always move to \"real\" parent of a node."
-  :group 'denote-tree
   :type 'boolean)
 
 (defcustom denote-tree-fancy-edit nil
   "If t, use fancy editing with widgets (experimental).
 If nil fall back to the thin `denote-rename-file' wrapper."
-  :group 'denote-tree
   :type 'boolean)
 
 (defcustom denote-tree-extend-filetype-with
@@ -162,7 +154,6 @@ If nil fall back to the thin `denote-rename-file' wrapper."
      text "^date\\s-*:"))
   "Alist of keys where values are plists of filetype regex value.
 User can extend it in format of (KEY TYPE VALUE)."
-  :group 'denote-tree
   :type
   '(alist
     :key-type symbol
