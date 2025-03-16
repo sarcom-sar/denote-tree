@@ -863,13 +863,12 @@ Return as a list sans BUFFER's own identifier."
    ((stringp el)
     (cons 'str el))
    ;; if it's in regexps, covert to str and push
-   ((re-search-forward (plist-get
-                        (cdr filetype)
-                        (seq-find
-                         (lambda (reg)
-                           (denote-tree--extract-and-compare-symbols reg el))
-                         regexps))
-                       nil t)
+   ((re-search-forward
+     (cadr (seq-find
+            (lambda (reg)
+              (denote-tree--extract-and-compare-symbols (car reg) el))
+            regexps))
+     nil t)
     (cons el
           (funcall denote-tree-node-colorize-function
                    (denote-trim-whitespace
@@ -880,14 +879,18 @@ Return as a list sans BUFFER's own identifier."
     (list el))))
 
 (defun denote-tree--get-regexps (plist)
-  "Return list of all symbols ending in -regexp in PLIST."
-  (let (lst)
-    (dolist (el plist lst)
+  "Return alist of all keys ending in -regexp with values in PLIST."
+  (let (lst el)
+    (while plist
+      (setq el (car plist))
       (and (symbolp el)
-           (string-suffix-p
-            "-regexp" (symbol-name el))
-           (stringp (plist-get plist el))
-           (push el lst)))))
+	   (string-suffix-p
+	    "-regexp" (symbol-name el))
+	   (stringp (cadr plist))
+	   (push (cadr plist) lst)
+	   (push el lst))
+      (setq plist (cddr plist)))
+    (seq-partition lst 2)))
 
 (defun denote-tree--extract-and-compare-symbols
     (symbol element &optional extractor-regexp)
@@ -924,19 +927,18 @@ not finding a match), but guaranteed to work as long the user set the
 front-matter."
   (with-current-buffer buffer
     (goto-char (point-min))
-    (let ((filetype
-           (seq-find
-            (lambda (type)
-              (let ((types-plist type))
-                (seq-find
-                 (lambda (el)
-                   (save-excursion
-                     (re-search-forward (plist-get (cdr types-plist) el)
-                                        nil t)))
-                 (denote-tree--get-regexps (cdr types-plist)))))
-            denote-tree--extended-filetype)))
+    (let ((filetype))
+      (setq filetype
+	          (catch 'file-type
+	            (dolist (type-plist denote-tree--extended-filetype)
+		            (dolist (el (denote-tree--get-regexps (cdr type-plist)))
+		              (let ((symbol-in-buff
+			                   (save-excursion
+			                     (re-search-forward (cadr el) nil t))))
+		                (when symbol-in-buff
+		                  (throw 'file-type type-plist)))))))
       (unless filetype
-        (warn "%s not a denote-style buffer" buffer))
+	      (warn "%s not a denote-style buffer" buffer))
       filetype)))
 
 (defun denote-tree--open-link-maybe (element)
