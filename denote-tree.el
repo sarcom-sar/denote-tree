@@ -464,7 +464,7 @@ return a list of four elements each."
      nil
      (list node)
      #'denote-tree--grow-alist-and-stack
-     (lambda (alist info stack)
+     (lambda (alist _ stack)
        (list (cadr stack)
              alist
              nil
@@ -489,7 +489,7 @@ return a list of four elements each."
   (denote-tree--traverse-structure
    initial-node alist (alist-get initial-node alist) (list initial-node)
    #'denote-tree--draw-node-list-helper
-   (lambda (alist info stack)
+   (lambda (alist _ stack)
      (list (cadr stack)
            alist
            (alist-get (cadr stack) alist)
