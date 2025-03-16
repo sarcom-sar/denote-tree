@@ -312,7 +312,7 @@ parent the point came from."
   (if (< arg 0)
       (denote-tree-child-node (- arg))
     (let ((alist denote-tree--tree-alist)
-          next-point canon-point current-teleport)
+          next-point canon-point)
       (dotimes (_ arg next-point)
         (let ((node-id (get-text-property (point) 'denote-tree--identifier)))
           (setq next-point (denote-tree--nested-value
