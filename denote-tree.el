@@ -834,8 +834,7 @@ Return as a list sans BUFFER's own identifier."
 
 (defun denote-tree--collect-keywords (buffer keywords)
   "Return denote propertized KEYWORDS from BUFFER."
-  (when-let* ((filetype (denote-tree--find-filetype buffer))
-              (regexps
+  (when-let* ((regexps
                (thread-first
                  (denote-tree--find-filetype buffer)
                  (cdr)
