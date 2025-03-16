@@ -358,13 +358,14 @@ and it's value in plist is a string."
   (should-not (denote-tree--get-regexps '(:regexp "foor")))
   (should
    (equal (denote-tree--get-regexps '(:foo-regexp "foor" :bar-regexp bar))
-          '(:foo-regexp)))
+          '((:foo-regexp "foor"))))
   (should
    (equal
-    (denote-tree--get-regexps '(:foo-regexp "foor" :bar "bar")) '(:foo-regexp)))
+    (denote-tree--get-regexps '(:foo-regexp "foor" :bar "bar"))
+    '((:foo-regexp "foor"))))
   (should
    (equal (denote-tree--get-regexps '(:foo-regexp "foor" :bar-regexp "baar"))
-          '(:bar-regexp :foo-regexp))))
+          '((:bar-regexp "baar") (:foo-regexp "foor")))))
 
 (ert-deftest denote-tree-test--open-link-maybe ()
   "Tests for `denote-tree--open-link-maybe'."
