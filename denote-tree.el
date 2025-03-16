@@ -558,18 +558,19 @@ and sets up everything for next iteration."
            (children-list (mapcar #'car children))
            (last-children-node (car (last children-list)))
            (new-alist
-            (mapcar (lambda (x)
-                      (denote-tree--node-plist
-                       x
-                       (denote-tree--next-sibling (car x) children-list)
-                       (denote-tree--next-sibling (car x) (reverse children-list))
-                       node
-                       indent
-                       (eq (car x) last-children-node)
-                       new-depth))
-                    children))
+            (append
+             (mapcar (lambda (x)
+                       (denote-tree--node-plist
+                        x
+                        (denote-tree--next-sibling (car x) children-list)
+                        (denote-tree--next-sibling (car x) (reverse children-list))
+                        node
+                        indent
+                        (eq (car x) last-children-node)
+                        new-depth))
+                     children)
+             alist))
            (new-stack (append children-list (cdr stack))))
-      (setq new-alist (append new-alist alist))
       (setf (alist-get node new-alist)
             (plist-put (alist-get node new-alist) :children children-list))
       (list (car new-stack) new-alist info new-stack))))
