@@ -476,11 +476,11 @@ return a list of four elements each."
     (seq-do
      (lambda (x)
        (push
-        (let* ((true-name (plist-get (cdr x) :true-name))
-               (children (denote-tree--nested-value alist true-name :children)))
-          (if (not (eq (car x) true-name))
-              (append (list (car x)) (plist-put (cdr x) :children children))
-            x))
+        (if-let* ((true-name (plist-get (cdr x) :true-name))
+                  ((not (eq (car x) true-name)))
+                  (children (denote-tree--nested-value alist true-name :children)))
+            (append (list (car x)) (plist-put (cdr x) :children children))
+          x)
         new-alist))
      alist)))
 
