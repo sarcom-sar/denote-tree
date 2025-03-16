@@ -852,11 +852,11 @@ Return as a list sans BUFFER's own identifier."
                  (denote-tree--get-regexps))))
     (with-current-buffer buffer
       (mapcar (lambda (el)
-                (denote-tree--collect-keywords-helper el regexps filetype))
+                (denote-tree--collect-keywords-helper el regexps))
               keywords))))
 
-(defun denote-tree--collect-keywords-helper (el regexps filetype)
-  "Turn EL into cons according to REGEXPS and FILETYPE."
+(defun denote-tree--collect-keywords-helper (el regexps)
+  "Turn EL into cons according to REGEXPS."
   (goto-char (point-min))
   (cond
    ;; if it's a string, just push it
