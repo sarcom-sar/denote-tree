@@ -557,6 +557,7 @@ and sets up everything for next iteration."
                         uniq-links-in-node))
            (children-list (mapcar #'car children))
            (last-children-node (car (last children-list)))
+           (new-stack (append children-list (cdr stack)))
            (new-alist
             (append
              (mapcar (lambda (x)
@@ -569,8 +570,7 @@ and sets up everything for next iteration."
                         (eq (car x) last-children-node)
                         new-depth))
                      children)
-             alist))
-           (new-stack (append children-list (cdr stack))))
+             alist)))
       (setf (alist-get node new-alist)
             (plist-put (alist-get node new-alist) :children children-list))
       (list (car new-stack) new-alist info new-stack))))
