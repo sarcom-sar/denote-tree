@@ -773,8 +773,7 @@ signal an error."
      (goto-char (denote-tree--nested-value alist node :pos))
      (line-beginning-position))
    (let ((now-pos (denote-tree--nested-value alist node :pos))
-         (next-pos (denote-tree--nested-value alist node :next :pos))
-         (prev-pos (denote-tree--nested-value alist node :prev :pos)))
+         (next-pos (denote-tree--nested-value alist node :next :pos)))
      (cond
       ((not (denote-tree--nested-value alist node :parent :pos))
        (1- (point-max)))
