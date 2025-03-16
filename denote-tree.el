@@ -784,27 +784,19 @@ signal an error."
       ((>= now-pos next-pos)
        (save-excursion
          (goto-char (denote-tree--nested-value alist node :parent :pos))
-         (let (prev-next next)
+         (let (prev-next next id)
+           (setq id (get-text-property (point) 'denote-tree--identifier))
            (while (and (setq next (denote-tree--nested-value
-                                   alist
-                                   (get-text-property
-                                    (point) 'denote-tree--identifier)
-                                   :next :pos))
+                                   alist id :next :pos))
                        (not (equal prev-next next))
                        (> now-pos next))
              (setq prev-next next)
-             (goto-char (or (denote-tree--nested-value alist
-                                            (get-text-property
-                                             (point) 'denote-tree--identifier)
-                                            :parent :pos)
-                            1)))
+             (goto-char (or (denote-tree--nested-value alist id :parent :pos)
+                            1))
+             (setq id (get-text-property (point) 'denote-tree--identifier)))
            (if (> now-pos (or next 1))
                (1- (point-max))
-             (goto-char (denote-tree--nested-value
-                         alist
-                         (get-text-property
-                          (point) 'denote-tree--identifier)
-                         :next :pos))
+             (goto-char (denote-tree--nested-value alist id :next :pos))
              (forward-line -1)
              (line-end-position)))))
       (t (error "Denote tree buffer %s is malformed" (buffer-name)))))))
