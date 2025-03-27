@@ -151,4 +151,7 @@ contributions.
 - [X] ability to edit the front matter at point;
 - [X] edit front matter with widgets (as optional denote-tree-edit);
 - [X] multiple denote-tree buffers;
-- [ ] un/link new notes to a node.
+- [ ] notes interaction,
+  - [ ] link two notes;
+  - [ ] unlink a note.
+  - [ ] create a note linked to other note;
