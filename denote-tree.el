@@ -190,6 +190,7 @@ position of cyclical parent node.")
     (keymap-set map "b" #'denote-tree-parent-node)
     (keymap-set map "g" #'denote-tree-redraw)
     (keymap-set map "e" #'denote-tree-edit-node)
+    (keymap-set map "l" #'denote-tree-link-nodes)
     map)
   "Keymap for `denote-tree-mode'.")
 
@@ -364,6 +365,13 @@ What is editable is dependent on `denote-prompts'."
         (setq denote-tree--tree-alist
               (denote-tree--redraw-node
                buffer denote-tree--tree-alist))))))
+
+(defun denote-tree-link-nodes (from-mark to-point)
+  "Link node at FROM-MARK to TO-POINT.
+
+Set a link from FROM-MARK in note at TO-POINT according to
+`denote-tree-insert-link-function'."
+  (interactive (list (mark) (point))))
 
 
 ;;;; Utilities for node editing
