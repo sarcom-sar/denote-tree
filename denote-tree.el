@@ -153,6 +153,15 @@ User can extend it in format of (KEY TYPE VALUE)."
     :key-type symbol
     :value-type (plist :key-type symbol :value-type string)))
 
+(defcustom denote-tree-insert-link-function #'denote-tree-insert-at-eof
+  "Return the point at which the link is to be inserted.
+
+The function takes no arguments and returns a pair of intergers.  The
+range determines a buffer region in which text will be replace with a
+link.  If the pair is the same integer, then perform the insertion in
+place."
+  :type 'function)
+
 
 ;;;; Vars and consts
 
@@ -956,6 +965,23 @@ Add ELEMENT to `denote-tree--visited-buffers' to delete it after
   "Default function returning STR of TYPE with properties.
 One props returned has to be denote-tree--type."
   (propertize str 'denote-tree--type type))
+
+(defun denote-tree-insert-at-eof ()
+  "Return a pair at the end of the file."
+  (cons (point-max) (point-max)))
+
+(defun denote-tree-insert-after-front-matter ()
+  "Return the position after the front-matter."
+  (let ((front-matter
+         (symbol-value
+          (plist-get (cdr (denote-tree--find-filetype (current-buffer)))
+                     :front-matter))))
+    (save-excursion
+      (goto-char (point-min))
+      (forward-line
+       (length (string-split front-matter "\n")))
+      (open-line 2)
+      (cons (point) (point)))))
 
 (defun denote-tree--get-node-pos (&optional object limit)
   "Get node position in line."
