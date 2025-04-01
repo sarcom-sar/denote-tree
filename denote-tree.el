@@ -972,15 +972,14 @@ One props returned has to be denote-tree--type."
 
 (defun denote-tree-insert-after-front-matter ()
   "Return the position after the front-matter."
-  (let ((front-matter
-         (symbol-value
-          (plist-get (cdr (denote-tree--find-filetype (current-buffer)))
-                     :front-matter))))
+  (when-let* ((front-matter
+               (symbol-value
+                (plist-get (cdr (denote-tree--find-filetype (current-buffer)))
+                           :front-matter))))
     (save-excursion
       (goto-char (point-min))
       (forward-line
        (length (string-split front-matter "\n")))
-      (open-line 2)
       (cons (point) (point)))))
 
 (defun denote-tree--get-node-pos (&optional object limit)
