@@ -1211,5 +1211,34 @@ and it's value in plist is a string."
    (equal (denote-tree--find-orphans '(a) '((a baz) (a5 foo) (b bar)))
           '((a5 foo)))))
 
+(ert-deftest denote-tree-test-insert-at-eof ()
+  "Tests for `denote-tree-insert-at-eof'."
+  (with-temp-buffer
+    (insert "\n")
+    (should
+     (equal (denote-tree-insert-at-eof)
+            '(2 . 2))))
+  (with-temp-buffer
+    (should
+     (equal (denote-tree-insert-at-eof)
+            '(1 . 1)))))
+
+(ert-deftest denote-tree-test-insert-after-front-matter ()
+  "Tests for `denote-tree-insert-after-front-matter'."
+  (with-temp-buffer
+    (insert "\n")
+    (should-not (denote-tree-insert-after-front-matter)))
+  (with-temp-buffer
+    (let ((proper-len (+ 2 (length denote-org-front-matter))))
+      (insert denote-org-front-matter
+              "\n"
+              "FOO BAR BAZ\n")
+      (should
+       (equal (denote-tree-insert-after-front-matter)
+              (cons proper-len proper-len)))
+      (should
+       (equal (char-after 86)
+              ?F)))))
+
 (provide 'denote-tree-test)
 ;;; denote-tree-test.el ends here
