@@ -154,7 +154,7 @@ User can extend it in format of (KEY TYPE VALUE)."
     :value-type (plist :key-type symbol :value-type string)))
 
 (defcustom denote-tree-insert-link-function #'denote-tree-insert-at-eof
-  "Return the point at which the link is to be inserted.
+  "Return the region at which the link is to be inserted.
 
 The function takes no arguments and returns a pair of intergers.  The
 range determines a buffer region in which text will be replace with a
@@ -968,7 +968,7 @@ One props returned has to be denote-tree--type."
 
 (defun denote-tree-insert-at-eof ()
   "Return a pair at the end of the file."
-  (cons (point-max) (point-max)))
+  (list (point-max) (point-max)))
 
 (defun denote-tree-insert-after-front-matter ()
   "Return the position after the front-matter."
@@ -980,7 +980,7 @@ One props returned has to be denote-tree--type."
       (goto-char (point-min))
       (forward-line
        (length (string-split front-matter "\n")))
-      (cons (point) (point)))))
+      (list (point) (point)))))
 
 (defun denote-tree--get-node-pos (&optional object limit)
   "Get node position in line."

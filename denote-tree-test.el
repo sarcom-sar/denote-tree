@@ -1217,11 +1217,11 @@ and it's value in plist is a string."
     (insert "\n")
     (should
      (equal (denote-tree-insert-at-eof)
-            '(2 . 2))))
+            '(2 2))))
   (with-temp-buffer
     (should
      (equal (denote-tree-insert-at-eof)
-            '(1 . 1)))))
+            '(1 1)))))
 
 (ert-deftest denote-tree-test-insert-after-front-matter ()
   "Tests for `denote-tree-insert-after-front-matter'."
@@ -1235,7 +1235,7 @@ and it's value in plist is a string."
               "FOO BAR BAZ\n")
       (should
        (equal (denote-tree-insert-after-front-matter)
-              (cons proper-len proper-len)))
+              (list proper-len proper-len)))
       (should
        (equal (char-after 86)
               ?F)))))
