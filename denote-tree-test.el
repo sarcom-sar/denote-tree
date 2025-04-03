@@ -1229,20 +1229,21 @@ and it's value in plist is a string."
 
 (ert-deftest denote-tree-test-insert-after-front-matter ()
   "Tests for `denote-tree-insert-after-front-matter'."
-  (with-temp-buffer
-    (insert "\n")
-    (should-not (denote-tree-insert-after-front-matter)))
-  (with-temp-buffer
-    (let ((proper-len (+ 2 (length denote-org-front-matter))))
-      (insert denote-org-front-matter
-              "\n"
-              "FOO BAR BAZ\n")
-      (should
-       (equal (denote-tree-insert-after-front-matter)
-              (list proper-len proper-len)))
-      (should
-       (equal (char-after 86)
-              ?F)))))
+  (let ((denote-tree--extended-filetype denote-tree-test-mock--extended-filetype))
+    (with-temp-buffer
+      (insert "\n")
+      (should-not (denote-tree-insert-after-front-matter)))
+    (with-temp-buffer
+      (let ((proper-len (+ 2 (length denote-org-front-matter))))
+        (insert denote-org-front-matter
+                "\n"
+                "FOO BAR BAZ\n")
+        (should
+         (equal (denote-tree-insert-after-front-matter)
+                (list proper-len proper-len)))
+        (should
+         (equal (char-after 86)
+                ?F))))))
 
 (provide 'denote-tree-test)
 ;;; denote-tree-test.el ends here
