@@ -5,6 +5,10 @@
 
 ;;; Code:
 
+(defvar denote-tree-test-mock--extended-filetype
+  (denote-tree--build-extended-filetype
+   denote-file-types denote-tree-extend-filetype-with))
+
 (defvar denote-tree-test-mock--denote-file-types-1
   '((org
      :title-key-regexp "org-title:"
