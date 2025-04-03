@@ -378,9 +378,28 @@ What is editable is dependent on `denote-prompts'."
 (defun denote-tree-link-nodes (from-mark to-point)
   "Link node at FROM-MARK to TO-POINT.
 
-Set a link from FROM-MARK in note at TO-POINT according to
-`denote-tree-insert-link-function'."
-  (interactive (list (mark) (point))))
+If `denote-tree-insert-link-function' is set, then perform this based on
+function's return value.  Otherwise create a new buffer and let the user
+decide where in TO-POINT node the link to FROM-MARK should be set."
+  (interactive (list (mark) (point)))
+  (when-let* ((node-from (denote-get-path-by-id
+                          (denote-tree--get-prop 'button-data from-mark)))
+              (node-to (denote-get-path-by-id
+                        (denote-tree--get-prop 'button-data to-point))))
+    (cond
+     (denote-tree-insert-link-function
+      (with-current-buffer (find-file-noselect node-to)
+        (seq-let (pos mark) (funcall denote-tree-insert-link-function)
+          (let ((boundaries-of-link ))
+            (goto-char (car pos))
+            (denote-link
+             node-from
+             (denote-tree--find-filetype (current-buffer))
+             (if (= pos mark)
+                 (funcall denote-link-description-format node-from)
+               (buffer-substring node-from node-to)))))))
+     (t
+      (ignore)))))
 
 
 ;;;; Utilities for node editing
