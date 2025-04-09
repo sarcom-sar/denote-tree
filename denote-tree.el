@@ -63,6 +63,7 @@
 (require 'let-alist)
 (require 'cl-lib)
 
+(declare-function denote-tree-link--helper "denote-tree-link")
 
 
 ;;;; Faces and Custom
@@ -152,15 +153,6 @@ User can extend it in format of (KEY TYPE VALUE)."
   '(alist
     :key-type symbol
     :value-type (plist :key-type symbol :value-type string)))
-
-(defcustom denote-tree-insert-link-function #'denote-tree-insert-at-eof
-  "Return the region at which the link is to be inserted.
-
-The function takes no arguments and returns a pair of intergers.  The
-range determines a buffer region in which text will be replace with a
-link.  If the pair is the same integer, then perform the insertion in
-place."
-  :type 'function)
 
 
 ;;;; Vars and consts
@@ -379,27 +371,14 @@ What is editable is dependent on `denote-prompts'."
   "Link node at FROM-MARK to TO-POINT.
 
 If `denote-tree-insert-link-function' is set, then perform this based on
-function's return value.  Otherwise create a new buffer and let the user
-decide where in TO-POINT node the link to FROM-MARK should be set."
+function's return value.  Otherwise open a TO-POINT file and let the
+user decide where in TO-POINT node the link to FROM-MARK should be set."
   (interactive (list (mark) (point)))
   (when-let* ((node-from (denote-get-path-by-id
                           (denote-tree--get-prop 'button-data from-mark)))
               (node-to (denote-get-path-by-id
                         (denote-tree--get-prop 'button-data to-point))))
-    (cond
-     (denote-tree-insert-link-function
-      (with-current-buffer (find-file-noselect node-to)
-        (seq-let (pos mark) (funcall denote-tree-insert-link-function)
-          (let ((boundaries-of-link ))
-            (goto-char (car pos))
-            (denote-link
-             node-from
-             (denote-tree--find-filetype (current-buffer))
-             (if (= pos mark)
-                 (funcall denote-link-description-format node-from)
-               (buffer-substring node-from node-to)))))))
-     (t
-      (ignore)))))
+    (denote-tree-link--helper node-from node-to)))
 
 
 ;;;; Utilities for node editing
@@ -984,22 +963,6 @@ Add ELEMENT to `denote-tree--visited-buffers' to delete it after
   "Default function returning STR of TYPE with properties.
 One props returned has to be denote-tree--type."
   (propertize str 'denote-tree--type type))
-
-(defun denote-tree-insert-at-eof ()
-  "Return a pair at the end of the file."
-  (list (point-max) (point-max)))
-
-(defun denote-tree-insert-after-front-matter ()
-  "Return the position after the front-matter."
-  (when-let* ((front-matter
-               (symbol-value
-                (plist-get (cdr (denote-tree--find-filetype (current-buffer)))
-                           :front-matter))))
-    (save-excursion
-      (goto-char (point-min))
-      (forward-line
-       (length (string-split front-matter "\n")))
-      (list (point) (point)))))
 
 (defun denote-tree--get-node-pos (&optional object limit)
   "Get node position in line."
