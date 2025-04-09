@@ -43,6 +43,19 @@ for linking notes.")
   "Insert a link between point and mark in the note buffer.
 
 Restore window configuration.")
+(defun denote-tree-link--do-the-link (pos mark node-from)
+  (goto-char (car pos))
+  (denote-link
+   node-from
+   (denote-tree--find-filetype (current-buffer))
+   (if (eql pos mark)
+       (if (boundp 'denote-link-description-format)
+           ;; denote > 3.1.0
+           (denote-get-link-description node-from)
+         ;; denote <= 3.1.0
+         (funcall denote-link-description-function node-from))
+     (prog1 (buffer-substring pos mark)
+       (delete-region pos mark)))))
 
 (defun denote-tree-link-kill ()
   "Abort the linking, restore window configuration.")
