@@ -63,7 +63,6 @@
 (require 'let-alist)
 (require 'cl-lib)
 
-(declare-function #'denote-tree-edit-mode "./denote-tree-edit.el")
 
 
 ;;;; Faces and Custom

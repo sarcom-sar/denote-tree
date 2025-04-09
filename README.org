@@ -126,8 +126,7 @@ be done by the user manually.
   it.  With =C-u= draw current node in a new window.  With =C-u C-u=, redraw the
   entire tree."
 - =denote-tree-edit-node= ()
-  Edit current note.  If =denote-tree-edit= is loaded, do it fancy
-  (experimental) style, otherwise default to denote's =denote-rename-file=.
+  Edit current note via denote's =denote-rename-file=.
 - =denote-tree-enter-node= (&optional button)
   Enter node at point in other window.  BUTTON is pased as node's ID.
 
@@ -149,7 +148,7 @@ contributions.
     - [X] works while unlinking nodes;
     - [X] move unlinked node to one of cyclical nodes who is still linked.
 - [X] ability to edit the front matter at point;
-- [X] edit front matter with widgets (as optional denote-tree-edit);
+- [ ] edit front matter with widgets;
 - [X] multiple denote-tree buffers;
 - [ ] notes interaction,
   - [ ] link two notes;
