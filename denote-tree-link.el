@@ -61,23 +61,16 @@ Restore window configuration.")
   "Abort the linking, restore window configuration.")
 
 (defun denote-tree-link--helper (node-from node-to)
+  (setq denote-tree-link--plist
+        `((:node-from ,node-from)
+          (:node-to ,node-to)
+          (:window-config ,(current-window-configuration))))
   (cond
    (denote-tree-link-insert-function
     (with-current-buffer (find-file-noselect node-to)
       (seq-let (pos mark) (funcall denote-tree-link-insert-function)
-        (let ((boundaries-of-link '()))
-          (goto-char (car pos))
-          (denote-link
-           node-from
-           (denote-tree--find-filetype (current-buffer))
-           (if (eql pos mark)
-               (if (boundp 'denote-link-description-format)
-                   ;; denote > 3.1.0
-                   (denote-get-link-description node-from)
-                 ;; denote <= 3.1.0
-                 (funcall denote-link-description-function node-from))
-             (prog1 (buffer-substring pos mark)
-               (delete-region pos mark))))))))
+        (denote-tree-link--do-the-link
+         pos mark (plist-get :node-from denote-tree-link--plist)))))
    (t
     (ignore))))
 
