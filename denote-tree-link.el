@@ -63,7 +63,9 @@ Restore window configuration."
        (delete-region pos mark)))))
 
 (defun denote-tree-link-kill ()
-  "Abort the linking, restore window configuration.")
+  "Abort the linking, restore window configuration."
+  (interactive)
+  (set-window-configuration (plist-get :window-config denote-tree-link--plist)))
 
 (defun denote-tree-link--helper (node-from node-to)
   (setq denote-tree-link--plist
