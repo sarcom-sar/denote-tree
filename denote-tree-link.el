@@ -58,7 +58,8 @@ Restore window configuration.")
                    (denote-get-link-description node-from)
                  ;; denote <= 3.1.0
                  (funcall denote-link-description-function node-from))
-             (buffer-substring node-from node-to)))))))
+             (prog1 (buffer-substring pos mark)
+               (delete-region pos mark))))))))
    (t
     (ignore))))
 
