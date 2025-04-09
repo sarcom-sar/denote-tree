@@ -42,7 +42,12 @@ for linking notes.")
 (defun denote-tree-link-finalize ()
   "Insert a link between point and mark in the note buffer.
 
-Restore window configuration.")
+Restore window configuration."
+  (interactive)
+  (denote-tree-link--do-the-link
+   (point) (or (mark) (point)) (plist-get :node-from denote-tree-link--plist))
+  (set-window-configuration (plist-get :window-config denote-tree-link--plist)))
+
 (defun denote-tree-link--do-the-link (pos mark node-from)
   (goto-char (car pos))
   (denote-link
