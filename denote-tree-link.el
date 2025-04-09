@@ -46,6 +46,7 @@ Restore window configuration."
   (interactive)
   (denote-tree-link--do-the-link
    (point) (or (mark) (point)) (plist-get :node-from denote-tree-link--plist))
+  (denote-tree-link -1)
   (set-window-configuration (plist-get :window-config denote-tree-link--plist)))
 
 (defun denote-tree-link--do-the-link (pos mark node-from)
@@ -65,6 +66,7 @@ Restore window configuration."
 (defun denote-tree-link-kill ()
   "Abort the linking, restore window configuration."
   (interactive)
+  (denote-tree-link -1)
   (set-window-configuration (plist-get :window-config denote-tree-link--plist)))
 
 (defun denote-tree-link--helper (node-from node-to)
@@ -79,7 +81,8 @@ Restore window configuration."
         (denote-tree-link--do-the-link
          pos mark (plist-get :node-from denote-tree-link--plist)))))
    (t
-    (ignore))))
+    (pop-to-buffer (find-file (plist-get :node-to denote-tree-link--plist)))
+    (denote-tree-link 1))))
 
 (defun denote-tree-link-insert-at-eof ()
   "Return a pair at the end of the file."
