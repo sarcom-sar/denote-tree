@@ -16,6 +16,11 @@ place."
   :group 'denote-tree
   :type 'function)
 
+(defvar denote-tree-link--plist '()
+  "Plist of elements necessary while linking.
+
+It should have three values :node-from, :node-to and :window-config.")
+
 (defvar denote-tree-link-mode-map
   (let ((map (make-sparse-keymap)))
     (keymap-set map "C-c C-c" #'denote-tree-link-finalize)
