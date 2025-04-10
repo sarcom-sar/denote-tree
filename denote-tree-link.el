@@ -70,19 +70,21 @@ Restore window configuration."
   (set-window-configuration (plist-get :window-config denote-tree-link--plist)))
 
 (defun denote-tree-link--helper (node-from node-to)
-  (setq denote-tree-link--plist
-        `((:node-from ,node-from)
-          (:node-to ,node-to)
-          (:window-config ,(current-window-configuration))))
-  (cond
-   (denote-tree-link-insert-function
-    (with-current-buffer (find-file-noselect node-to)
-      (seq-let (pos mark) (funcall denote-tree-link-insert-function)
-        (denote-tree-link--do-the-link
-         pos mark (plist-get :node-from denote-tree-link--plist)))))
-   (t
-    (pop-to-buffer (find-file (plist-get :node-to denote-tree-link--plist)))
-    (denote-tree-link 1))))
+  (let ((buff (find-file-noselect node-to)))
+    (with-current-buffer buff
+        (setq-local denote-tree-link--plist
+                    `(:node-from ,node-from
+                      :node-to ,node-to
+                      :window-config ,(current-window-configuration))))
+    (cond
+     (denote-tree-link-insert-function
+      (with-current-buffer buff
+          (seq-let (pos mark) (funcall denote-tree-link-insert-function)
+            (denote-tree-link--do-the-link
+             pos mark (plist-get :node-from denote-tree-link--plist)))))
+     (t
+      (pop-to-buffer (find-file (plist-get :node-to denote-tree-link--plist)))
+      (denote-tree-link 1)))))
 
 (defun denote-tree-link-insert-at-eof ()
   "Return a pair at the end of the file."
