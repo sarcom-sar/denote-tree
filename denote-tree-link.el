@@ -81,9 +81,9 @@ Restore window configuration."
       (with-current-buffer buff
           (seq-let (pos mark) (funcall denote-tree-link-insert-function)
             (denote-tree-link--do-the-link
-             pos mark (plist-get :node-from denote-tree-link--plist)))))
+             pos mark node-from))))
      (t
-      (pop-to-buffer (find-file (plist-get :node-to denote-tree-link--plist)))
+      (pop-to-buffer (find-file node-to))
       (denote-tree-link 1)))))
 
 (defun denote-tree-link-insert-at-eof ()
