@@ -1245,5 +1245,31 @@ and it's value in plist is a string."
          (equal (char-after 86)
                 ?F))))))
 
+(ert-deftest denote-tree-test-link-node ()
+  "Tests for `denote-tree-link-nodes'."
+  (with-temp-buffer
+    (denote-tree--draw-node-list
+     (denote-tree-test-mock-draw-tree '(("a") (b) (c)))
+     'a)
+    (cl-letf (((symbol-function 'denote-tree-link--helper)
+               (lambda (x y) (list x y)))
+              ((symbol-function 'denote-get-path-by-id)
+               (lambda (x)
+                 x)))
+      (should
+       (equal (denote-tree-link-nodes 1 (1- (point-max)))
+              '("a" "c")))))
+  (with-temp-buffer
+    (denote-tree--draw-node-list
+     (denote-tree-test-mock-draw-tree '(("a") (b) (c)))
+     'a)
+    (cl-letf (((symbol-function 'denote-tree-link--helper)
+               (lambda (x y) (list x y)))
+              ((symbol-function 'denote-get-path-by-id)
+               (lambda (x)
+                 x)))
+      ;; you are at trailing newline
+      (should-not (denote-tree-link-nodes 1 (point-max))))))
+
 (provide 'denote-tree-test)
 ;;; denote-tree-test.el ends here
