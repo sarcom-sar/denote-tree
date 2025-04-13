@@ -67,6 +67,32 @@
          (point-max) (point-max) from-node-file)
         (goto-char (point-min))
         (should (search-forward id nil t))))
+    ;; now select a range
+    (ert-with-temp-file from-node-file
+      :buffer from-node-buffer
+      :suffix ".org"
+      :prefix (concat id "--")
+      (insert "#+title: from-node-buffer\n"
+              "#+date:  2137-12-14\n"
+              "\n"
+              "Bye!\n")
+      (ert-with-temp-file to-node-file
+        :buffer to-node-buffer
+        :suffix ".org"
+        (insert "#+title: to-node-buffer\n"
+                "#+date:  2137-12-15\n"
+                "\n"
+                "Hello there!\n")
+        (goto-char (point-min))
+        (search-forward "Hello")
+        (denote-tree-link--do-the-link
+         (line-beginning-position) (point) from-node-file)
+        (progn
+          (goto-char (point-min))
+          (should (search-forward id nil t)))
+        (progn
+          (goto-char (point-min))
+          (should (search-forward "Hello" nil t)))))
     ;; it tries to link to itself
     ;; yes, -link--do-the-link should not care about it
     (ert-with-temp-file from-node-file
