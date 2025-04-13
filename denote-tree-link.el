@@ -49,17 +49,17 @@ Restore window configuration."
   (denote-tree-link -1)
   (set-window-configuration (plist-get :window-config denote-tree-link--plist)))
 
-(defun denote-tree-link--do-the-link (pos mark node-from)
+(defun denote-tree-link--do-the-link (pos mark node-from-file)
   (goto-char (car pos))
   (denote-link
-   node-from
+   node-from-file
    (denote-tree--find-filetype (current-buffer))
    (if (eql pos mark)
        (if (boundp 'denote-link-description-format)
            ;; denote > 3.1.0
-           (denote-get-link-description node-from)
+           (denote-get-link-description node-from-file)
          ;; denote <= 3.1.0
-         (funcall denote-link-description-function node-from))
+         (funcall denote-link-description-function node-from-file))
      (prog1 (buffer-substring pos mark)
        (delete-region pos mark)))))
 
