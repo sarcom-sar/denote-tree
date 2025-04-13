@@ -53,7 +53,7 @@ Restore window configuration."
   (goto-char pos)
   (denote-link
    node-from-file
-   (denote-tree--find-filetype (current-buffer))
+   (car (save-excursion (denote-tree--find-filetype (current-buffer))))
    (if (eql pos mark)
        (if (boundp 'denote-link-description-format)
            ;; denote > 3.1.0
