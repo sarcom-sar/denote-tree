@@ -2,7 +2,9 @@
 
 (require 'denote)
 (require 'denote-tree-link)
-(require 'erc)
+(require 'ert)
+(require 'ert-x)
+(require 'calendar)
 
 ;;; Code
 
@@ -39,6 +41,46 @@
         (should
          (equal (char-after proper-len)
                 ?F))))))
+
+(ert-deftest denote-tree-link-test--do-the-link ()
+  "Tests for `denote-tree-link--do-the-link'."
+  (let ((denote-tree--extended-filetype
+         denote-tree-link-test-mock--extended-filetype)
+        (id (denote-get-identifier (calendar-current-date))))
+    ;; normal linking of form-node to to-node
+    (ert-with-temp-file from-node-file
+      :buffer from-node-buffer
+      :suffix ".org"
+      :prefix (concat id "--")
+      (insert "#+title: from-node-buffer\n"
+              "#+date:  2137-12-14\n"
+              "\n"
+              "Bye!\n")
+      (ert-with-temp-file to-node-file
+        :buffer to-node-buffer
+        :suffix ".org"
+        (insert "#+title: to-node-buffer\n"
+                "#+date:  2137-12-15\n"
+                "\n"
+                "Hello there!\n")
+        (denote-tree-link--do-the-link
+         (point-max) (point-max) from-node-file)
+        (goto-char (point-min))
+        (should (search-forward id nil t))))
+    ;; it tries to link to itself
+    ;; yes, -link--do-the-link should not care about it
+    (ert-with-temp-file from-node-file
+      :buffer from-node-buffer
+      :suffix ".org"
+      :prefix (concat id "--")
+      (insert "#+title: from-node-buffer\n"
+              "#+date:  2137-12-14\n"
+              "\n"
+              "Bye!\n")
+      (denote-tree-link--do-the-link
+       (point-max) (point-max) from-node-file)
+      (goto-char (point-min))
+      (should (search-forward id nil t)))))
 
 (provide 'denote-tree-link-test)
 ;;; denote-tree-link ends here
