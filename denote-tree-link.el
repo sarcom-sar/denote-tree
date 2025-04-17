@@ -50,6 +50,9 @@ Restore window configuration."
   (set-window-configuration (plist-get :window-config denote-tree-link--plist)))
 
 (defun denote-tree-link--do-the-link (pos mark node-from-file)
+  "Link NODE-FROM-FILE in current buffer at region from POS to MARK.
+
+If POS and MARK are the same, or MARK is not set, do it at POS."
   (or mark (setq mark pos))
   (goto-char pos)
   (denote-link
@@ -71,6 +74,12 @@ Restore window configuration."
   (set-window-configuration (plist-get :window-config denote-tree-link--plist)))
 
 (defun denote-tree-link--helper (node-from node-to)
+  "Link note NODE-FROM to note NODE-TO.
+
+If `denote-tree-link-insert-function' is set, do it automatically.
+Otherwise prompt the user for manual interaction.  This function sets
+buffer-local `denote-tree-link--plist' in order to restore user window
+configuration."
   (let ((buff (find-file-noselect node-to)))
     (with-current-buffer buff
       (setq-local denote-tree-link--plist
