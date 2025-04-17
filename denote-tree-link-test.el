@@ -37,7 +37,7 @@
          (equal (denote-tree-link-insert-after-front-matter)
                 (list proper-len proper-len)))
         (should
-         (equal (char-after 86)
+         (equal (char-after proper-len)
                 ?F))))))
 
 (provide 'denote-tree-link-test)
