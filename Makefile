@@ -34,7 +34,7 @@ lisp: %.elc
 
 .PHONY: test
 test:
-	${EMACS} -Q -batch --eval ${INIT-PACKAGES} -L . ${LOAD-PACKAGE-TEST} -f ert-run-tests-batch-and-exit
+	${EMACS} -Q -batch --eval ${INIT-PACKAGES} -L . ${LOAD-PACKAGE-TEST} -f ert-run-tests-batch-and-exit 2>&1 | grep -v "^Building denote-tree buffer" | grep -v "^Warning"
 
 .PHONY: clean
 clean:
