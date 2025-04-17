@@ -131,11 +131,6 @@ Denote's default front matter elements:
 When nil, always move to \"real\" parent of a node."
   :type 'boolean)
 
-(defcustom denote-tree-fancy-edit nil
-  "If t, use fancy editing with widgets (experimental).
-If nil fall back to the thin `denote-rename-file' wrapper."
-  :type 'boolean)
-
 (defcustom denote-tree-extend-filetype-with
   '((:identifier-key-regexp
      org "^#\\+identifier\\s-*:"
@@ -358,24 +353,18 @@ omitted, nil or zero, move once."
 (defun denote-tree-edit-node ()
   "Edit node's front matter.
 
-What is editable is dependent on `denote-prompts'.  If
-`denote-tree-edit-mode' is loaded and `denote-tree-fancy-edit' is set to
-t, use it's UI."
+What is editable is dependent on `denote-prompts'."
   (interactive)
-  (if denote-tree-fancy-edit
-      (progn
-        (require 'denote-tree-edit)
-        (denote-tree-edit-mode))
-    (let* ((identifier (denote-tree--get-prop 'button-data))
-           (buffer (denote-tree--edit-node (denote-get-path-by-id identifier))))
-      (save-excursion
-        (goto-char (point-min))
-        ;; edit all occurences of that buffer
-        (while (text-property-search-forward
-                'button-data identifier t)
-          (setq denote-tree--tree-alist
-                (denote-tree--redraw-node
-                 buffer denote-tree--tree-alist)))))))
+  (let* ((identifier (denote-tree--get-prop 'button-data))
+         (buffer (denote-tree--edit-node (denote-get-path-by-id identifier))))
+    (save-excursion
+      (goto-char (point-min))
+      ;; edit all occurences of that buffer
+      (while (text-property-search-forward
+              'button-data identifier t)
+        (setq denote-tree--tree-alist
+              (denote-tree--redraw-node
+               buffer denote-tree--tree-alist))))))
 
 
 ;;;; Utilities for node editing
