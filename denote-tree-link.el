@@ -73,16 +73,16 @@ Restore window configuration."
 (defun denote-tree-link--helper (node-from node-to)
   (let ((buff (find-file-noselect node-to)))
     (with-current-buffer buff
-        (setq-local denote-tree-link--plist
-                    `(:node-from ,node-from
-                      :node-to ,node-to
-                      :window-config ,(current-window-configuration))))
+      (setq-local denote-tree-link--plist
+                  `(:node-from ,node-from
+                               :node-to ,node-to
+                               :window-config ,(current-window-configuration))))
     (cond
      (denote-tree-link-insert-function
       (with-current-buffer buff
-          (seq-let (pos mark) (funcall denote-tree-link-insert-function)
-            (denote-tree-link--do-the-link
-             pos mark node-from))))
+        (seq-let (pos mark) (funcall denote-tree-link-insert-function)
+          (denote-tree-link--do-the-link
+           pos mark node-from))))
      (t
       (pop-to-buffer (find-file node-to))
       (denote-tree-link 1)))))
