@@ -93,7 +93,7 @@ configuration."
           (denote-tree-link--do-the-link
            pos mark node-from))))
      (t
-      (pop-to-buffer (find-file node-to))
+      (pop-to-buffer buff)
       (denote-tree-link 1)))))
 
 (defun denote-tree-link-insert-at-eof ()
