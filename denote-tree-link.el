@@ -50,6 +50,7 @@ Restore window configuration."
   (set-window-configuration (plist-get :window-config denote-tree-link--plist)))
 
 (defun denote-tree-link--do-the-link (pos mark node-from-file)
+  (or mark (setq mark pos))
   (goto-char pos)
   (denote-link
    node-from-file
