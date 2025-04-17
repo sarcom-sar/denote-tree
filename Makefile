@@ -1,7 +1,7 @@
 EMACS              ?= emacs
 DEPS               ?= ert denote cl-lib
-PACKAGE-FILES      := denote-tree.el denote-tree-edit.el
-LOAD-PACKAGE-TEST  := -l denote-tree-test.el -l denote-tree-edit-test.el
+PACKAGE-FILES      := denote-tree.el
+LOAD-PACKAGE-TEST  := -l denote-tree-test.el
 RM                 := rm -f
 
 INIT-PACKAGES="(progn \
