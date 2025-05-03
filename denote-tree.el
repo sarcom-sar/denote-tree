@@ -424,7 +424,6 @@ properties."
 
 (defun denote-tree--draw-tree (buffer)
   "Draw and propertize a tree in current buffer starting with BUFFER."
-  (denote-tree--open-link-maybe buffer)
   (setq denote-tree--tree-alist
         (denote-tree--fix-children-in-alist
          (denote-tree--walk-links-iteratively
@@ -599,6 +598,7 @@ Argument INDENT - next indent
   (let* ((node (car x))
          (true-node (cdr x))
          (indent (denote-tree--calculate-indent indent lastp)))
+    (denote-tree--open-link-maybe (symbol-name true-node))
     (list
      node
      :next-indent indent
