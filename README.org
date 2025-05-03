@@ -86,11 +86,17 @@ be done by the user manually.
   =denote-tree-node-description=.
 - =denote-tree-buffer-prefix=, every denote tree is built by a custom custom
   prefix, customizable here, and root node of a tree.
-- =denote-tree-fancy-edit=, use fancy propertized edit over thin wrapper around
-  =denote-rename-file=. *EXPERIMENTAL*
 - =denote-tree-extend-filetype-with=, extend what kinds of regexps =denote-tree=
   is aware of in your front matter.  It also provides backwards compatibility
   with versions od =denote= older than commit 3517ba2.
+- =denote-tree-link-insert-function=, return the region at which the link is to
+  be inserted.  The function takes no arguments and returns a pair of intergers.
+  The range determines a buffer region in which text will be replace with a
+  link.  If the pair is the same integer, then perform the insertion in place.
+  - =denote-tree-insert-at-eof=, return a pair of locations at the end of the
+    file.
+  - =denote-tree-insert-after-front-matter=, return a pair of locations after
+    the front-matter.
 
 **** Faces
 
@@ -129,6 +135,11 @@ be done by the user manually.
   Edit current note via denote's =denote-rename-file=.
 - =denote-tree-enter-node= (&optional button)
   Enter node at point in other window.  BUTTON is pased as node's ID.
+- =denote-tree-link-nodes= (from-mark to-point)
+  Link node at FROM-MARK to TO-POINT.  If =denote-tree-insert-link-function= is
+  set, then perform this based on function's return value.  Otherwise open a
+  TO-POINT file and let the user decide where in TO-POINT node the link to
+  FROM-MARK should be set."
 
 ** Contributing
 
@@ -150,7 +161,7 @@ contributions.
 - [X] ability to edit the front matter at point;
 - [ ] edit front matter with widgets;
 - [X] multiple denote-tree buffers;
-- [ ] notes interaction,
-  - [ ] link two notes;
+- [-] notes interaction,
+  - [X] link two notes;
   - [ ] unlink a note.
   - [ ] create a note linked to other note;
