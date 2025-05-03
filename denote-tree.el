@@ -192,6 +192,7 @@ position of cyclical parent node.")
     (keymap-set map "g" #'denote-tree-redraw)
     (keymap-set map "e" #'denote-tree-edit-node)
     (keymap-set map "i" #'denote-tree-link-nodes)
+    (keymap-set map "u" #'denote-tree-unlink-node)
     map)
   "Keymap for `denote-tree-mode'.")
 
@@ -382,6 +383,10 @@ user decide where in TO-POINT node the link to FROM-MARK should be set."
       (user-error "Trying to link a file to itself"))
     (denote-tree-link--helper node-from node-to)
     (denote-tree-redraw)))
+
+(defun denote-tree-unlink-node ()
+  "Unlink the current node from it's parrent."
+  nil)
 
 
 ;;;; Utilities for node editing
