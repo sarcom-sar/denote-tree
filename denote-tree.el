@@ -191,7 +191,7 @@ position of cyclical parent node.")
     (keymap-set map "b" #'denote-tree-parent-node)
     (keymap-set map "g" #'denote-tree-redraw)
     (keymap-set map "e" #'denote-tree-edit-node)
-    (keymap-set map "l" #'denote-tree-link-nodes)
+    (keymap-set map "i" #'denote-tree-link-nodes)
     map)
   "Keymap for `denote-tree-mode'.")
 
