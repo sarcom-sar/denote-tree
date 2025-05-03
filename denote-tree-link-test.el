@@ -110,40 +110,43 @@
 
 (ert-deftest denote-tree-link-test--helper ()
   "Tests for `denote-tree-link--helper'."
-  (let ((denote-tree--extended-filetype
-         denote-tree-link-test-mock--extended-filetype)
-        (denote-tree-link-insert-function nil)
-        (id (denote-get-identifier (calendar-current-date))))
-    ;; normal linking of form-node to to-node
-    (ert-with-temp-file from-node-file
-      :buffer from-node-buffer
-      :suffix ".org"
-      :prefix (concat id "--")
-      (insert "#+title: from-node-buffer\n"
-              "#+date:  2137-12-14\n"
-              "\n"
-              "Bye!\n")
-      (ert-with-temp-file to-node-file
-        :buffer to-node-buffer
+  (cl-letf (((symbol-function 'write-file)
+             (lambda (_ _)
+               nil)))
+    (let ((denote-tree--extended-filetype
+           denote-tree-link-test-mock--extended-filetype)
+          (denote-tree-link-insert-function nil)
+          (id (denote-get-identifier (calendar-current-date))))
+      ;; normal linking of form-node to to-node
+      (ert-with-temp-file from-node-file
+        :buffer from-node-buffer
         :suffix ".org"
-        (insert "#+title: to-node-buffer\n"
-                "#+date:  2137-12-15\n"
+        :prefix (concat id "--")
+        (insert "#+title: from-node-buffer\n"
+                "#+date:  2137-12-14\n"
                 "\n"
-                "Hello there!\n")
-        (cl-letf (((symbol-function 'find-file-noselect)
-                   (lambda (x)
-                     (get-buffer to-node-buffer))))
-          (denote-tree-link--helper from-node-file to-node-file))
-        (with-current-buffer to-node-buffer
-          (should denote-tree-link)
-          (should denote-tree-link--plist)
-          (should
-           (equal (plist-get denote-tree-link--plist :node-from)
-                  from-node-file))
-          (should
-           (equal (plist-get denote-tree-link--plist :node-to)
-                  to-node-file))
-          (should (plist-get denote-tree-link--plist :window-config)))))))
+                "Bye!\n")
+        (ert-with-temp-file to-node-file
+          :buffer to-node-buffer
+          :suffix ".org"
+          (insert "#+title: to-node-buffer\n"
+                  "#+date:  2137-12-15\n"
+                  "\n"
+                  "Hello there!\n")
+          (cl-letf (((symbol-function 'find-file-noselect)
+                     (lambda (x)
+                       (get-buffer to-node-buffer))))
+            (denote-tree-link--helper from-node-file to-node-file))
+          (with-current-buffer to-node-buffer
+            (should denote-tree-link)
+            (should denote-tree-link--plist)
+            (should
+             (equal (plist-get denote-tree-link--plist :node-from)
+                    from-node-file))
+            (should
+             (equal (plist-get denote-tree-link--plist :node-to)
+                    to-node-file))
+            (should (plist-get denote-tree-link--plist :window-config))))))))
 
 (provide 'denote-tree-link-test)
 ;;; denote-tree-link ends here
