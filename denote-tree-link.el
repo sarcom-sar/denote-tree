@@ -85,17 +85,18 @@ configuration."
     (with-current-buffer buff
       (setq-local denote-tree-link--plist
                   `(:node-from ,node-from
-                               :node-to ,node-to
-                               :window-config ,(current-window-configuration))))
-    (cond
-     (denote-tree-link-insert-function
-      (with-current-buffer buff
-        (seq-let (pos mark) (funcall denote-tree-link-insert-function)
-          (denote-tree-link--do-the-link
-           pos mark node-from))))
-     (t
-      (pop-to-buffer buff)
-      (denote-tree-link 1)))))
+                    :node-to ,node-to
+                    :window-config ,(current-window-configuration)))
+      (cond
+       (denote-tree-link-insert-function
+        (with-current-buffer buff
+          (seq-let (pos mark) (funcall denote-tree-link-insert-function)
+            (denote-tree-link--do-the-link
+             pos mark node-from))))
+       (t
+        (pop-to-buffer buff)
+        (denote-tree-link 1)))
+      (write-file node-to nil))))
 
 (defun denote-tree-link-insert-at-eof ()
   "Return a pair at the end of the file."
