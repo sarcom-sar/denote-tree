@@ -386,6 +386,24 @@ user decide where in TO-POINT node the link to FROM-MARK should be set."
 (defun denote-tree-unlink-node ()
   "Unlink the current node from it's parrent."
   nil)
+(defun denote-tree--link-range (buff node description)
+  (let ((file-type (denote-tree--find-filetype buff))
+        ;; default regex according to denote
+        (regex-to-search
+         (concat "\\("
+                 (regexp-quote (plist-get (cdr file-type) denote-link))
+                 "\\)"))
+        (id-only-regex (concat
+                        "\\("
+                        (regexp-quote denote-id-only-link-format)
+                        "\\)")))
+    (save-match-data
+      (unless (re-search-forward
+               (format regex-to-search (symbol-name node) description) nil t)
+        ;; id-only case
+        (re-search-forward
+         (format regex-to-search (symbol-name node)) nil t))
+      (list (match-beginning 0) (match-end 0)))))
 
 
 ;;;; Utilities for node editing
