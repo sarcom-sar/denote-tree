@@ -381,8 +381,7 @@ user decide where in TO-POINT node the link to FROM-MARK should be set."
                         (denote-tree--get-prop 'button-data to-point))))
     (when (equal node-from node-to)
       (user-error "Trying to link a file to itself"))
-    (denote-tree-link--helper node-from node-to)
-    (denote-tree-redraw)))
+    (denote-tree-link--helper node-from node-to)))
 
 (defun denote-tree-unlink-node ()
   "Unlink the current node from it's parrent."
