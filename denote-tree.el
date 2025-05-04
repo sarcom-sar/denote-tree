@@ -383,9 +383,17 @@ user decide where in TO-POINT node the link to FROM-MARK should be set."
       (user-error "Trying to link a file to itself"))
     (denote-tree-link--helper node-from node-to)))
 
-(defun denote-tree-unlink-node ()
-  "Unlink the current node from it's parrent."
-  nil)
+(defun denote-tree-unlink-node (pos)
+  "Unlink the node at POS from it's parent."
+  (interactive "d")
+  (when-let* ((node (denote-tree--get-prop 'button-data pos))
+              (parent-pos (denote-tree--nested-value
+                           denote-tree--tree-alist node :parent :pos))
+              (parent-buff (find-file-noselect
+                            (denote-get-path-by-id
+                             (denote-tree--get-prop 'button-data parent-pos)))))
+    (denote-tree--unlink node parent-buff)))
+
 (defun denote-tree--unlink (node parent)
   "Unlink NODE in PARENT to just text."
   (with-current-buffer parent-buff
