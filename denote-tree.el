@@ -386,6 +386,23 @@ user decide where in TO-POINT node the link to FROM-MARK should be set."
 (defun denote-tree-unlink-node ()
   "Unlink the current node from it's parrent."
   nil)
+(defun denote-tree--unlink (node parent)
+  "Unlink NODE in PARENT to just text."
+  (with-current-buffer parent-buff
+    (goto-char (point-min))
+    (let* ((link-range
+            (denote-tree--link-range parent-buff node ".+"))
+           (link-string
+            (buffer-substring-no-properties
+             (car link-range) (cadr link-range))))
+      (save-match-data
+        (string-match denote-org-link-in-context-regexp link-string)
+        (goto-char (car link-range))
+        (delete-region (car link-range) (cadr link-range))
+        (insert (substring link-string (match-data 2)))))
+    (write-file (buffer-file-name) nil)
+    (denote-tree-redraw)))
+
 (defun denote-tree--link-range (buff node description)
   (let ((file-type (denote-tree--find-filetype buff))
         ;; default regex according to denote
