@@ -36,15 +36,17 @@ It handles both linking and unlinking nodes via =denote-tree-link-nodes= and
 
 *** Keybindings for =*denote-tree*= buffer
 
-| Keybinding | Function                |
-|------------+-------------------------|
-| n          | denote-tree-next-node   |
-| p          | denote-tree-prev-node   |
-| f          | denote-tree-child-node  |
-| b          | denote-tree-parent-node |
-| g          | denote-tree-redraw      |
-| e          | denote-tree-edit-node   |
-| RET        | denote-tree-enter-node  |
+| Keybinding | Function                     |
+|------------+------------------------------|
+| n          | denote-tree-next-node        |
+| p          | denote-tree-prev-node        |
+| f          | denote-tree-child-node       |
+| b          | denote-tree-parent-node      |
+| g          | denote-tree-redraw           |
+| e          | denote-tree-edit-node        |
+| i          | denote-tree-link-nodes       |
+| u          | denote-tree-unlink-node      |
+| RET        | denote-tree-enter-node       |
 
 *** Visualization
 
