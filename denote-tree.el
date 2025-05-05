@@ -388,7 +388,7 @@ user decide where in TO-POINT node the link to FROM-MARK should be set."
   (interactive "d")
   (when-let* ((node (denote-tree--get-prop 'button-data pos))
               (parent-pos (denote-tree--nested-value
-                           denote-tree--tree-alist node :parent :pos))
+                           denote-tree--tree-alist (intern node) :parent :pos))
               (parent-buff (find-file-noselect
                             (denote-get-path-by-id
                              (denote-tree--get-prop 'button-data parent-pos)))))
