@@ -397,6 +397,46 @@ contains only an ID, delete entire line sans the newline."
                              (denote-tree--get-prop 'button-data parent-pos)))))
     (denote-tree--unlink node parent-buff)))
 
+
+;;;; Utilities for node editing
+
+(defun denote-tree--edit-node (buffer)
+  "Call `denote-rename-file' interactively to edit BUFFER.
+
+Return current buffer object."
+  (let ((denote-save-buffers t))
+    (with-current-buffer (find-file-noselect buffer)
+      (call-interactively #'denote-rename-file)
+      (current-buffer))))
+
+(defun denote-tree--redraw-node (buffer alist)
+  "Redraw node based on BUFFER's, return updated ALIST.
+
+Include only elements from `denote-tree-node-description'.  Preserve
+properties."
+  (let ((inhibit-read-only t)
+        (node (get-text-property (point) 'denote-tree--identifier))
+        (new-alist alist)
+        (new-descp (denote-tree--collect-keywords-as-string
+                    buffer denote-tree-node-description))
+        (pos))
+    (setf (alist-get node new-alist)
+          (plist-put (alist-get node new-alist) :descp new-descp))
+    (delete-region (line-beginning-position) (line-end-position))
+    (setq pos
+          (denote-tree--draw-node-foo
+           node
+           (alist-get node new-alist)
+           (denote-tree--nested-value
+            alist node :parent :next-indent)))
+    (setf (alist-get node new-alist)
+          (plist-put (alist-get node new-alist) :pos pos))
+    (delete-char 1)
+    new-alist))
+
+
+;;;; Utilities for unlinking
+
 (defun denote-tree--unlink (node parent)
   "Unlink NODE in PARENT to just text."
   (with-current-buffer parent
@@ -440,43 +480,6 @@ contains only an ID, delete entire line sans the newline."
         (re-search-forward
          (format id-only-regex node) nil t))
       (list (match-beginning 0) (match-end 0)))))
-
-
-;;;; Utilities for node editing
-
-(defun denote-tree--edit-node (buffer)
-  "Call `denote-rename-file' interactively to edit BUFFER.
-
-Return current buffer object."
-  (let ((denote-save-buffers t))
-    (with-current-buffer (find-file-noselect buffer)
-      (call-interactively #'denote-rename-file)
-      (current-buffer))))
-
-(defun denote-tree--redraw-node (buffer alist)
-  "Redraw node based on BUFFER's, return updated ALIST.
-
-Include only elements from `denote-tree-node-description'.  Preserve
-properties."
-  (let ((inhibit-read-only t)
-        (node (get-text-property (point) 'denote-tree--identifier))
-        (new-alist alist)
-        (new-descp (denote-tree--collect-keywords-as-string
-                    buffer denote-tree-node-description))
-        (pos))
-    (setf (alist-get node new-alist)
-          (plist-put (alist-get node new-alist) :descp new-descp))
-    (delete-region (line-beginning-position) (line-end-position))
-    (setq pos
-          (denote-tree--draw-node-foo
-           node
-           (alist-get node new-alist)
-           (denote-tree--nested-value
-            alist node :parent :next-indent)))
-    (setf (alist-get node new-alist)
-          (plist-put (alist-get node new-alist) :pos pos))
-    (delete-char 1)
-    new-alist))
 
 
 ;;;; Tree traversal
