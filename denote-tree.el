@@ -193,6 +193,7 @@ position of cyclical parent node.")
     (keymap-set map "e" #'denote-tree-edit-node)
     (keymap-set map "i" #'denote-tree-link-nodes)
     (keymap-set map "u" #'denote-tree-unlink-node)
+    (keymap-set map "s" #'denote-tree-spawn-child-node)
     map)
   "Keymap for `denote-tree-mode'.")
 
@@ -396,6 +397,10 @@ contains only an ID, delete entire line sans the newline."
                             (denote-get-path-by-id
                              (denote-tree--get-prop 'button-data parent-pos)))))
     (denote-tree--unlink node parent-buff)))
+
+(defun denote-tree-spawn-child-node (pos)
+  "Create new child node with node at POS as a parent."
+  (interactive "d"))
 
 
 ;;;; Utilities for node editing
