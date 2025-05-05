@@ -112,7 +112,7 @@ configuration."
     (save-excursion
       (goto-char (point-min))
       (forward-line
-       (length (string-split front-matter "\n")))
+       (length (split-string front-matter "\n")))
       (list (point) (point)))))
 
 (provide 'denote-tree-link)
