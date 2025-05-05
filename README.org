@@ -31,8 +31,8 @@ those cyclical nodes by default.  The initial cost of drawing a full tree is
 paid once, at initialization. If user is willing to do so, one can tweak the
 value of =denote-tree-max-traversal-depth=, so that the tree is drawn only
 partially.  That truncated tree can be then expanded via =denote-tree-redraw=.
-It handles both linking and unlinking nodes, but, as of right now, this has to
-be done by the user manually.
+It handles both linking and unlinking nodes via =denote-tree-link-nodes= and
+=denote-tree-unlink-node=.
 
 *** Keybindings for =*denote-tree*= buffer
 
@@ -139,7 +139,11 @@ be done by the user manually.
   Link node at FROM-MARK to TO-POINT.  If =denote-tree-insert-link-function= is
   set, then perform this based on function's return value.  Otherwise open a
   TO-POINT file and let the user decide where in TO-POINT node the link to
-  FROM-MARK should be set."
+  FROM-MARK should be set.
+- =denote-tree-unlink-node= (pos)
+  Unlink the node at POS from it's parent.  Leave only the text that was there
+  before the linking.  If the link contains only an ID, delete entire line sans
+  the newline.
 
 ** Contributing
 
@@ -163,5 +167,5 @@ contributions.
 - [X] multiple denote-tree buffers;
 - [-] notes interaction,
   - [X] link two notes;
-  - [ ] unlink a note.
+  - [X] unlink a note.
   - [ ] create a note linked to other note;
