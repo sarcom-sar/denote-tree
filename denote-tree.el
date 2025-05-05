@@ -396,10 +396,10 @@ user decide where in TO-POINT node the link to FROM-MARK should be set."
 
 (defun denote-tree--unlink (node parent)
   "Unlink NODE in PARENT to just text."
-  (with-current-buffer parent-buff
+  (with-current-buffer parent
     (goto-char (point-min))
     (let* ((link-range
-            (denote-tree--link-range parent-buff node ".+"))
+            (denote-tree--link-range parent node ".+"))
            (link-string
             (buffer-substring-no-properties
              (car link-range) (cadr link-range))))
