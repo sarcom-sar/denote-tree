@@ -1,11 +1,34 @@
 ;;; denote-tree-link.el --- Visualize your notes as a tree -*- lexical-binding: t -*-
 
+;; Copyright 2024, Sararin
+;; URL: http://github.com/sarcom-sar/denote-tree.el
+
+;; This file is not part of GNU Emacs.
+
+;; denote-tree is free software: you can redistribute it and/or modify it under
+;; the terms of the GNU General Public License as published by the Free Software
+;; Foundation, either version 3 of the License, or (at your option) any later
+;; version.
+
+;; denote-tree is distributed in the hope that it will be useful, but WITHOUT
+;; ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+;; FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+;; details.
+
+;; You should have received a copy of the GNU General Public License along with
+;; denote-tree.  If not, see <https://www.gnu.org/licenses/>.
+
+;;; Commentary:
+
+;; Provide a major mode for `org-capture'-like linking of files while using
+;; denote-tree.
+
+;;; Code:
+
 (require 'denote-tree)
 
 (declare-function denote-get-link-description "denote")
 (declare-function denote-tree-redraw "denote-tree")
-
-;;; Code
 
 (defcustom denote-tree-link-insert-function #'denote-tree-link-insert-at-eof
   "Return the region at which the link is to be inserted.
@@ -14,7 +37,7 @@ The function takes no arguments and returns a pair of intergers.  The
 range determines a buffer region in which text will be replace with a
 link.  If the pair is the same integer, then perform the insertion in
 place."
-  :group 'denote-tree
+  :group 'denote-tree-link
   :type 'function)
 
 (defvar denote-tree-link--plist '()
@@ -116,3 +139,4 @@ configuration."
       (list (point) (point)))))
 
 (provide 'denote-tree-link)
+;;; denote-tree-link.el ends here
