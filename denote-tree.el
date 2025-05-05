@@ -413,7 +413,8 @@ user decide where in TO-POINT node the link to FROM-MARK should be set."
                       link-string)
         (goto-char (car link-range))
         (delete-region (car link-range) (cadr link-range))
-        (insert (substring link-string (match-beginning 2) (match-end 2)))))
+        (when (match-beginning 2)
+          (insert (substring link-string (match-beginning 2) (match-end 2))))))
     (write-file (buffer-file-name) nil))
   (denote-tree-redraw))
 
