@@ -412,19 +412,22 @@ user decide where in TO-POINT node the link to FROM-MARK should be set."
     (denote-tree-redraw)))
 
 (defun denote-tree--link-range (buff node description)
-  (let ((file-type (denote-tree--find-filetype buff))
-        ;; default regex according to denote
-        (regex-to-search
-         (concat "\\("
-                 (regexp-quote (plist-get (cdr file-type) denote-link))
-                 "\\)"))
-        (id-only-regex (concat
-                        "\\("
-                        (regexp-quote denote-id-only-link-format)
-                        "\\)")))
+  (let* ((file-type (denote-tree--find-filetype buff))
+         (link (plist-get (cdr file-type) :link))
+         ;; default regex according to denote
+         (regex-to-search
+          (concat "\\("
+                  (regexp-quote (if (symbolp link)
+                                    (symbol-value link)
+                                  link))
+                  "\\)"))
+         (id-only-regex (concat
+                         "\\("
+                         (regexp-quote denote-id-only-link-format)
+                         "\\)")))
     (save-match-data
       (unless (re-search-forward
-               (format regex-to-search (symbol-name node) description) nil t)
+               (format regex-to-search node description) nil t)
         ;; id-only case
         (re-search-forward
          (format regex-to-search (symbol-name node)) nil t))
