@@ -398,13 +398,19 @@ user decide where in TO-POINT node the link to FROM-MARK should be set."
   "Unlink NODE in PARENT to just text."
   (with-current-buffer parent
     (goto-char (point-min))
-    (let* ((link-range
-            (denote-tree--link-range parent node ".+"))
+    (let* ((file-type (denote-tree--find-filetype parent))
+           (link (plist-get (cdr file-type) :link))
+           (link-in-context (plist-get (cdr file-type) :link-in-context-regexp))
+           (link-range
+            (denote-tree--link-range node ".*?" link))
            (link-string
             (buffer-substring-no-properties
              (car link-range) (cadr link-range))))
       (save-match-data
-        (string-match denote-org-link-in-context-regexp link-string)
+        (string-match (if (symbolp link-in-context)
+                          (symbol-value link-in-context)
+                        link-in-context)
+                      link-string)
         (goto-char (car link-range))
         (delete-region (car link-range) (cadr link-range))
         (insert (substring link-string (match-beginning 2) (match-end 2)))))
