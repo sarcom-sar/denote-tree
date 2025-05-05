@@ -1217,44 +1217,46 @@ and it's value in plist is a string."
 
 (ert-deftest denote-tree-test--link-range ()
   "Tests for `denote-tree--link-range'."
-  (let ((denote-tree--extended-filetype
-         denote-tree-test-mock--extended-filetype))
-    (with-temp-buffer
-      (insert "#+title: f\n"
-              "\n"
-              "[[denote:FOO][BAR]]\n"
-              "\n"
-              "Some text no one cares about\n")
-      (should
-       (equal (denote-tree--link-range (current-buffer) "FOO" "BAR")
-              '(13 32))))
-    (with-temp-buffer
-      (insert "#+title: f\n"
-              "\n"
-              "[[denote:FOO]]\n"
-              "\n"
-              "Some text no one cares about\n")
-      (should
-       (equal (denote-tree--link-range (current-buffer) "FOO" "BAR")
-              '(13 27))))
-    (with-temp-buffer
-      (insert "#+title: f\n"
-              "\n"
-              "[[denote:FOO][this is very arbitrary]]\n"
-              "\n"
-              "Some text no one cares about\n")
-      (should
-       (equal (denote-tree--link-range (current-buffer) "FOO" ".*?")
-              '(13 51))))
-    (with-temp-buffer
-      (insert "#+title: f\n"
-              "\n"
-              "[[denote:FOO]]\n"
-              "\n"
-              "Some text no one cares about\n")
-      (should
-       (equal (denote-tree--link-range (current-buffer) "FOO" ".*?")
-              '(13 27))))))
+  (with-temp-buffer
+    (insert "#+title: f\n"
+            "\n"
+            "[[denote:FOO][BAR]]\n"
+            "\n"
+            "Some text no one cares about\n")
+    (goto-char (point-min))
+    (should
+     (equal (denote-tree--link-range "FOO" "BAR" "[[denote:%s][%s]]")
+            '(13 32))))
+  (with-temp-buffer
+    (insert "#+title: f\n"
+            "\n"
+            "[[denote:FOO]]\n"
+            "\n"
+            "Some text no one cares about\n")
+    (goto-char (point-min))
+    (should
+     (equal (denote-tree--link-range "FOO" "BAR" "[[denote:%s][%s]]")
+            '(13 27))))
+  (with-temp-buffer
+    (insert "#+title: f\n"
+            "\n"
+            "[[denote:FOO][this is very arbitrary]]\n"
+            "\n"
+            "Some text no one cares about\n")
+    (goto-char (point-min))
+    (should
+     (equal (denote-tree--link-range "FOO" ".*?" "[[denote:%s][%s]]")
+            '(13 51))))
+  (with-temp-buffer
+    (insert "#+title: f\n"
+            "\n"
+            "[[denote:FOO]]\n"
+            "\n"
+            "Some text no one cares about\n")
+    (goto-char (point-min))
+    (should
+     (equal (denote-tree--link-range "FOO" ".*?" "[[denote:%s][%s]]")
+            '(13 27)))))
 
 (provide 'denote-tree-test)
 ;;; denote-tree-test.el ends here
