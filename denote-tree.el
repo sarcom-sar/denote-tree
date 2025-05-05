@@ -384,7 +384,10 @@ user decide where in TO-POINT node the link to FROM-MARK should be set."
     (denote-tree-link--helper node-from node-to)))
 
 (defun denote-tree-unlink-node (pos)
-  "Unlink the node at POS from it's parent."
+  "Unlink the node at POS from it's parent.
+
+Leave only the text that was there before the linking.  If the link
+contains only an ID, delete entire line sans the newline."
   (interactive "d")
   (when-let* ((node (denote-tree--get-prop 'button-data pos))
               (parent-pos (denote-tree--nested-value
