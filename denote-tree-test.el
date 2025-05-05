@@ -1258,5 +1258,46 @@ and it's value in plist is a string."
      (equal (denote-tree--link-range "FOO" ".*?" "[[denote:%s][%s]]")
             '(13 27)))))
 
+(ert-deftest denote-tree-test--unlink ()
+  "Tests for `denote-tree--unlink'."
+  (with-temp-buffer
+    (insert "#+title: f\n"
+            "\n"
+            "[[denote:FOO][BAR]]\n"
+            "\n"
+            "Some text no one cares about\n")
+    (goto-char (point-min))
+    (cl-letf (((symbol-function 'write-file)
+               (lambda (_ _)
+                 nil))
+              ((symbol-function 'denote-tree-redraw)
+               (lambda ()
+                 nil)))
+      (denote-tree--unlink "FOO" (current-buffer))
+      (goto-line 3)
+      (should
+       (equal (buffer-substring
+               (line-beginning-position) (line-end-position))
+              "BAR"))))
+  (with-temp-buffer
+    (insert "#+title: f\n"
+            "\n"
+            "[[denote:FOO]]\n"
+            "\n"
+            "Some text no one cares about\n")
+    (goto-char (point-min))
+    (cl-letf (((symbol-function 'write-file)
+               (lambda (_ _)
+                 nil))
+              ((symbol-function 'denote-tree-redraw)
+               (lambda ()
+                 nil)))
+      (denote-tree--unlink "FOO" (current-buffer))
+      (goto-line 3)
+      (should
+       (equal (buffer-substring
+               (line-beginning-position) (line-end-position))
+              "")))))
+
 (provide 'denote-tree-test)
 ;;; denote-tree-test.el ends here
