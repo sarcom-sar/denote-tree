@@ -113,17 +113,18 @@ configuration."
       (setq-local denote-tree-link--plist
                   `(:node-from ,node-from
                     :node-to ,node-to
-                    :window-config ,(current-window-configuration)))
-      (cond
-       (denote-tree-link-insert-function
+                    :window-config ,(current-window-configuration))))
+    (cond
+     (denote-tree-link-insert-function
+      (with-current-buffer buff
         (seq-let (pos mark) (funcall denote-tree-link-insert-function)
           (denote-tree-link--do-the-link
            pos mark node-from))
-        (write-file node-to nil)
-        (denote-tree-redraw))
-       (t
-        (pop-to-buffer buff)
-        (denote-tree-link 1))))))
+        (write-file node-to nil))
+      (denote-tree-redraw))
+     (t
+      (pop-to-buffer buff)
+      (denote-tree-link 1)))))
 
 (defun denote-tree-link-insert-at-eof ()
   "Return a pair at the end of the file."
