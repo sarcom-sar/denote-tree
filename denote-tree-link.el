@@ -57,6 +57,7 @@ for linking notes.")
 (define-minor-mode denote-tree-link
   "Minor mode for inserting a link in a note."
   :lighter " Link"
+  :interactive nil
   (setq-local
    header-line-format
    (substitute-command-keys
