@@ -400,7 +400,14 @@ contains only an ID, delete entire line sans the newline."
 
 (defun denote-tree-spawn-child-node (pos)
   "Create new child node with node at POS as a parent."
-  (interactive "d"))
+  (interactive "d")
+  (when-let* ((denote-save-buffers t)
+              (buff (current-buffer))
+              (node (denote-get-path-by-id
+                     (denote-tree--get-prop 'button-data pos)))
+              (child (call-interactively #'denote)))
+    (with-current-buffer buff
+      (denote-tree-link--helper child node))))
 
 
 ;;;; Utilities for node editing
