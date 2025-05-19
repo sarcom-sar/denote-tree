@@ -72,9 +72,9 @@ for linking notes.")
 Restore window configuration."
   (interactive)
   (denote-tree-link--do-the-link
-   (point) (or (mark) (point)) (plist-get :node-from denote-tree-link--plist))
+   (point) (or (mark) (point)) (plist-get denote-tree-link--plist :node-from))
   (denote-tree-link -1)
-  (set-window-configuration (plist-get :window-config denote-tree-link--plist))
+  (set-window-configuration (plist-get denote-tree-link--plist :window-config))
   (denote-tree-redraw))
 
 (defun denote-tree-link--do-the-link (pos mark node-from-file)
