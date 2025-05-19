@@ -93,7 +93,8 @@ If POS and MARK are the same, or MARK is not set, do it at POS."
          ;; denote <= 3.1.0
          (funcall denote-link-description-function node-from-file))
      (prog1 (buffer-substring pos mark)
-       (delete-region pos mark)))))
+       (delete-region pos mark))))
+  (write-file (buffer-file-name) nil))
 
 (defun denote-tree-link-kill ()
   "Abort the linking, restore window configuration."
@@ -121,8 +122,7 @@ configuration."
       (with-current-buffer buff
         (seq-let (pos mark) (funcall denote-tree-link-insert-function)
           (denote-tree-link--do-the-link
-           pos mark node-from))
-        (write-file node-to nil))
+           pos mark node-from)))
       (denote-tree-redraw))
      (t
       (pop-to-buffer buff)
