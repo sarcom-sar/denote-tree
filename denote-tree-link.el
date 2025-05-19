@@ -108,11 +108,13 @@ If `denote-tree-link-insert-function' is set, do it automatically.
 Otherwise prompt the user for manual interaction.  This function sets
 buffer-local `denote-tree-link--plist' in order to restore user window
 configuration."
-  (let ((buff (find-file-noselect node-to)))
+  (let ((buff (find-file-noselect node-to))
+        (main-buff (current-buffer)))
     (with-current-buffer buff
       (setq-local denote-tree-link--plist
                   `(:node-from ,node-from
                     :node-to ,node-to
+                    :denote-tree-buffer ,main-buff
                     :window-config ,(current-window-configuration))))
     (cond
      (denote-tree-link-insert-function
