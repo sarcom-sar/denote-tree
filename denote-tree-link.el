@@ -75,7 +75,8 @@ Restore window configuration."
    (point) (or (mark) (point)) (plist-get denote-tree-link--plist :node-from))
   (denote-tree-link -1)
   (set-window-configuration (plist-get denote-tree-link--plist :window-config))
-  (denote-tree-redraw))
+  (with-current-buffer (plist-get denote-tree-link--plist :denote-tree-buffer)
+    (denote-tree-redraw)))
 
 (defun denote-tree-link--do-the-link (pos mark node-from-file)
   "Link NODE-FROM-FILE in current buffer at region from POS to MARK.
