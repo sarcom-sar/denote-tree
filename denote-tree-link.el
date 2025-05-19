@@ -58,11 +58,13 @@ for linking notes.")
   "Minor mode for inserting a link in a note."
   :lighter " Link"
   :interactive nil
-  (setq-local
-   header-line-format
-   (substitute-command-keys
-    "\\<denote-tree-link-mode-map> Add link buffer.  Finish \
-`\\[denote-tree-link-finalize]', abort `\\[denote-tree-link-kill]'.")))
+  (if (and arg (= 1 arg))
+      (setq-local
+       header-line-format
+       (substitute-command-keys
+        "\\<denote-tree-link-mode-map> Add link buffer.  Finish \
+`\\[denote-tree-link-finalize]', abort `\\[denote-tree-link-kill]'."))
+    (setq-local header-line-format nil)))
 
 (defun denote-tree-link-finalize ()
   "Insert a link between point and mark in the note buffer.
