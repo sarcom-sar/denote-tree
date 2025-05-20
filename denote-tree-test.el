@@ -1230,6 +1230,16 @@ and it's value in plist is a string."
   (with-temp-buffer
     (insert "#+title: f\n"
             "\n"
+            "[[denote:FOO][BAR]]\n"
+            "\n"
+            "Some text no one cares about\n")
+    (goto-char (point-min))
+    (should
+     (equal (denote-tree--link-range "blzgh" "BAR" "[[denote:%s][%s]]")
+            nil)))
+  (with-temp-buffer
+    (insert "#+title: f\n"
+            "\n"
             "[[denote:FOO]]\n"
             "\n"
             "Some text no one cares about\n")
