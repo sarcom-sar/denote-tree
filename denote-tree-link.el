@@ -103,30 +103,30 @@ If POS and MARK are the same, or MARK is not set, do it at POS."
   (denote-tree-link -1)
   (set-window-configuration (plist-get :window-config denote-tree-link--plist)))
 
-(defun denote-tree-link--helper (node-from node-to)
-  "Link note NODE-FROM to note NODE-TO.
+(defun denote-tree-link--helper (link-this to-this)
+  "Link note LINK-THIS to note TO-THIS.
 
 If `denote-tree-link-insert-function' is set, do it automatically.
 Otherwise prompt the user for manual interaction.  This function sets
 buffer-local `denote-tree-link--plist' in order to restore user window
 configuration."
-  (let ((buff (find-file-noselect node-to))
+  (let ((to-this-buff (find-file-noselect to-this))
         (main-buff (current-buffer)))
-    (with-current-buffer buff
+    (with-current-buffer to-this-buff
       (setq-local denote-tree-link--plist
-                  `(:node-from ,node-from
-                    :node-to ,node-to
+                  `(:node-from ,link-this
+                    :node-to ,to-this
                     :denote-tree-buffer ,main-buff
                     :window-config ,(current-window-configuration))))
     (cond
      (denote-tree-link-insert-function
-      (with-current-buffer buff
+      (with-current-buffer to-this-buff
         (seq-let (pos mark) (funcall denote-tree-link-insert-function)
           (denote-tree-link--do-the-link
-           pos mark node-from)))
+           pos mark link-this)))
       (denote-tree-redraw))
      (t
-      (pop-to-buffer buff)
+      (pop-to-buffer to-this-buff)
       (denote-tree-link 1)))))
 
 (defun denote-tree-link-insert-at-eof ()
