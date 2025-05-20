@@ -138,13 +138,13 @@
                        (get-buffer to-node-buffer))))
             (denote-tree-link--helper from-node-file to-node-file))
           (with-current-buffer to-node-buffer
-            (should denote-tree-link)
+            (should denote-tree-link-mode)
             (should denote-tree-link--plist)
             (should
-             (equal (plist-get denote-tree-link--plist :node-from)
+             (equal (plist-get denote-tree-link--plist :link-this)
                     from-node-file))
             (should
-             (equal (plist-get denote-tree-link--plist :node-to)
+             (equal (plist-get denote-tree-link--plist :to-this)
                     to-node-file))
             (should (plist-get denote-tree-link--plist :window-config))))))))
 
