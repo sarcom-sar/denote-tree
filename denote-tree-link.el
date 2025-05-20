@@ -78,21 +78,21 @@ Restore window configuration."
   (with-current-buffer (plist-get denote-tree-link--plist :denote-tree-buffer)
     (denote-tree-redraw)))
 
-(defun denote-tree-link--do-the-link (pos mark node-from-file)
-  "Link NODE-FROM-FILE in current buffer at region from POS to MARK.
+(defun denote-tree-link--do-the-link (pos mark link-this-file)
+  "Link LINK-THIS-FILE in current buffer at region from POS to MARK.
 
 If POS and MARK are the same, or MARK is not set, do it at POS."
   (or mark (setq mark pos))
   (goto-char pos)
   (denote-link
-   node-from-file
+   link-this-file
    (car (save-excursion (denote-tree--find-filetype (current-buffer))))
    (if (eql pos mark)
        (if (boundp 'denote-link-description-format)
            ;; denote > 3.1.0
-           (denote-get-link-description node-from-file)
+           (denote-get-link-description link-this-file)
          ;; denote <= 3.1.0
-         (funcall denote-link-description-function node-from-file))
+         (funcall denote-link-description-function link-this-file))
      (prog1 (buffer-substring pos mark)
        (delete-region pos mark))))
   (write-file (buffer-file-name) nil))
