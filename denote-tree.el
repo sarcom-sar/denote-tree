@@ -453,14 +453,15 @@ properties."
   "Unlink NODE in PARENT to just text."
   (with-current-buffer parent
     (goto-char (point-min))
-    (let* ((file-type (denote-tree--find-filetype parent))
-           (link (plist-get (cdr file-type) :link))
-           (link-in-context (plist-get (cdr file-type) :link-in-context-regexp))
-           (link-range
-            (denote-tree--link-range node ".*?" link))
-           (link-string
-            (buffer-substring-no-properties
-             (car link-range) (cadr link-range))))
+    (when-let* ((file-type (denote-tree--find-filetype parent))
+                (link (plist-get (cdr file-type) :link))
+                (link-in-context
+                 (plist-get (cdr file-type) :link-in-context-regexp))
+                (link-range
+                 (denote-tree--link-range node ".*?" link))
+                (link-string
+                 (buffer-substring-no-properties
+                  (car link-range) (cadr link-range))))
       (save-match-data
         (string-match (if (symbolp link-in-context)
                           (symbol-value link-in-context)
