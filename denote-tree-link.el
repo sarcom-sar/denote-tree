@@ -58,7 +58,7 @@ It should consist of:
 Use this map to set additional keybindings for when denote-tree is used
 for linking notes.")
 
-(define-minor-mode denote-tree-link
+(define-minor-mode denote-tree-link-mode
   "Minor mode for inserting a link in a note."
   :lighter " Link"
   :interactive nil
@@ -77,7 +77,7 @@ Restore window configuration."
   (interactive)
   (denote-tree-link--do-the-link
    (point) (or (mark) (point)) (plist-get denote-tree-link--plist :link-this))
-  (denote-tree-link -1)
+  (denote-tree-link-mode -1)
   (set-window-configuration (plist-get denote-tree-link--plist :window-config))
   (with-current-buffer (plist-get denote-tree-link--plist :denote-tree-buffer)
     (denote-tree-redraw)))
@@ -104,7 +104,7 @@ If POS and MARK are the same, or MARK is not set, do it at POS."
 (defun denote-tree-link-kill ()
   "Abort the linking, restore window configuration."
   (interactive)
-  (denote-tree-link -1)
+  (denote-tree-link-mode -1)
   (set-window-configuration (plist-get :window-config denote-tree-link--plist)))
 
 (defun denote-tree-link--helper (link-this to-this)
@@ -131,7 +131,7 @@ configuration."
       (denote-tree-redraw))
      (t
       (pop-to-buffer to-this-buff)
-      (denote-tree-link 1)))))
+      (denote-tree-link-mode 1)))))
 
 (defun denote-tree-link-insert-at-eof ()
   "Return a pair at the end of the file."
