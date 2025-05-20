@@ -474,7 +474,9 @@ properties."
   (denote-tree-redraw))
 
 (defun denote-tree--link-range (node description link)
-  "Find NODE with DESCRIPTION in LINK style."
+  "Find NODE with DESCRIPTION in LINK style.
+
+If none present, return nil."
   (let* ((regex-to-search
           (concat "\\("
                   (regexp-quote (if (symbolp link)
@@ -486,12 +488,11 @@ properties."
                          (regexp-quote denote-id-only-link-format)
                          "\\)")))
     (save-match-data
-      (unless (re-search-forward
-               (format regex-to-search node description) nil t)
-        ;; id-only case
-        (re-search-forward
-         (format id-only-regex node) nil t))
-      (list (match-beginning 0) (match-end 0)))))
+      (when (or (re-search-forward
+                 (format regex-to-search node description) nil t)
+                (re-search-forward
+                 (format id-only-regex node) nil t))
+        (list (match-beginning 0) (match-end 0))))))
 
 
 ;;;; Tree traversal
