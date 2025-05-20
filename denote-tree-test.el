@@ -1282,25 +1282,28 @@ and it's value in plist is a string."
          (equal (buffer-substring
                  (line-beginning-position) (line-end-position))
                 "BAR")))))
-  (with-temp-buffer
-    (insert "#+title: f\n"
-            "\n"
-            "[[denote:FOO]]\n"
-            "\n"
-            "Some text no one cares about\n")
-    (goto-char (point-min))
-    (cl-letf (((symbol-function 'write-file)
-               (lambda (_ _)
-                 nil))
-              ((symbol-function 'denote-tree-redraw)
-               (lambda ()
-                 nil)))
-      (denote-tree--unlink "FOO" (current-buffer))
-      (goto-line 3)
-      (should
-       (equal (buffer-substring
-               (line-beginning-position) (line-end-position))
-              "")))))
+  (let ((denote-tree--extended-filetype
+         (denote-tree--build-extended-filetype
+          denote-file-types denote-tree-extend-filetype-with)))
+    (with-temp-buffer
+      (insert "#+title: f\n"
+              "\n"
+              "[[denote:12345678T123456]]\n"
+              "\n"
+              "Some text no one cares about\n")
+      (goto-char (point-min))
+      (cl-letf (((symbol-function 'write-file)
+                 (lambda (_ _)
+                   nil))
+                ((symbol-function 'denote-tree-redraw)
+                 (lambda ()
+                   nil)))
+        (denote-tree--unlink "12345678T123456" (current-buffer))
+        (goto-line 3)
+        (should
+         (equal (buffer-substring
+                 (line-beginning-position) (line-end-position))
+                ""))))))
 
 (provide 'denote-tree-test)
 ;;; denote-tree-test.el ends here
