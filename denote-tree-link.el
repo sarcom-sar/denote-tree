@@ -43,7 +43,11 @@ place."
 (defvar denote-tree-link--plist '()
   "Plist of elements necessary while linking.
 
-It should have three values :node-from, :node-to and :window-config.")
+It should consist of:
+- :link-this, the note that will be linked;
+- :to-this, the note to which it will be linked;
+- :denote-tree-buffer, current denote-tree buffer;
+- :window-config, window config to restore.")
 
 (defvar denote-tree-link-mode-map
   (let ((map (make-sparse-keymap)))
@@ -72,7 +76,7 @@ for linking notes.")
 Restore window configuration."
   (interactive)
   (denote-tree-link--do-the-link
-   (point) (or (mark) (point)) (plist-get denote-tree-link--plist :node-from))
+   (point) (or (mark) (point)) (plist-get denote-tree-link--plist :link-this))
   (denote-tree-link -1)
   (set-window-configuration (plist-get denote-tree-link--plist :window-config))
   (with-current-buffer (plist-get denote-tree-link--plist :denote-tree-buffer)
@@ -114,8 +118,8 @@ configuration."
         (main-buff (current-buffer)))
     (with-current-buffer to-this-buff
       (setq-local denote-tree-link--plist
-                  `(:node-from ,link-this
-                    :node-to ,to-this
+                  `(:link-this ,link-this
+                    :to-this ,to-this
                     :denote-tree-buffer ,main-buff
                     :window-config ,(current-window-configuration))))
     (cond
