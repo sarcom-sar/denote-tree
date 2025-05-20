@@ -1277,11 +1277,13 @@ and it's value in plist is a string."
                  (lambda ()
                    nil)))
         (denote-tree--unlink "12345678T123456" (current-buffer))
-        (goto-line 3)
         (should
-         (equal (buffer-substring
-                 (line-beginning-position) (line-end-position))
-                "BAR")))))
+         (equal (concat "#+title: f\n"
+                        "\n"
+                        "BAR\n"
+                        "\n"
+                        "Some text no one cares about\n")
+                (buffer-substring (point-min) (point-max)))))))
   (let ((denote-tree--extended-filetype
          (denote-tree--build-extended-filetype
           denote-file-types denote-tree-extend-filetype-with)))
@@ -1299,16 +1301,13 @@ and it's value in plist is a string."
                  (lambda ()
                    nil)))
         (denote-tree--unlink "BAR" (current-buffer))
-        (goto-line 3)
         (should
-         (equal (buffer-substring
-                 (line-beginning-position) (line-end-position))
-                "[[denote:12345678T123456][BAR]]"))
-        (goto-line 1)
-        (should
-         (equal (buffer-substring
-                 (line-beginning-position) (line-end-position))
-                "#+title: f")))))
+         (equal (concat "#+title: f\n"
+                        "\n"
+                        "[[denote:12345678T123456][BAR]]\n"
+                        "\n"
+                        "Some text no one cares about\n")
+                (buffer-substring (point-min) (point-max)))))))
   (let ((denote-tree--extended-filetype
          (denote-tree--build-extended-filetype
           denote-file-types denote-tree-extend-filetype-with)))
@@ -1328,9 +1327,36 @@ and it's value in plist is a string."
         (denote-tree--unlink "12345678T123456" (current-buffer))
         (goto-line 3)
         (should
-         (equal (buffer-substring
-                 (line-beginning-position) (line-end-position))
-                ""))))))
+         (equal (concat "#+title: f\n"
+                        "\n"
+                        "\n"
+                        "\n"
+                        "Some text no one cares about\n")
+                (buffer-substring (point-min) (point-max)))))))
+  (let ((denote-tree--extended-filetype
+         (denote-tree--build-extended-filetype
+          denote-file-types denote-tree-extend-filetype-with)))
+    (with-temp-buffer
+      (insert "#+title: f\n"
+              "\n"
+              "[[denote:12345678T123456]]\n"
+              "\n"
+              "Some text no one cares about\n")
+      (goto-char (point-min))
+      (cl-letf (((symbol-function 'write-file)
+                 (lambda (_ _)
+                   nil))
+                ((symbol-function 'denote-tree-redraw)
+                 (lambda ()
+                   nil)))
+        (denote-tree--unlink "BAR" (current-buffer))
+        (should
+         (equal (concat "#+title: f\n"
+                        "\n"
+                        "[[denote:12345678T123456]]\n"
+                        "\n"
+                        "Some text no one cares about\n")
+                (buffer-substring (point-min) (point-max))))))))
 
 (provide 'denote-tree-test)
 ;;; denote-tree-test.el ends here
