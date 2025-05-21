@@ -30,6 +30,9 @@
 (declare-function denote-get-link-description "denote")
 (declare-function denote-tree-redraw "denote-tree")
 
+(defgroup denote-tree-link ()
+  "Functionalities for linking in denote-tree.")
+
 (defcustom denote-tree-link-insert-function #'denote-tree-link-insert-at-eof
   "Return the region at which the link is to be inserted.
 
@@ -37,7 +40,6 @@ The function takes no arguments and returns a pair of intergers.  The
 range determines a buffer region in which text will be replace with a
 link.  If the pair is the same integer, then perform the insertion in
 place."
-  :group 'denote-tree-link
   :type 'function)
 
 (defvar denote-tree-link--plist '()
