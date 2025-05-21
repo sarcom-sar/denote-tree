@@ -85,8 +85,7 @@ Restore window configuration."
 (defun denote-tree-link--do-the-link (pos mark link-this-file)
   "Link LINK-THIS-FILE in current buffer at region from POS to MARK.
 
-If POS and MARK are the same, or MARK is not set, do it at POS."
-  (or mark (setq mark pos))
+If POS and MARK are the same, do it at POS."
   (goto-char pos)
   (denote-link
    link-this-file
