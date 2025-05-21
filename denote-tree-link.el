@@ -117,9 +117,13 @@ is narrowed to region between POS and MARK."
   (write-file (buffer-file-name) nil))
 
 (defun denote-tree-link-kill ()
-  "Abort the linking, restore window configuration."
+  "Abort the linking, restore window configuration.
+
+Do not actually kill the buffer itself, since the user might wish to
+examine it."
   (interactive)
   (denote-tree-link-mode -1)
+  (bury-buffer)
   (set-window-configuration (plist-get :window-config denote-tree-link--plist)))
 
 (defun denote-tree-link--helper (link-this to-this)
