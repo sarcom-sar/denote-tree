@@ -100,7 +100,12 @@ It handles both linking and unlinking nodes via =denote-tree-link-nodes= and
   - =denote-tree-insert-at-eof=, return a pair of locations at the end of the
     file.
   - =denote-tree-insert-after-front-matter=, return a pair of locations after
-    the front-matter.
+    the front-matter, if it fails default to =denote-tree-insert-at-eof=;
+- =denote-tree-link-after-link-insertion-hooks=, List of hooks to run after the
+  link was inserted.  This variable is primarily used to modify the text around
+  inserted link.  Before this hook is ran the buffer is narrowed to just the
+  link itself.  =point-min= points to the area behind the link, while the
+  =point-max= points to the area after the link.
 
 **** Faces
 
