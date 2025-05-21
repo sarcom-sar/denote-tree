@@ -42,6 +42,15 @@ link.  If the pair is the same integer, then perform the insertion in
 place."
   :type 'function)
 
+(defcustom denote-tree-link-after-link-insertion-hooks '()
+  "List of hooks to run after the link was inserted.
+
+This variable is primarily used to modify the text around inserted link.
+Before this hook is ran the buffer is narrowed to just the link itself.
+`point-min' points to the area behind the link, while the `point-max'
+points to the area after the link."
+  :type 'hook)
+
 (defvar denote-tree-link--plist '()
   "Plist of elements necessary while linking.
 
@@ -87,19 +96,24 @@ Restore window configuration."
 (defun denote-tree-link--do-the-link (pos mark link-this-file)
   "Link LINK-THIS-FILE in current buffer at region from POS to MARK.
 
-If POS and MARK are the same, do it at POS."
+If POS and MARK are the same, do it at POS.  During the insertion buffer
+is narrowed to region between POS and MARK."
   (goto-char pos)
-  (denote-link
-   link-this-file
-   (car (save-excursion (denote-tree--find-filetype (current-buffer))))
-   (if (eql pos mark)
-       (if (boundp 'denote-link-description-format)
-           ;; denote > 3.1.0
-           (denote-get-link-description link-this-file)
-         ;; denote <= 3.1.0
-         (funcall denote-link-description-function link-this-file))
-     (prog1 (buffer-substring pos mark)
-       (delete-region pos mark))))
+  (save-restriction
+    (widen)
+    (narrow-to-region pos mark)
+    (denote-link
+     link-this-file
+     (car (save-excursion (denote-tree--find-filetype (current-buffer))))
+     (if (eql pos mark)
+         (if (boundp 'denote-link-description-format)
+             ;; denote > 3.1.0
+             (denote-get-link-description link-this-file)
+           ;; denote <= 3.1.0
+           (funcall denote-link-description-function link-this-file))
+       (prog1 (buffer-substring pos mark)
+         (delete-region pos mark))))
+    (run-hooks 'denote-tree-link-after-link-insertion-hooks))
   (write-file (buffer-file-name) nil))
 
 (defun denote-tree-link-kill ()
