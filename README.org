@@ -23,8 +23,9 @@ If you have GNU Emacs>=29.1, then feel free to get it from here:
      :vc-backend Git))
 #+end_src
 
-The entry point function is =denote-tree=, which acts on current buffer
-searching for any denote identifiers within it.
+The entry point function is =denote-tree=, which acts on any file-visiting
+buffer (defaulting to the current buffer) searching for any denote identifiers
+within it.
 
 It is able to handle cyclical notes and provides a mechanism to move between
 those cyclical nodes by default.  The initial cost of drawing a full tree is
