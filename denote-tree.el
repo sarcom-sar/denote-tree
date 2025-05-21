@@ -205,30 +205,34 @@ open it.
   :interactive nil)
 
 ;;;###autoload
-(defun denote-tree (&optional buffer)
+(defun denote-tree (buffer)
   "Draw hierarchy between denote files as a tree.
 
-The function uses either the current buffer, if called interactively or
-a BUFFER provided by the user."
-  (interactive)
-  (let (buffer-name)
+The function allows the user to choose between all file-visiting
+buffers.  If called non-interactively, then the BUFFER has to be a valid
+denote-style identifier."
+  (interactive
+   (list
+    (buffer-file-name
+     (get-buffer
+      (read-buffer "Draw buffer: "
+                   (if (eq (selected-window) (next-window))
+		                   (other-buffer (current-buffer))
+		                 (window-buffer (next-window)))
+		               t
+                   (lambda (x) (buffer-file-name (cdr x))))))))
+  (let* ((id (denote-retrieve-filename-identifier-with-error buffer))
+         (buffer-name (concat "*" denote-tree-buffer-prefix " " id "*")))
     (unwind-protect
         (progn
           (setq denote-tree--extended-filetype
                 (denote-tree--build-extended-filetype
                  denote-file-types denote-tree-extend-filetype-with))
-          (setq buffer
-                (denote-retrieve-filename-identifier-with-error
-                 (or (and (bufferp buffer) (buffer-file-name buffer))
-                     buffer
-                     (buffer-file-name))))
-          (setq buffer-name
-                (concat "*" denote-tree-buffer-prefix " " buffer "*"))
           (let ((inhibit-read-only t))
             (with-current-buffer (get-buffer-create buffer-name)
               (erase-buffer)
               (denote-tree-mode)
-              (denote-tree--draw-tree buffer)
+              (denote-tree--draw-tree id)
               (setq denote-tree--buffer-name buffer-name)))
           (pop-to-buffer buffer-name)
           (goto-char (1+ (length denote-tree-lower-knee))))
