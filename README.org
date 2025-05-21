@@ -115,8 +115,9 @@ It handles both linking and unlinking nodes via =denote-tree-link-nodes= and
 **** User facing functions
 
 - =denote-tree= (&optional buffer)
-  Draw hierarchy between denote files as a tree.  The function uses either the
-  current buffer, if called from a function or a BUFFER provided by the user.
+  Draw hierarchy between denote files as a tree.  The function allows the user
+  to choose between all file-visiting buffers.  If called non-interactively,
+  then the BUFFER has to be a valid denote-style identifier.
 - =denote-tree-next-node= (&optional arg)
   Move the point to the next sibling node ARG times.  If ARG is negative move
   to the prev sibling node ARG times.  If ARG is omitted, nil or zero, move
