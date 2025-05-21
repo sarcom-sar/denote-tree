@@ -47,6 +47,7 @@ It handles both linking and unlinking nodes via =denote-tree-link-nodes= and
 | e          | denote-tree-edit-node        |
 | i          | denote-tree-link-nodes       |
 | u          | denote-tree-unlink-node      |
+| s          | denote-tree-spawn-child-node |
 | RET        | denote-tree-enter-node       |
 
 *** Visualization
