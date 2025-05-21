@@ -29,7 +29,9 @@
   (let ((denote-tree--extended-filetype denote-tree-link-test-mock--extended-filetype))
     (with-temp-buffer
       (insert "\n")
-      (should-not (denote-tree-link-insert-after-front-matter)))
+      (should
+       (equal (denote-tree-link-insert-after-front-matter)
+              (list (point-max) (point-max)))))
     (with-temp-buffer
       (let ((proper-len (+ 2 (length denote-org-front-matter))))
         (insert denote-org-front-matter
