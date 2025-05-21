@@ -157,16 +157,19 @@ function sets buffer-local `denote-tree-link--plist' in order to
   (list (point-max) (point-max)))
 
 (defun denote-tree-link-insert-after-front-matter ()
-  "Return the position after the front-matter."
-  (when-let* ((front-matter
-               (symbol-value
-                (plist-get (cdr (denote-tree--find-filetype (current-buffer)))
-                           :front-matter))))
+  "Return the position after the front-matter.
+
+If it can not be determined, default to EoF."
+  (if-let* ((front-matter
+             (symbol-value
+              (plist-get (cdr (denote-tree--find-filetype (current-buffer)))
+                         :front-matter))))
     (save-excursion
       (goto-char (point-min))
       (forward-line
        (length (split-string front-matter "\n")))
-      (list (point) (point)))))
+      (list (point) (point)))
+    (denote-tree-link-insert-at-eof)))
 
 (provide 'denote-tree-link)
 ;;; denote-tree-link.el ends here
