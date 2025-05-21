@@ -129,10 +129,10 @@ examine it."
 (defun denote-tree-link--helper (link-this to-this)
   "Link note LINK-THIS to note TO-THIS.
 
-If `denote-tree-link-insert-function' is set, do it automatically.
-Otherwise prompt the user for manual interaction.  This function sets
-buffer-local `denote-tree-link--plist' in order to restore user window
-configuration."
+If `denote-tree-link-insert-function' is set, do it
+automatically. Otherwise prompt the user for manual interaction.  This
+function sets buffer-local `denote-tree-link--plist' in order to
+\"smuggle\" the state beyond the function call."
   (let ((to-this-buff (find-file-noselect to-this))
         (main-buff (current-buffer)))
     (with-current-buffer to-this-buff
