@@ -972,7 +972,7 @@ mangles the SYMBOL like so,
 :key-value-regexp      -> key
 :foo-bar-regexp        -> foo
 :identifier-val-regexp -> identifier"
-  (setq extractor-regexp (or extractor-regexp ":\\(.+?\\)-\\(?:.*?\\)regexp"))
+  (or extractor-regexp (setq extractor-regexp ":\\(.+?\\)-\\(?:.*?\\)regexp"))
   (and (eq (intern
             (replace-regexp-in-string
              extractor-regexp "\\1" (symbol-name symbol)))
