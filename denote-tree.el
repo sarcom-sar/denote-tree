@@ -458,19 +458,20 @@ properties."
   (with-current-buffer parent
     (goto-char (point-min))
     (when-let* ((file-type (denote-tree--find-filetype parent))
-                (link (plist-get (cdr file-type) :link))
                 (link-in-context
-                 (plist-get (cdr file-type) :link-in-context-regexp))
+                 (thread-last
+                   (plist-get (cdr file-type) :link-in-context-regexp)
+                   symbol-value))
                 (link-range
-                 (denote-tree--link-range node ".*?" link))
+                 (thread-last
+                   (plist-get (cdr file-type) :link)
+                   symbol-value
+                   (denote-tree--link-range node ".*?")))
                 (link-string
                  (buffer-substring-no-properties
                   (car link-range) (cadr link-range))))
       (save-match-data
-        (string-match (if (symbolp link-in-context)
-                          (symbol-value link-in-context)
-                        link-in-context)
-                      link-string)
+        (string-match link-in-context link-string)
         (goto-char (car link-range))
         (delete-region (car link-range) (cadr link-range))
         (when (match-beginning 2)
@@ -482,16 +483,14 @@ properties."
   "Find NODE with DESCRIPTION in LINK style.
 
 If none present, return nil."
-  (let* ((regex-to-search
-          (concat "\\("
-                  (regexp-quote (if (symbolp link)
-                                    (symbol-value link)
-                                  link))
-                  "\\)"))
-         (id-only-regex (concat
-                         "\\("
-                         (regexp-quote denote-id-only-link-format)
-                         "\\)")))
+  (let ((regex-to-search
+         (concat "\\("
+                 (regexp-quote link)
+                 "\\)"))
+        (id-only-regex
+         (concat "\\("
+                 (regexp-quote denote-id-only-link-format)
+                 "\\)")))
     (save-match-data
       (when (or (re-search-forward
                  (format regex-to-search node description) nil t)
