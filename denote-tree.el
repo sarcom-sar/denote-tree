@@ -981,10 +981,11 @@ mangles the SYMBOL like so,
 
 (defun denote-tree--collect-keywords-as-string (buffer keywords)
   "Return KEYWORDS as a joint string from BUFFER."
-  (string-join (seq-filter
-                #'identity
-                (mapcar #'cdr (denote-tree--collect-keywords buffer keywords)))
-               " "))
+  (let ((result '()))
+    (dolist (el (denote-tree--collect-keywords buffer keywords))
+      (when (cdr el)
+        (push (cdr el) result)))
+    (string-join (nreverse result) " ")))
 
 (defun denote-tree--find-filetype (buffer)
   "Guess the filetype in BUFFER and return it as a symbol.
