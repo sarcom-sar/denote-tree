@@ -557,16 +557,13 @@ return a list of four elements each."
 (defun denote-tree--fix-children-in-alist (alist)
   "Copy :children of true node to the same prop of duplicate node in ALIST."
   (let (new-alist)
-    (seq-do
-     (lambda (x)
-       (push
-        (if-let* ((true-name (plist-get (cdr x) :true-name))
-                  ((not (eq (car x) true-name)))
-                  (children (denote-tree--nested-value alist true-name :children)))
-            (append (list (car x)) (plist-put (cdr x) :children children))
-          x)
-        new-alist))
-     alist)))
+    (dolist (x alist (nreverse new-alist))
+      (if-let* ((true-name (plist-get (cdr x) :true-name))
+                ((not (eq (car x) true-name)))
+                (children (denote-tree--nested-value alist true-name :children)))
+          (push (append (list (car x)) (plist-put (cdr x) :children children))
+                new-alist)
+        (push x new-alist)))))
 
 (defun denote-tree--draw-node-list (alist initial-node)
   "Draw every node in ALIST starting from INITIAL-NODE."
