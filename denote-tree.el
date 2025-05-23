@@ -808,12 +808,10 @@ with it.  Children of that node become effectively lost."
           (denote-tree--walk-region
            (lambda ()
              (get-text-property
-              (point) 'denote-tree--identifier)))))
-    (seq-reduce
-     (lambda (payload el)
-       (setq payload (append (list (assq el alist)) payload)))
-     nodes-in-region
-     '())))
+              (point) 'denote-tree--identifier))))
+         (result '()))
+    (dolist (el nodes-in-region result)
+      (push (assq el alist) result))))
 
 (defun denote-tree--args-for-walking (node alist)
   "Return NODE information from ALIST.
