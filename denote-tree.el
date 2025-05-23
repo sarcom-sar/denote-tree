@@ -919,9 +919,10 @@ Return as a list sans BUFFER's own identifier."
                  (cdr)
                  (denote-tree--get-regexps))))
     (with-current-buffer buffer
-      (mapcar (lambda (el)
-                (denote-tree--collect-keywords-helper el regexps))
-              keywords))))
+      (let ((result '()))
+        (dolist (el keywords (nreverse result))
+          (push (denote-tree--collect-keywords-helper el regexps)
+                result))))))
 
 (defun denote-tree--collect-keywords-helper (el regexps)
   "Turn EL into cons according to REGEXPS."
