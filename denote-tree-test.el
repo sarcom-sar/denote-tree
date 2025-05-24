@@ -193,7 +193,7 @@ allows to classify the type of front matter denote is dealing with."
        "org-signature: foz\n"
        "org-date: fazboo")
       (should
-       (equal-including-properties
+       (seq-set-equal-p
         (denote-tree--collect-keywords
          (current-buffer) '(title identifier keywords signature date))
         `((title . ,(propertize "foo" 'denote-tree--type 'title))
@@ -208,7 +208,7 @@ allows to classify the type of front matter denote is dealing with."
        "org-signature: foz\n"
        "org-date: fazboo")
       (should
-       (equal-including-properties
+       (seq-set-equal-p
         (denote-tree--collect-keywords
          (current-buffer) '(title identifier keywords signature date))
         `((title . ,(propertize "foo" 'denote-tree--type 'title))
@@ -220,7 +220,7 @@ allows to classify the type of front matter denote is dealing with."
       (should-not (denote-tree--collect-keywords (current-buffer) '())))
     (with-temp-buffer
       (should
-       (equal
+       (seq-set-equal-p
         (denote-tree--collect-keywords
          (current-buffer) '(title identifier))
         '((title) (identifier)))))
@@ -234,7 +234,7 @@ allows to classify the type of front matter denote is dealing with."
       (with-temp-buffer
         (insert "org-kazoo: PRRT")
         (should
-         (equal-including-properties
+         (seq-set-equal-p
           (denote-tree--collect-keywords (current-buffer) '(kazoo))
           `((kazoo . ,(propertize "PRRT" 'denote-tree--type 'kazoo)))))))))
 
