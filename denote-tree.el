@@ -902,13 +902,11 @@ Return as a list sans BUFFER's own identifier."
   "Add keys and values from ADD-THIS to GEN-FROM alist."
   (let ((ext-filetype (copy-tree gen-from)))
     (dolist (type ext-filetype)
-      (mapc
-       (lambda (key)
-         (unless (plist-member (cdr type) (car key))
-           (setf (cdr type)
-                 (plist-put
-                  (cdr type) (car key) (plist-get (cdr key) (car type))))))
-       add-this))
+      (let ((ret '()))
+        (dolist (key add-this)
+          (push (plist-get (cdr key) (car type)) ret)
+          (push (car key) ret))
+        (setf (cdr type) (seq-union (cdr type) ret))))
     ext-filetype))
 
 (defun denote-tree--collect-keywords (buffer keywords)
