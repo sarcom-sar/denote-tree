@@ -918,7 +918,7 @@ Return as a list sans BUFFER's own identifier."
                  (denote-tree--get-regexps))))
     (with-current-buffer buffer
       (let ((result '()))
-        (dolist (el keywords (nreverse result))
+        (dolist (el keywords result)
           (push (denote-tree--collect-keywords-helper el regexps)
                 result))))))
 
