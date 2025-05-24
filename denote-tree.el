@@ -557,6 +557,7 @@ return a list of four elements each."
 (defun denote-tree--fix-children-in-alist (alist)
   "Copy :children of true node to the same prop of duplicate node in ALIST."
   (let (new-alist)
+    ;; the order matters, make it not so
     (dolist (x alist (nreverse new-alist))
       (if-let* ((true-name (plist-get (cdr x) :true-name))
                 ((not (eq (car x) true-name)))

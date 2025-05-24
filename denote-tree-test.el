@@ -440,20 +440,28 @@ and it's value in plist is a string."
   "Tests for `denote-tree--fix-children-in-alist'."
   (let ((alist '((a12 :true-name a :children nil)
                  (a :true-name a :children (b c)))))
-    (should (equal (denote-tree--fix-children-in-alist alist)
-                   '((a12 :true-name a :children (b c))
-                     (a :true-name a :children (b c))))))
+    (should
+     (seq-set-equal-p
+      (denote-tree--fix-children-in-alist alist)
+      '((a12 :true-name a :children (b c))
+        (a :true-name a :children (b c))))))
   (let ((alist '((a :true-name a :children nil))))
-    (should (equal (denote-tree--fix-children-in-alist alist)
-                   '((a :true-name a :children nil)))))
+    (should
+     (seq-set-equal-p
+      (denote-tree--fix-children-in-alist alist)
+      '((a :true-name a :children nil)))))
   (let ((alist '((a12 :true-name a :children nil))))
-    (should (equal (denote-tree--fix-children-in-alist alist)
-                   '((a12 :true-name a :children nil)))))
+    (should
+     (seq-set-equal-p
+      (denote-tree--fix-children-in-alist alist)
+      '((a12 :true-name a :children nil)))))
   (let ((alist '((a12 :true-name a :children (b c))
                  (a :true-name a :children (d e)))))
-    (should (equal (denote-tree--fix-children-in-alist alist)
-                   '((a12 :true-name a :children (d e))
-                     (a :true-name a :children (d e)))))))
+    (should
+     (seq-set-equal-p
+      (denote-tree--fix-children-in-alist alist)
+      '((a12 :true-name a :children (d e))
+        (a :true-name a :children (d e)))))))
 
 (ert-deftest denote-tree-test--draw-node-foo ()
   "Tests for `denote-tree--draw-node-foo'."
