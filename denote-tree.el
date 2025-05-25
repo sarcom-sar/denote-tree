@@ -790,18 +790,19 @@ low value."
 If a node is deleted during rescan of a tree, then there is
 a possibility, that that node had cyclical buffers associated
 with it.  Children of that node become effectively lost."
-  (seq-reduce
-   (lambda (acc orp-el)
-     (push (seq-find
-            (lambda (alist-el)
-              (let ((el-name (symbol-name orp-el))
-                    (alist-key (symbol-name (car alist-el))))
-                (and (not (string= el-name alist-key))
-                     (string-prefix-p el-name alist-key))))
-            alist)
-           acc))
-   orphaned
-   '()))
+  (let ((result '()))
+    (dolist (orp-el orphaned result)
+      (let ((orphan (denote-tree--first-orphan (symbol-name orp-el) alist)))
+        (push orphan result)))))
+
+(defun denote-tree--first-orphan (el-name alist)
+  "Return first element of ALIST equal to EL-NAME or nil."
+  (catch 'break
+    (dolist (alist-el alist)
+      (let ((alist-key (symbol-name (car alist-el))))
+        (when (and (not (string= el-name alist-key))
+                   (string-prefix-p el-name alist-key))
+          (throw 'break alist-el))))))
 
 (defun denote-tree--alist-in-region (alist)
   "Return ALIST of nodes from the current region."
