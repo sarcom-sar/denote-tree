@@ -217,8 +217,8 @@ denote-style identifier."
      (get-buffer
       (read-buffer "Draw buffer: "
                    (if (eq (selected-window) (next-window))
-		                   (other-buffer (current-buffer))
-		                 (window-buffer (next-window)))
+		                   (window-buffer (next-window))
+		                 (other-buffer (current-buffer)))
 		               t
                    (lambda (x) (buffer-file-name (cdr x))))))))
   (let* ((id (denote-retrieve-filename-identifier-with-error buffer))
