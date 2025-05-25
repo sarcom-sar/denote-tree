@@ -1227,6 +1227,16 @@ and it's value in plist is a string."
    (equal (denote-tree--find-orphans '(a) '((a baz) (a5 foo) (b bar)))
           '((a5 foo)))))
 
+(ert-deftest denote-tree-test--first-orphan ()
+  (should
+   (equal (denote-tree--first-orphan "a" '((a5 foo) (b bar)))
+          '(a5 foo)))
+  (should-not (denote-tree--first-orphan "a" '((b bar) (b5 bar))))
+  (should-not (denote-tree--first-orphan "a" '((a foo) (b bar))))
+  (should
+   (equal (denote-tree--first-orphan "a" '((a foo) (a1 car) (a2 dar)))
+          '(a1 car))))
+
 (ert-deftest denote-tree-test--link-range ()
   "Tests for `denote-tree--link-range'."
   (with-temp-buffer
