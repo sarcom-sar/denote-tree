@@ -701,7 +701,7 @@ The following attributes are recognised:
   (let* ((node x)
          (true-node (plist-get args :true-name))
          (indent (denote-tree--calculate-indent
-                  (plist-get args :indent)
+                  (or (plist-get args :indent) "")
                   (plist-get args :lastp))))
     (denote-tree--open-link-maybe (symbol-name true-node))
     (list
