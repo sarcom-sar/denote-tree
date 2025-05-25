@@ -510,27 +510,40 @@ If none present, return nil."
   (when denote-tree--tree-alist
     (denote-tree--draw-node-list denote-tree--tree-alist (intern buffer))))
 
-(defun denote-tree--traverse-structure
-    (element alist info stack call-fn &optional other-fn)
-  "Traverse the structure calling CALL-FN or OTHER-FN, return the ALIST.
+(defun denote-tree--traverse-structure (alist &rest args)
+  "Iterate on ALIST via ARGS.  Return a new alist.
 
-CALL-FN and OTHER-FN are user supplied functions with 4 arguments which
-are in charge of maintaining the stack.  ELEMENT is a current element under
-traversal.  ALIST stores the general information, INFO should store the
-specific information, while STACK maintains the elements to traverse further.
+This function abstracts the traversal of structure defied in ALIST, both the
+`:call-fn' and `:other-fn' should return a list of elements ELEMENT, NEW-ALIST,
+INFO and STACK which specify the the next step of iteration.
 
-If CALL-FN returns nil, OTHER-FN is called instead.  These functions should
-return a list of four elements each."
-  (when (car alist)
-    (let ((progress (make-progress-reporter "Building denote-tree buffer..."))
-          (new-alist (copy-sequence alist)))
-      (while element
-        (seq-setq (element new-alist info stack)
-                  (or (funcall call-fn element new-alist info stack)
-                      (funcall other-fn new-alist info stack)))
-        (progress-reporter-update progress))
-      (progress-reporter-done progress)
-      new-alist)))
+The full detail of all attributes:
+
+ `:call-fn' - user supplied functions with 4 arguments which are in
+              charge of maintaining the stack;
+`:other-fn' - user supplied function with 3 arguments which is ran if function
+              defined by `:call-fn' failed.  If this argument is empty, default
+              to `(lambda (x y z) (list (cadr z) x y (cdr z)))';
+ `:element' - current element under traversal;
+    `:info' - stores the information specific to the current `:call-fn' or
+              `:other-fn' implementation that can not be generalised;
+   `:stack' - maintains the elements to traverse further."
+  (let ((element (plist-get args :element))
+        (info (plist-get args :info))
+        (stack (plist-get args :stack))
+        (call-fn (plist-get args :call-fn))
+        (other-fn (or (plist-get args :other-fn)
+                      (lambda (x y z) (list (cadr z) x y (cdr z))))))
+    (when (car alist)
+      (let ((progress (make-progress-reporter "Building denote-tree buffer..."))
+            (new-alist (copy-sequence alist)))
+        (while element
+          (seq-setq (element new-alist info stack)
+                    (or (funcall call-fn element new-alist info stack)
+                        (funcall other-fn new-alist info stack)))
+          (progress-reporter-update progress))
+        (progress-reporter-done progress)
+        new-alist))))
 
 (defun denote-tree--walk-links-iteratively
     (buffer indent lastp depth &optional parent next prev suppl-alist)
@@ -539,7 +552,6 @@ return a list of four elements each."
     (setq next (or next node))
     (setq prev (or prev node))
     (denote-tree--traverse-structure
-     node
      (append
       (list
        (denote-tree--node-plist
@@ -552,14 +564,14 @@ return a list of four elements each."
         :lastp lastp
         :depth depth))
       suppl-alist)
-     nil
-     (list node)
-     #'denote-tree--grow-alist-and-stack
-     (lambda (alist _ stack)
-       (list (cadr stack)
-             alist
-             nil
-             (cdr stack))))))
+     :element node
+     :stack (list node)
+     :call-fn #'denote-tree--grow-alist-and-stack
+     :other-fn (lambda (alist _ stack)
+                 (list (cadr stack)
+                       alist
+                       nil
+                       (cdr stack))))))
 
 (defun denote-tree--fix-children-in-alist (alist)
   "Copy :children of true node to the same prop of duplicate node in ALIST."
@@ -576,13 +588,16 @@ return a list of four elements each."
 (defun denote-tree--draw-node-list (alist initial-node)
   "Draw every node in ALIST starting from INITIAL-NODE."
   (denote-tree--traverse-structure
-   initial-node alist (alist-get initial-node alist) (list initial-node)
-   #'denote-tree--draw-node-list-helper
-   (lambda (alist _ stack)
-     (list (cadr stack)
-           alist
-           (alist-get (cadr stack) alist)
-           (cdr stack)))))
+   alist
+   :element initial-node
+   :info (alist-get initial-node alist)
+   :stack (list initial-node)
+   :call-fn #'denote-tree--draw-node-list-helper
+   :other-fn (lambda (alist _ stack)
+               (list (cadr stack)
+                     alist
+                     (alist-get (cadr stack) alist)
+                     (cdr stack)))))
 
 (defun denote-tree--draw-node-list-helper (node alist node-plist stack)
   "Set the current NODE in NODE-PLIST and advance the STACK.
