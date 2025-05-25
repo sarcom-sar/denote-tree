@@ -549,8 +549,8 @@ The full detail of all attributes:
     (buffer indent lastp depth &optional parent next prev suppl-alist)
   "Walk links from BUFFER with starting INDENT."
   (let ((node (intern buffer)))
-    (setq next (or next node))
-    (setq prev (or prev node))
+    (or next (setq next node))
+    (or prev (setq prev node))
     (denote-tree--traverse-structure
      (append
       (list
