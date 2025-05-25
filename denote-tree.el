@@ -953,11 +953,11 @@ Return as a list sans BUFFER's own identifier."
     (while plist
       (setq el (car plist))
       (and (symbolp el)
-	   (string-suffix-p
-	    "-regexp" (symbol-name el))
-	   (stringp (cadr plist))
-	   (push (cadr plist) lst)
-	   (push el lst))
+	         (string-suffix-p
+	          "-regexp" (symbol-name el))
+	         (stringp (cadr plist))
+	         (push (cadr plist) lst)
+	         (push el lst))
       (setq plist (cddr plist)))
     (seq-partition lst 2)))
 
