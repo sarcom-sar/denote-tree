@@ -1155,7 +1155,14 @@ and it's value in plist is a string."
              (lambda (x y)
                x)))
     (let* ((alist (list (denote-tree--node-plist
-                         '(a . a) 'a 'a nil "" t t)))
+                         'a
+                         :true-name 'a
+                         :next 'a
+                         :prev 'a
+                         :parent nil
+                         :indent ""
+                         :lastp t
+                         :depth t)))
            (ret (denote-tree--grow-alist-and-stack 'a alist nil (list 'a)))
            (new-alist (cadr ret))
            (new-stack (cadddr ret))
@@ -1178,7 +1185,14 @@ and it's value in plist is a string."
              (lambda (x y)
                x)))
     (let* ((alist (list (denote-tree--node-plist
-                         '(a . a) 'a 'a nil "" t t)))
+                         'a
+                         :true-name 'a
+                         :next 'a
+                         :prev 'a
+                         :parent nil
+                         :indent ""
+                         :lastp t
+                         :depth t)))
            (ret (denote-tree--grow-alist-and-stack 'a alist nil (list 'a)))
            (new-alist (cadr ret))
            (new-stack (cadddr ret))

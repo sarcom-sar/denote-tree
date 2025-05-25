@@ -543,7 +543,14 @@ return a list of four elements each."
      (append
       (list
        (denote-tree--node-plist
-        (cons node node) next prev parent indent lastp depth))
+        node
+        :true-name node
+        :next next
+        :prev prev
+        :parent parent
+        :indent indent
+        :lastp lastp
+        :depth depth))
       suppl-alist)
      nil
      (list node)
@@ -644,13 +651,14 @@ and sets up everything for next iteration."
             (append
              (mapcar (lambda (x)
                        (denote-tree--node-plist
-                        x
-                        (denote-tree--next-sibling (car x) children-list)
-                        (denote-tree--next-sibling (car x) (reverse children-list))
-                        node
-                        indent
-                        (eq (car x) last-children-node)
-                        new-depth))
+                        (car x)
+                        :true-name (cdr x)
+                        :next (denote-tree--next-sibling (car x) children-list)
+                        :prev (denote-tree--next-sibling (car x) (reverse children-list))
+                        :parent node
+                        :indent indent
+                        :lastp (eq (car x) last-children-node)
+                        :depth new-depth))
                      children)
              alist)))
       (setf (alist-get node new-alist)
@@ -664,30 +672,35 @@ If EXISTSP, return an unique identifier."
   (cons (if existsp (gensym node) node)
         node))
 
-(defun denote-tree--node-plist (x &optional next prev parent indent lastp depth)
-  "Build full plist for X.
+(defun denote-tree--node-plist (x &rest args)
+  "Build full plist for node X.
 
-  Argument NEXT - next sibling
-  Argument PREV - previous sibling
-Argument PARENT - parent node
-Argument INDENT - next indent
- Argument LASTP - is the node last node."
-  (let* ((node (car x))
-         (true-node (cdr x))
-         (indent (denote-tree--calculate-indent indent lastp)))
+The following attributes are recognised:
+
+`:true-name' - denote id of the note;
+     `:next' - next sibling;
+     `:prev' - previous sibling;
+   `:parent' - parent node;
+   `:indent' - next indent;
+    `:lastp' - is the node last node."
+  (let* ((node x)
+         (true-node (plist-get args :true-name))
+         (indent (denote-tree--calculate-indent
+                  (plist-get args :indent)
+                  (plist-get args :lastp))))
     (denote-tree--open-link-maybe (symbol-name true-node))
     (list
      node
      :next-indent indent
      :true-name true-node
-     :next next
-     :prev prev
+     :next (plist-get args :next)
+     :prev (plist-get args :prev)
      :descp (denote-tree--collect-keywords-as-string
              (symbol-name true-node) denote-tree-node-description)
      :children nil
-     :parent parent
-     :last lastp
-     :depth depth)))
+     :parent (plist-get args :parent)
+     :last (plist-get args :lastp)
+     :depth (plist-get args :depth))))
 
 (defun denote-tree--next-sibling (x siblings)
   "Return the :next SIBLING of X."
