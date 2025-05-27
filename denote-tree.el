@@ -506,7 +506,9 @@ If none present, return nil."
   (setq denote-tree--tree-alist
         (denote-tree--fix-children-in-alist
          (denote-tree--walk-links-iteratively
-          buffer "" t denote-tree-max-traversal-depth)))
+          buffer
+          :lastp t
+          :depth denote-tree-max-traversal-depth)))
   (when denote-tree--tree-alist
     (denote-tree--draw-node-list denote-tree--tree-alist (intern buffer))))
 
@@ -545,12 +547,35 @@ The full detail of all attributes:
         (progress-reporter-done progress)
         new-alist))))
 
-(defun denote-tree--walk-links-iteratively
-    (buffer indent lastp depth &optional parent next prev suppl-alist)
-  "Walk links from BUFFER with starting INDENT."
-  (let ((node (intern buffer)))
-    (or next (setq next node))
-    (or prev (setq prev node))
+(defun denote-tree--walk-links-iteratively (buffer &rest args)
+  "Walk along the links from BUFFER with ARGS.
+
+This function returns a new alist that maps relations between nodes in
+form specified by `denote-tree--node-plist'.
+
+The following attributes are recognized:
+
+      `:indent' - initial indentation for the first node;
+       `:lastp' - is this node the last node?
+       `:depth' - maximum depth the traversal is going to have, if t, then it's
+                  unlimited;
+      `:parent' - parent of a current node, the root's parent is nil;
+        `:next' - next sibling of the parent node, if there is none, then it's
+                  the same node;
+        `:prev' - prev sibling of the parent node, if there is none, then it's
+                  the same node;
+`:suppl-alist:' - if this is not the first traversal, then this is the
+                  current alist, which will be used to build a nowe one."
+  (let* ((node (intern buffer))
+         (indent (plist-get args :indent))
+         (lastp (plist-get args :lastp))
+         (depth (plist-get args :depth))
+         (parent (plist-get args :parent))
+         (next (or (plist-get args :next)
+                   node))
+         (prev (or (plist-get args :prev)
+                   node))
+         (suppl-alist (plist-get args :suppl-alist)))
     (denote-tree--traverse-structure
      (append
       (list
@@ -776,13 +801,24 @@ low value."
                       (save-excursion
                         (denote-tree--alist-in-region alist)))
                      (alist-sans-region
-                      (list (seq-difference alist alist-in-region)))
-                     (args-for-walking
-                      (denote-tree--args-for-walking curr-node alist)))
+                      (seq-difference alist alist-in-region)))
                 (setq new-alist (denote-tree--fix-children-in-alist
-                                 (apply #'denote-tree--walk-links-iteratively
-                                        (append args-for-walking
-                                                alist-sans-region))))
+                                 (denote-tree--walk-links-iteratively
+                                  (symbol-name curr-node)
+                                  :indent (buffer-substring-no-properties
+                                           (line-beginning-position)
+                                           (- (denote-tree--get-node-pos)
+                                              (length denote-tree-node)))
+                                  :lastp (denote-tree--nested-value
+                                          alist curr-node :last)
+                                  :depth denote-tree-max-traversal-depth
+                                  :parent (denote-tree--nested-value
+                                           alist curr-node :parent)
+                                  :next (denote-tree--nested-value
+                                         alist curr-node :next)
+                                  :prev (denote-tree--nested-value
+                                         alist curr-node :prev)
+                                  :suppl-alist alist-sans-region)))
                 (setq orphans
                       (seq-difference (mapcar #'car alist-in-region)
                                       (mapcar #'car new-alist)))
