@@ -963,7 +963,7 @@ Return as a list sans BUFFER's own identifier."
    ((re-search-forward
      (cadr (seq-find
             (lambda (reg)
-              (denote-tree--extract-and-compare-symbols (car reg) el))
+              (denote-tree--extract-and-compare-symbol (car reg) el))
             regexps))
      nil t)
     (cons el
@@ -989,7 +989,7 @@ Return as a list sans BUFFER's own identifier."
       (setq plist (cddr plist)))
     (seq-partition lst 2)))
 
-(defun denote-tree--extract-and-compare-symbols
+(defun denote-tree--extract-and-compare-symbol
     (symbol element &optional extractor-regexp)
   "Apply EXTRACTOR-REGEXP to SYMBOL and compare with ELEMENT.
 
@@ -999,13 +999,29 @@ mangles the SYMBOL like so,
 
 :key-value-regexp      -> key
 :foo-bar-regexp        -> foo
-:identifier-val-regexp -> identifier"
+:identifier-val-regexp -> identifier
+
+If the mangled form is `eq' to SYMBOL, return the SYMBOL."
   (or extractor-regexp (setq extractor-regexp ":\\(.+?\\)-\\(?:.*?\\)regexp"))
   (and (eq (intern
             (replace-regexp-in-string
              extractor-regexp "\\1" (symbol-name symbol)))
            element)
        symbol))
+
+(defun denote-tree--extract-and-compare-symbols
+    (el regexps &optional extractor-regexp)
+  "Return symbol in REGEXPS, that matches EL.
+
+Optional argument EXTRACTOR-REGEXP is passed along to
+`denote-tree--extract-and-compare-symbol' and returns the matching
+symbol."
+  (catch 'break
+    (dolist (reg regexps)
+      (let ((symbol (denote-tree--extract-and-compare-symbol
+                     (car reg) el extractor-regexp)))
+        (when symbol
+          (throw 'break symbol))))))
 
 (defun denote-tree--collect-keywords-as-string (buffer keywords)
   "Return KEYWORDS as a joint string from BUFFER."
