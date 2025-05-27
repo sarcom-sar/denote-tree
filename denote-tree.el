@@ -722,7 +722,8 @@ The following attributes are recognised:
      `:prev' - previous sibling;
    `:parent' - parent node;
    `:indent' - next indent;
-    `:lastp' - is the node last node."
+    `:lastp' - is the node last node;
+    `:depth' - depth of the current node."
   (let* ((node x)
          (true-node (plist-get args :true-name))
          (indent (denote-tree--calculate-indent
