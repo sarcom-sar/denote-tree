@@ -338,23 +338,25 @@ allows to classify the type of front matter denote is dealing with."
          (equal (denote-tree--collect-links (buffer-name (current-buffer)))
                 nil))))))
 
-(ert-deftest denote-tree-test--extract-and-compare-symbols ()
-  "Tests for `denote-tree--extract-and-compare-symbols'."
+(ert-deftest denote-tree-test--extract-and-compare-symbol ()
+  "Tests for `denote-tree--extract-and-compare-symbol'."
   (should
-   (eq (denote-tree--extract-and-compare-symbols :title-key-regexp 'title)
+   (eq (denote-tree--extract-and-compare-symbol :title-key-regexp 'title)
        :title-key-regexp))
   (should
-   (eq (denote-tree--extract-and-compare-symbols 'title-key-regexp 'title) nil))
+   (eq (denote-tree--extract-and-compare-symbol 'title-key-regexp 'title)
+       nil))
   (should
-   (eq (denote-tree--extract-and-compare-symbols :date-format 'date) nil))
+   (eq (denote-tree--extract-and-compare-symbol :date-format 'date)
+       nil))
   (should
-   (eq (denote-tree--extract-and-compare-symbols :foo-bar-baz-regexp 'foo)
+   (eq (denote-tree--extract-and-compare-symbol :foo-bar-baz-regexp 'foo)
        :foo-bar-baz-regexp))
   (should
-   (eq (denote-tree--extract-and-compare-symbols :foobar-regexp 'foobar)
+   (eq (denote-tree--extract-and-compare-symbol :foobar-regexp 'foobar)
        :foobar-regexp))
-  (should-not (denote-tree--extract-and-compare-symbols :foo-regexp nil))
-  (should-not (denote-tree--extract-and-compare-symbols nil 'bar)))
+  (should-not (denote-tree--extract-and-compare-symbol :foo-regexp nil))
+  (should-not (denote-tree--extract-and-compare-symbol nil 'bar)))
 
 (ert-deftest denote-tree-test--get-regexps ()
   "Tests for `denote-tree--get-regexps'.
