@@ -955,25 +955,17 @@ Return as a list sans BUFFER's own identifier."
 (defun denote-tree--collect-keywords-helper (el regexps)
   "Turn EL into cons according to REGEXPS."
   (goto-char (point-min))
-  (cond
-   ;; if it's a string, just push it
-   ((stringp el)
-    (cons 'str el))
-   ;; if it's in regexps, covert to str and push
-   ((re-search-forward
-     (cadr (seq-find
-            (lambda (reg)
-              (denote-tree--extract-and-compare-symbol (car reg) el))
-            regexps))
-     nil t)
-    (cons el
-          (funcall denote-tree-node-colorize-function
-                   (denote-trim-whitespace
-                    (buffer-substring-no-properties (point) (line-end-position)))
-                   el)))
-   ;; symbol with no associated str
-   ((symbolp el)
-    (list el))))
+  (or (and (stringp el)
+           (cons 'str el))
+      (and (re-search-forward
+            (cadr (denote-tree--extract-and-compare-symbols el regexps)) nil t)
+           (cons el (funcall denote-tree-node-colorize-function
+                             (denote-trim-whitespace
+                              (buffer-substring-no-properties
+                               (point) (line-end-position)))
+                             el)))
+      (and (symbolp el)
+           (cons el nil))))
 
 (defun denote-tree--get-regexps (plist)
   "Return alist of all keys ending in -regexp with values in PLIST."
