@@ -879,28 +879,6 @@ with it.  Children of that node become effectively lost."
     (dolist (el nodes-in-region result)
       (push (assq el alist) result))))
 
-(defun denote-tree--args-for-walking (node alist)
-  "Return NODE information from ALIST.
-
-To be more specific, the function returns a list of:
-
-- name;
-- indent;
-- last;
-- traversal-depth;
-- parent;
-- next-node;
-- prev-node."
-  (list (symbol-name node)
-        (buffer-substring-no-properties
-         (line-beginning-position)
-         (- (denote-tree--get-node-pos) (length denote-tree-node)))
-        (denote-tree--nested-value alist node :last)
-        denote-tree-max-traversal-depth
-        (denote-tree--nested-value alist node :parent)
-        (denote-tree--nested-value alist node :next)
-        (denote-tree--nested-value alist node :prev)))
-
 (defun denote-tree--determine-node-bounds (node alist)
   "Return bounds of current NODE with ALIST as a cons.
 
