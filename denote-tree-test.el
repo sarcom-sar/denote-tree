@@ -709,7 +709,9 @@ and it's value in plist is a string."
            (setq tree-alist
                  (denote-tree--fix-children-in-alist
                   (denote-tree--walk-links-iteratively
-                   (caar (funcall next)) "" t t)))
+                   (caar (funcall next))
+                   :lastp t
+                   :depth t)))
            (denote-tree--clean-up)))
      tree-alist))
 
