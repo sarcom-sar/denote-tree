@@ -958,7 +958,7 @@ Return as a list sans BUFFER's own identifier."
   (or (and (stringp el)
            (cons 'str el))
       (and (re-search-forward
-            (cadr (denote-tree--extract-and-compare-symbols el regexps)) nil t)
+            (denote-tree--extract-and-compare-symbols el regexps) nil t)
            (cons el (funcall denote-tree-node-colorize-function
                              (denote-trim-whitespace
                               (buffer-substring-no-properties
@@ -1009,11 +1009,12 @@ Optional argument EXTRACTOR-REGEXP is passed along to
 `denote-tree--extract-and-compare-symbol' and returns the matching
 symbol."
   (catch 'break
-    (dolist (reg regexps)
-      (let ((symbol (denote-tree--extract-and-compare-symbol
-                     (car reg) el extractor-regexp)))
-        (when symbol
-          (throw 'break symbol))))))
+    (let ((regexps (if (listp regexps) regexps (list regexps))))
+      (dolist (reg regexps)
+        (let ((symbol (denote-tree--extract-and-compare-symbol
+                       (car reg) el extractor-regexp)))
+          (when symbol
+            (throw 'break (car (alist-get symbol regexps)))))))))
 
 (defun denote-tree--collect-keywords-as-string (buffer keywords)
   "Return KEYWORDS as a joint string from BUFFER."
