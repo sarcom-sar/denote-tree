@@ -58,10 +58,10 @@ points to the area after the link."
   "Plist of elements necessary while linking.
 
 It should consist of:
-- :link-this, the note that will be linked;
-- :to-this, the note to which it will be linked;
-- :denote-tree-buffer, current denote-tree buffer;
-- :window-config, window config to restore.")
+- `:link-this', the note that will be linked;
+- `:to-this', the note to which it will be linked;
+- `:denote-tree-buffer', current denote-tree buffer;
+- `:window-config', window config to restore.")
 
 
 ;;;; Mode definition
