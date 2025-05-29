@@ -1118,7 +1118,7 @@ This function will move the point, if AT-POS is a position."
     (error nil)))
 
 
-;;;; Finalisation
+;;;; Finalization
 
 (defun denote-tree--clean-up ()
   "Clean up buffers created during the tree walk."
