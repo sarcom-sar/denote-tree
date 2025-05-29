@@ -142,17 +142,25 @@ is narrowed to region between POS and MARK."
     (run-hooks 'denote-tree-link-after-link-insertion-hooks))
   (write-file (buffer-file-name) nil))
 
-(defun denote-tree-link-finalize ()
+(defun denote-tree-link-finalize (&optional stay-with-capture)
   "Insert a link between point and mark in the note buffer.
 
-Restore window configuration."
-  (interactive)
+With prefix argument STAY-WITH-CAPTURE, jump to the location of the
+captured item after finalizing."
+  (interactive "P")
   (denote-tree-link--do-the-link
    (point) (or (mark) (point)) (plist-get denote-tree-link--plist :link-this))
   (denote-tree-link-mode -1)
-  (set-window-configuration (plist-get denote-tree-link--plist :window-config))
-  (with-current-buffer (plist-get denote-tree-link--plist :denote-tree-buffer)
-    (denote-tree-redraw)))
+  (let ((marker (set-marker (make-marker) (point))))
+    (set-window-configuration
+     (plist-get denote-tree-link--plist :window-config))
+    (with-current-buffer (plist-get denote-tree-link--plist :denote-tree-buffer)
+      (denote-tree-redraw))
+    (when stay-with-capture
+      (when (or (> marker (point-max)) (< marker (point-min)))
+	      (widen))
+      (pop-to-buffer-same-window (marker-buffer marker))
+      (goto-char marker))))
 
 (defun denote-tree-link-kill ()
   "Abort the linking, restore window configuration.
