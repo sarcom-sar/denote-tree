@@ -394,13 +394,16 @@ user decide where in TO-POINT node the link to FROM-MARK should be set."
 Leave only the text that was there before the linking.  If the link
 contains only an ID, delete entire line sans the newline."
   (interactive "d")
-  (when-let* ((node (denote-tree--get-prop 'button-data pos))
+  (when-let* (;; node id linked with the file
+              (real-node (denote-tree--get-prop 'button-data pos))
+              ;; the gensyme'd id to make it unique
+              (node (get-text-property pos 'denote-tree--identifier))
               (parent-pos (denote-tree--nested-value
-                           denote-tree--tree-alist (intern node) :parent :pos))
+                           denote-tree--tree-alist node :parent :pos))
               (parent-buff (find-file-noselect
                             (denote-get-path-by-id
                              (denote-tree--get-prop 'button-data parent-pos)))))
-    (denote-tree--unlink node parent-buff)))
+    (denote-tree--unlink real-node parent-buff)))
 
 (defun denote-tree-spawn-child-node (pos)
   "Create new child node with node at POS as a parent."
