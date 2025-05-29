@@ -146,7 +146,7 @@ It handles both linking and unlinking nodes via =denote-tree-link-nodes= and
 - =denote-tree-enter-node= (&optional button)
   Enter node at point in other window.  BUTTON is pased as node's ID.
 - =denote-tree-link-nodes= (from-mark to-point)
-  Link node at FROM-MARK to TO-POINT.  If =denote-tree-insert-link-function= is
+  Link node at FROM-MARK to TO-POINT.  If =denote-tree-link-insert-function= is
   set, then perform this based on function's return value.  Otherwise open a
   TO-POINT file and let the user decide where in TO-POINT node the link to
   FROM-MARK should be set.
