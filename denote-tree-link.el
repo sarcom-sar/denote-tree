@@ -161,8 +161,10 @@ Do not actually kill the buffer itself, since the user might wish to
 examine it."
   (interactive)
   (denote-tree-link-mode -1)
-  (bury-buffer)
-  (set-window-configuration (plist-get :window-config denote-tree-link--plist)))
+  (let ((curr-buff (current-buffer)))
+    (set-window-configuration
+     (plist-get denote-tree-link--plist :window-config))
+    (bury-buffer curr-buff)))
 
 
 ;;;; Default functions for denote-tree-link-insert-function
