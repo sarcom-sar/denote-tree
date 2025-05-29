@@ -30,6 +30,9 @@
 (declare-function denote-get-link-description "denote")
 (declare-function denote-tree-redraw "denote-tree")
 
+
+;;;; Customization and vars
+
 (defgroup denote-tree-link ()
   "Functionalities for linking in denote-tree.")
 
@@ -60,6 +63,9 @@ It should consist of:
 - :denote-tree-buffer, current denote-tree buffer;
 - :window-config, window config to restore.")
 
+
+;;;; Mode definition
+
 (defvar denote-tree-link-mode-map
   (let ((map (make-sparse-keymap)))
     (keymap-set map "C-c C-c" #'denote-tree-link-finalize)
@@ -70,7 +76,9 @@ Use this map to set additional keybindings for when denote-tree is used
 for linking notes.")
 
 (define-minor-mode denote-tree-link-mode
-  "Minor mode for inserting a link in a note."
+  "Minor mode for inserting a link in a note.
+
+\\{denote-tree-link-mode-map\}"
   :lighter " Link"
   :interactive nil
   (if (and arg (= 1 arg))
@@ -81,17 +89,35 @@ for linking notes.")
 `\\[denote-tree-link-finalize]', abort `\\[denote-tree-link-kill]'."))
     (setq-local header-line-format nil)))
 
-(defun denote-tree-link-finalize ()
-  "Insert a link between point and mark in the note buffer.
+
+;;;; Module entry point
 
-Restore window configuration."
-  (interactive)
-  (denote-tree-link--do-the-link
-   (point) (or (mark) (point)) (plist-get denote-tree-link--plist :link-this))
-  (denote-tree-link-mode -1)
-  (set-window-configuration (plist-get denote-tree-link--plist :window-config))
-  (with-current-buffer (plist-get denote-tree-link--plist :denote-tree-buffer)
-    (denote-tree-redraw)))
+(defun denote-tree-link--helper (link-this to-this)
+  "Link note LINK-THIS to note TO-THIS.
+
+If `denote-tree-link-insert-function' is set, do it
+automatically. Otherwise prompt the user for manual interaction.  This
+function sets buffer-local `denote-tree-link--plist' in order to
+\"smuggle\" the state beyond the function call."
+  (let ((to-this-buff (find-file-noselect to-this))
+        (main-buff (current-buffer)))
+    (with-current-buffer to-this-buff
+      (setq-local denote-tree-link--plist
+                  `(
+                    :link-this ,link-this
+                    :to-this ,to-this
+                    :denote-tree-buffer ,main-buff
+                    :window-config ,(current-window-configuration))))
+    (cond
+     (denote-tree-link-insert-function
+      (with-current-buffer to-this-buff
+        (seq-let (pos mark) (funcall denote-tree-link-insert-function)
+          (denote-tree-link--do-the-link
+           pos mark link-this)))
+      (denote-tree-redraw))
+     (t
+      (pop-to-buffer to-this-buff)
+      (denote-tree-link-mode 1)))))
 
 (defun denote-tree-link--do-the-link (pos mark link-this-file)
   "Link LINK-THIS-FILE in current buffer at region from POS to MARK.
@@ -116,6 +142,18 @@ is narrowed to region between POS and MARK."
     (run-hooks 'denote-tree-link-after-link-insertion-hooks))
   (write-file (buffer-file-name) nil))
 
+(defun denote-tree-link-finalize ()
+  "Insert a link between point and mark in the note buffer.
+
+Restore window configuration."
+  (interactive)
+  (denote-tree-link--do-the-link
+   (point) (or (mark) (point)) (plist-get denote-tree-link--plist :link-this))
+  (denote-tree-link-mode -1)
+  (set-window-configuration (plist-get denote-tree-link--plist :window-config))
+  (with-current-buffer (plist-get denote-tree-link--plist :denote-tree-buffer)
+    (denote-tree-redraw)))
+
 (defun denote-tree-link-kill ()
   "Abort the linking, restore window configuration.
 
@@ -126,31 +164,8 @@ examine it."
   (bury-buffer)
   (set-window-configuration (plist-get :window-config denote-tree-link--plist)))
 
-(defun denote-tree-link--helper (link-this to-this)
-  "Link note LINK-THIS to note TO-THIS.
-
-If `denote-tree-link-insert-function' is set, do it
-automatically. Otherwise prompt the user for manual interaction.  This
-function sets buffer-local `denote-tree-link--plist' in order to
-\"smuggle\" the state beyond the function call."
-  (let ((to-this-buff (find-file-noselect to-this))
-        (main-buff (current-buffer)))
-    (with-current-buffer to-this-buff
-      (setq-local denote-tree-link--plist
-                  `(:link-this ,link-this
-                    :to-this ,to-this
-                    :denote-tree-buffer ,main-buff
-                    :window-config ,(current-window-configuration))))
-    (cond
-     (denote-tree-link-insert-function
-      (with-current-buffer to-this-buff
-        (seq-let (pos mark) (funcall denote-tree-link-insert-function)
-          (denote-tree-link--do-the-link
-           pos mark link-this)))
-      (denote-tree-redraw))
-     (t
-      (pop-to-buffer to-this-buff)
-      (denote-tree-link-mode 1)))))
+
+;;;; Default functions for denote-tree-link-insert-function
 
 (defun denote-tree-link-insert-at-eof ()
   "Return a pair at the end of the file."
