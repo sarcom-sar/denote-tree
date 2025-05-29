@@ -1338,30 +1338,6 @@ and it's value in plist is a string."
     (with-temp-buffer
       (insert "#+title: f\n"
               "\n"
-              "[[denote:12345678T123456][BAR]]\n"
-              "\n"
-              "Some text no one cares about\n")
-      (goto-char (point-min))
-      (cl-letf (((symbol-function 'write-file)
-                 (lambda (_ _)
-                   nil))
-                ((symbol-function 'denote-tree-redraw)
-                 (lambda ()
-                   nil)))
-        (denote-tree--unlink "BAR" (current-buffer))
-        (should
-         (equal (concat "#+title: f\n"
-                        "\n"
-                        "[[denote:12345678T123456][BAR]]\n"
-                        "\n"
-                        "Some text no one cares about\n")
-                (buffer-substring (point-min) (point-max)))))))
-  (let ((denote-tree--extended-filetype
-         (denote-tree--build-extended-filetype
-          denote-file-types denote-tree-extend-filetype-with)))
-    (with-temp-buffer
-      (insert "#+title: f\n"
-              "\n"
               "[[denote:12345678T123456]]\n"
               "\n"
               "Some text no one cares about\n")
@@ -1397,11 +1373,41 @@ and it's value in plist is a string."
                 ((symbol-function 'denote-tree-redraw)
                  (lambda ()
                    nil)))
-        (denote-tree--unlink "BAR" (current-buffer))
+        ;; not testing for errors, only for not clobbering a buffer
+        (condition-case nil
+            (denote-tree--unlink "BAR" (current-buffer))
+          (error nil))
         (should
          (equal (concat "#+title: f\n"
                         "\n"
                         "[[denote:12345678T123456]]\n"
+                        "\n"
+                        "Some text no one cares about\n")
+                (buffer-substring (point-min) (point-max)))))))
+  (let ((denote-tree--extended-filetype
+         (denote-tree--build-extended-filetype
+          denote-file-types denote-tree-extend-filetype-with)))
+    (with-temp-buffer
+      (insert "#+title: f\n"
+              "\n"
+              "[[denote:12345678T123456][BAR]]\n"
+              "\n"
+              "Some text no one cares about\n")
+      (goto-char (point-min))
+      (cl-letf (((symbol-function 'write-file)
+                 (lambda (_ _)
+                   nil))
+                ((symbol-function 'denote-tree-redraw)
+                 (lambda ()
+                   nil)))
+        ;; not testing for errors, only for not clobbering a buffer
+        (condition-case nil
+            (denote-tree--unlink "BAR" (current-buffer))
+          (error nil))
+        (should
+         (equal (concat "#+title: f\n"
+                        "\n"
+                        "[[denote:12345678T123456][BAR]]\n"
                         "\n"
                         "Some text no one cares about\n")
                 (buffer-substring (point-min) (point-max))))))))
