@@ -150,6 +150,13 @@ It handles both linking and unlinking nodes via =denote-tree-link-nodes= and
   set, then perform this based on function's return value.  Otherwise open a
   TO-POINT file and let the user decide where in TO-POINT node the link to
   FROM-MARK should be set.
+  - =denote-tree-link-finalize= (&optional stay-with-capture)
+    Insert a link between point and mark in the note buffer.  With prefix
+    argument STAY-WITH-CAPTURE, jump to the location of the captured item after
+    finalizing.
+  - =denote-tree-link-kill= ()
+    Abort the linking, restore window configuration.  Do not actually kill the
+    buffer itself, since the user might wish to examine it.
 - =denote-tree-unlink-node= (pos)
   Unlink the node at POS from it's parent.  Leave only the text that was there
   before the linking.  If the link contains only an ID, delete entire line sans
