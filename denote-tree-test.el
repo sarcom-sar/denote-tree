@@ -1274,9 +1274,7 @@ and it's value in plist is a string."
             "\n"
             "Some text no one cares about\n")
     (goto-char (point-min))
-    (should
-     (equal (denote-tree--link-range "blzgh" "BAR" "[[denote:%s][%s]]")
-            nil)))
+    (should-error (denote-tree--link-range "blzgh" "BAR" "[[denote:%s][%s]]")))
   (with-temp-buffer
     (insert "#+title: f\n"
             "\n"
