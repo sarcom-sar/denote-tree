@@ -506,11 +506,12 @@ If none present, return nil."
                  (regexp-quote denote-id-only-link-format)
                  "\\)")))
     (save-match-data
-      (when (or (re-search-forward
-                 (format regex-to-search node description) nil t)
-                (re-search-forward
-                 (format id-only-regex node) nil t))
-        (list (match-beginning 0) (match-end 0))))))
+      (if (or (re-search-forward
+               (format regex-to-search node description) nil t)
+              (re-search-forward
+               (format id-only-regex node) nil t))
+          (list (match-beginning 0) (match-end 0))
+        (error "No valid target for unlinking in node %s" node)))))
 
 
 ;;;; Tree traversal
