@@ -54,7 +54,7 @@ Before this hook is ran the buffer is narrowed to just the link itself.
 points to the area after the link."
   :type 'hook)
 
-(defvar denote-tree-link--plist '()
+(defvar-local denote-tree-link--plist '()
   "Plist of elements necessary while linking.
 
 It should consist of:
@@ -102,12 +102,12 @@ function sets buffer-local `denote-tree-link--plist' in order to
   (let ((to-this-buff (find-file-noselect to-this))
         (main-buff (current-buffer)))
     (with-current-buffer to-this-buff
-      (setq-local denote-tree-link--plist
-                  `(
-                    :link-this ,link-this
-                    :to-this ,to-this
-                    :denote-tree-buffer ,main-buff
-                    :window-config ,(current-window-configuration))))
+      (setq denote-tree-link--plist
+            `(
+              :link-this ,link-this
+              :to-this ,to-this
+              :denote-tree-buffer ,main-buff
+              :window-config ,(current-window-configuration))))
     (cond
      (denote-tree-link-insert-function
       (with-current-buffer to-this-buff
