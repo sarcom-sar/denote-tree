@@ -839,8 +839,8 @@ Return as a list sans BUFFER's own identifier."
   (let ((result '()))
     (dolist (el (denote-tree--collect-keywords buffer keywords))
       (when (cdr el)
-        (push (cdr el) result))
-      (string-join (nreverse result) " "))))
+        (push (cdr el) result)))
+    (string-join (nreverse result) " ")))
 
 (defun denote-tree--collect-keywords (buffer keywords)
   "Return denote propertized KEYWORDS from BUFFER."
