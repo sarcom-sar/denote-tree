@@ -63,8 +63,6 @@
 (require 'let-alist)
 (require 'cl-lib)
 
-(declare-function denote-tree-link--helper "denote-tree-link")
-
 
 ;;;; Faces and Custom
 
