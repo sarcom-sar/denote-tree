@@ -1,4 +1,4 @@
-;;; denote-tree-link-test.el --- Test denote-tree -*- lexical-binding: t -*-
+;;; denote-tree-link-test.el --- Test denote-tree-link -*- lexical-binding: t -*-
 
 (require 'denote)
 (require 'denote-tree-link)
