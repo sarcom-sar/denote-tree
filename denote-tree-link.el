@@ -90,6 +90,41 @@ for linking notes.")
     (setq-local header-line-format nil)))
 
 
+;;;; Interactive functions
+
+(defun denote-tree-link-finalize (&optional stay-with-capture)
+  "Insert a link between point and mark in the note buffer.
+
+With prefix argument STAY-WITH-CAPTURE, jump to the location of the
+captured item after finalizing."
+  (interactive "P")
+  (denote-tree-link--do-the-link
+   (point) (or (mark) (point)) (plist-get denote-tree-link--plist :link-this))
+  (denote-tree-link-mode -1)
+  (let ((marker (set-marker (make-marker) (point))))
+    (set-window-configuration
+     (plist-get denote-tree-link--plist :window-config))
+    (with-current-buffer (plist-get denote-tree-link--plist :denote-tree-buffer)
+      (denote-tree-redraw))
+    (when stay-with-capture
+      (when (or (> marker (point-max)) (< marker (point-min)))
+	      (widen))
+      (pop-to-buffer-same-window (marker-buffer marker))
+      (goto-char marker))))
+
+(defun denote-tree-link-kill ()
+  "Abort the linking, restore window configuration.
+
+Do not actually kill the buffer itself, since the user might wish to
+examine it."
+  (interactive)
+  (denote-tree-link-mode -1)
+  (let ((curr-buff (current-buffer)))
+    (set-window-configuration
+     (plist-get denote-tree-link--plist :window-config))
+    (bury-buffer curr-buff)))
+
+
 ;;;; Module entry point
 
 (defun denote-tree-link--helper (link-this to-this)
@@ -142,37 +177,6 @@ is narrowed to region between POS and MARK."
     (run-hooks 'denote-tree-link-after-link-insertion-hooks))
   (write-file (buffer-file-name) nil))
 
-(defun denote-tree-link-finalize (&optional stay-with-capture)
-  "Insert a link between point and mark in the note buffer.
-
-With prefix argument STAY-WITH-CAPTURE, jump to the location of the
-captured item after finalizing."
-  (interactive "P")
-  (denote-tree-link--do-the-link
-   (point) (or (mark) (point)) (plist-get denote-tree-link--plist :link-this))
-  (denote-tree-link-mode -1)
-  (let ((marker (set-marker (make-marker) (point))))
-    (set-window-configuration
-     (plist-get denote-tree-link--plist :window-config))
-    (with-current-buffer (plist-get denote-tree-link--plist :denote-tree-buffer)
-      (denote-tree-redraw))
-    (when stay-with-capture
-      (when (or (> marker (point-max)) (< marker (point-min)))
-	      (widen))
-      (pop-to-buffer-same-window (marker-buffer marker))
-      (goto-char marker))))
-
-(defun denote-tree-link-kill ()
-  "Abort the linking, restore window configuration.
-
-Do not actually kill the buffer itself, since the user might wish to
-examine it."
-  (interactive)
-  (denote-tree-link-mode -1)
-  (let ((curr-buff (current-buffer)))
-    (set-window-configuration
-     (plist-get denote-tree-link--plist :window-config))
-    (bury-buffer curr-buff)))
 
 
 ;;;; Default functions for denote-tree-link-insert-function
