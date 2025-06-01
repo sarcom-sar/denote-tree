@@ -92,6 +92,49 @@ for linking notes.")
 
 ;;;; Interactive functions
 
+(defun denote-tree-link-nodes (from-mark to-point)
+  "Link node at FROM-MARK to TO-POINT.
+
+If `denote-tree-link-insert-function' is set, then perform this based on
+function's return value.  Otherwise open a TO-POINT file and let the
+user decide where in TO-POINT node the link to FROM-MARK should be set."
+  (interactive (list (mark) (point)))
+  (when-let* ((node-from (denote-get-path-by-id
+                          (denote-tree--get-prop 'button-data from-mark)))
+              (node-to (denote-get-path-by-id
+                        (denote-tree--get-prop 'button-data to-point))))
+    (when (equal node-from node-to)
+      (user-error "Trying to link a file to itself"))
+    (denote-tree-link--helper node-from node-to)))
+
+(defun denote-tree-link-unlink-node (pos)
+  "Unlink the node at POS from it's parent.
+
+Leave only the text that was there before the linking.  If the link
+contains only an ID, delete entire line sans the newline."
+  (interactive "d")
+  (when-let* (;; node id linked with the file
+              (real-node (denote-tree--get-prop 'button-data pos))
+              ;; the gensyme'd id to make it unique
+              (node (get-text-property pos 'denote-tree--identifier))
+              (parent-pos (denote-tree--nested-value
+                           denote-tree--tree-alist node :parent :pos))
+              (parent-buff (find-file-noselect
+                            (denote-get-path-by-id
+                             (denote-tree--get-prop 'button-data parent-pos)))))
+    (denote-tree-link--unlink real-node parent-buff)))
+
+(defun denote-tree-link-spawn-child-node (pos)
+  "Create new child node with node at POS as a parent."
+  (interactive "d")
+  (when-let* ((denote-save-buffers t)
+              (buff (current-buffer))
+              (node (denote-get-path-by-id
+                     (denote-tree--get-prop 'button-data pos)))
+              (child (call-interactively #'denote)))
+    (with-current-buffer buff
+      (denote-tree-link--helper child node))))
+
 (defun denote-tree-link-finalize (&optional stay-with-capture)
   "Insert a link between point and mark in the note buffer.
 
@@ -177,6 +220,51 @@ is narrowed to region between POS and MARK."
     (run-hooks 'denote-tree-link-after-link-insertion-hooks))
   (write-file (buffer-file-name) nil))
 
+(defun denote-tree-link--unlink (node parent)
+  "Unlink NODE in PARENT to just text."
+  (with-current-buffer parent
+    (goto-char (point-min))
+    (when-let* ((file-type (denote-tree--find-filetype parent))
+                (link-in-context
+                 (thread-last
+                   (plist-get (cdr file-type) :link-in-context-regexp)
+                   symbol-value))
+                (link-range
+                 (thread-last
+                   (plist-get (cdr file-type) :link)
+                   symbol-value
+                   (denote-tree-link--range node ".*?")))
+                (link-string
+                 (buffer-substring-no-properties
+                  (car link-range) (cadr link-range))))
+      (save-match-data
+        (string-match link-in-context link-string)
+        (goto-char (car link-range))
+        (delete-region (car link-range) (cadr link-range))
+        (when (match-beginning 2)
+          (insert (substring link-string (match-beginning 2) (match-end 2))))))
+    (write-file (buffer-file-name) nil))
+  (denote-tree-redraw))
+
+(defun denote-tree-link--range (node description link)
+  "Find NODE with DESCRIPTION in LINK style.
+
+If none present, return nil."
+  (let ((regex-to-search
+         (concat "\\("
+                 (regexp-quote link)
+                 "\\)"))
+        (id-only-regex
+         (concat "\\("
+                 (regexp-quote denote-id-only-link-format)
+                 "\\)")))
+    (save-match-data
+      (if (or (re-search-forward
+               (format regex-to-search node description) nil t)
+              (re-search-forward
+               (format id-only-regex node) nil t))
+          (list (match-beginning 0) (match-end 0))
+        (error "No valid target for unlinking in node %s" node)))))
 
 
 ;;;; Default functions for denote-tree-link-insert-function
