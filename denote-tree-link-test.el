@@ -150,5 +150,162 @@
                     to-node-file))
             (should (plist-get denote-tree-link--plist :window-config))))))))
 
+(ert-deftest denote-tree-link-test--unlink ()
+  "Tests for `denote-tree-link--unlink'."
+  (let ((denote-tree--extended-filetype
+         (denote-tree--build-extended-filetype
+          denote-file-types denote-tree-extend-filetype-with)))
+    (with-temp-buffer
+      (insert "#+title: f\n"
+              "\n"
+              "[[denote:12345678T123456][BAR]]\n"
+              "\n"
+              "Some text no one cares about\n")
+      (goto-char (point-min))
+      (cl-letf (((symbol-function 'write-file)
+                 (lambda (_ _)
+                   nil))
+                ((symbol-function 'denote-tree-redraw)
+                 (lambda ()
+                   nil)))
+        (denote-tree-link--unlink "12345678T123456" (current-buffer))
+        (should
+         (equal (concat "#+title: f\n"
+                        "\n"
+                        "BAR\n"
+                        "\n"
+                        "Some text no one cares about\n")
+                (buffer-substring (point-min) (point-max)))))))
+  (let ((denote-tree--extended-filetype
+         (denote-tree--build-extended-filetype
+          denote-file-types denote-tree-extend-filetype-with)))
+    (with-temp-buffer
+      (insert "#+title: f\n"
+              "\n"
+              "[[denote:12345678T123456]]\n"
+              "\n"
+              "Some text no one cares about\n")
+      (goto-char (point-min))
+      (cl-letf (((symbol-function 'write-file)
+                 (lambda (_ _)
+                   nil))
+                ((symbol-function 'denote-tree-redraw)
+                 (lambda ()
+                   nil)))
+        (denote-tree-link--unlink "12345678T123456" (current-buffer))
+        (goto-line 3)
+        (should
+         (equal (concat "#+title: f\n"
+                        "\n"
+                        "\n"
+                        "\n"
+                        "Some text no one cares about\n")
+                (buffer-substring (point-min) (point-max)))))))
+  (let ((denote-tree--extended-filetype
+         (denote-tree--build-extended-filetype
+          denote-file-types denote-tree-extend-filetype-with)))
+    (with-temp-buffer
+      (insert "#+title: f\n"
+              "\n"
+              "[[denote:12345678T123456]]\n"
+              "\n"
+              "Some text no one cares about\n")
+      (goto-char (point-min))
+      (cl-letf (((symbol-function 'write-file)
+                 (lambda (_ _)
+                   nil))
+                ((symbol-function 'denote-tree-redraw)
+                 (lambda ()
+                   nil)))
+        ;; not testing for errors, only for not clobbering a buffer
+        (condition-case nil
+            (denote-tree-link--unlink "BAR" (current-buffer))
+          (error nil))
+        (should
+         (equal (concat "#+title: f\n"
+                        "\n"
+                        "[[denote:12345678T123456]]\n"
+                        "\n"
+                        "Some text no one cares about\n")
+                (buffer-substring (point-min) (point-max)))))))
+  (let ((denote-tree--extended-filetype
+         (denote-tree--build-extended-filetype
+          denote-file-types denote-tree-extend-filetype-with)))
+    (with-temp-buffer
+      (insert "#+title: f\n"
+              "\n"
+              "[[denote:12345678T123456][BAR]]\n"
+              "\n"
+              "Some text no one cares about\n")
+      (goto-char (point-min))
+      (cl-letf (((symbol-function 'write-file)
+                 (lambda (_ _)
+                   nil))
+                ((symbol-function 'denote-tree-redraw)
+                 (lambda ()
+                   nil)))
+        ;; not testing for errors, only for not clobbering a buffer
+        (condition-case nil
+            (denote-tree-link--unlink "BAR" (current-buffer))
+          (error nil))
+        (should
+         (equal (concat "#+title: f\n"
+                        "\n"
+                        "[[denote:12345678T123456][BAR]]\n"
+                        "\n"
+                        "Some text no one cares about\n")
+                (buffer-substring (point-min) (point-max))))))))
+
+(ert-deftest denote-tree-link-test--range ()
+  "Tests for `denote-tree-link--range'."
+  (with-temp-buffer
+    (insert "#+title: f\n"
+            "\n"
+            "[[denote:FOO][BAR]]\n"
+            "\n"
+            "Some text no one cares about\n")
+    (goto-char (point-min))
+    (should
+     (equal (denote-tree-link--range "FOO" "BAR" "[[denote:%s][%s]]")
+            '(13 32))))
+  (with-temp-buffer
+    (insert "#+title: f\n"
+            "\n"
+            "[[denote:FOO][BAR]]\n"
+            "\n"
+            "Some text no one cares about\n")
+    (goto-char (point-min))
+    (should-error (denote-tree-link--range "blzgh" "BAR" "[[denote:%s][%s]]")))
+  (with-temp-buffer
+    (insert "#+title: f\n"
+            "\n"
+            "[[denote:FOO]]\n"
+            "\n"
+            "Some text no one cares about\n")
+    (goto-char (point-min))
+    (should
+     (equal (denote-tree-link--range "FOO" "BAR" "[[denote:%s][%s]]")
+            '(13 27))))
+  (with-temp-buffer
+    (insert "#+title: f\n"
+            "\n"
+            "[[denote:FOO][this is very arbitrary]]\n"
+            "\n"
+            "Some text no one cares about\n")
+    (goto-char (point-min))
+    (should
+     (equal (denote-tree-link--range "FOO" ".*?" "[[denote:%s][%s]]")
+            '(13 51))))
+  (with-temp-buffer
+    (insert "#+title: f\n"
+            "\n"
+            "[[denote:FOO]]\n"
+            "\n"
+            "Some text no one cares about\n")
+    (goto-char (point-min))
+    (should
+     (equal (denote-tree-link--range "FOO" ".*?" "[[denote:%s][%s]]")
+            '(13 27)))))
+
 (provide 'denote-tree-link-test)
 ;;; denote-tree-link ends here
