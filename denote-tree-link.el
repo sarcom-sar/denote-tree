@@ -34,7 +34,8 @@
 ;;;; Customization and vars
 
 (defgroup denote-tree-link ()
-  "Functionalities for linking in denote-tree.")
+  "Functionalities for linking in denote-tree."
+  :group 'convenience)
 
 (defcustom denote-tree-link-insert-function #'denote-tree-link-insert-at-eof
   "Return the region at which the link is to be inserted.
