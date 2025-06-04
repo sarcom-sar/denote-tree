@@ -267,7 +267,7 @@
     (goto-char (point-min))
     (should
      (equal (denote-tree-link--range "FOO" "BAR" "[[denote:%s][%s]]")
-            '(13 32))))
+            '(13 . 32))))
   (with-temp-buffer
     (insert "#+title: f\n"
             "\n"
@@ -285,7 +285,7 @@
     (goto-char (point-min))
     (should
      (equal (denote-tree-link--range "FOO" "BAR" "[[denote:%s][%s]]")
-            '(13 27))))
+            '(13 . 27))))
   (with-temp-buffer
     (insert "#+title: f\n"
             "\n"
@@ -295,7 +295,7 @@
     (goto-char (point-min))
     (should
      (equal (denote-tree-link--range "FOO" ".*?" "[[denote:%s][%s]]")
-            '(13 51))))
+            '(13 . 51))))
   (with-temp-buffer
     (insert "#+title: f\n"
             "\n"
@@ -305,7 +305,7 @@
     (goto-char (point-min))
     (should
      (equal (denote-tree-link--range "FOO" ".*?" "[[denote:%s][%s]]")
-            '(13 27)))))
+            '(13 . 27)))))
 
 (provide 'denote-tree-link-test)
 ;;; denote-tree-link ends here
