@@ -221,7 +221,7 @@ is narrowed to region between POS and MARK."
   (write-file (buffer-file-name) nil))
 
 (defun denote-tree-link--unlink (node parent)
-  "Unlink NODE in PARENT to just text."
+  "Unlink NODE in PARENT and leave just text."
   (with-current-buffer parent
     (goto-char (point-min))
     (when-let* ((file-type (denote-tree--find-filetype parent))
@@ -249,7 +249,7 @@ is narrowed to region between POS and MARK."
 (defun denote-tree-link--range (node description link)
   "Find NODE with DESCRIPTION in LINK style.
 
-If none present, return nil."
+If none present, error, because the link should be there."
   (let ((regex-to-search
          (concat "\\("
                  (regexp-quote link)
