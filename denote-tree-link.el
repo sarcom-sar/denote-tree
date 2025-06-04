@@ -99,13 +99,18 @@ If `denote-tree-link-insert-function' is set, then perform this based on
 function's return value.  Otherwise open a TO-POINT file and let the
 user decide where in TO-POINT node the link to FROM-MARK should be set."
   (interactive (list (mark) (point)))
-  (when-let* ((node-from (denote-get-path-by-id
-                          (denote-tree--get-prop 'button-data from-mark)))
-              (node-to (denote-get-path-by-id
-                        (denote-tree--get-prop 'button-data to-point))))
-    (when (equal node-from node-to)
+  (let ((node-from (denote-get-path-by-id
+                    (denote-tree--get-prop 'button-data from-mark)))
+        (node-to (denote-get-path-by-id
+                  (denote-tree--get-prop 'button-data to-point))))
+    (cond
+     ((not node-from)
+      (message "The line under the mark doesn't contain a node"))
+     ((not node-to)
+      (message "The line under the point doesn't contain a node"))
+     ((equal node-from node-to)
       (user-error "Trying to link a file to itself"))
-    (denote-tree-link--helper node-from node-to)))
+     (t (denote-tree-link--helper node-from node-to)))))
 
 (defun denote-tree-link-unlink-node (pos)
   "Unlink the node at POS from it's parent.
