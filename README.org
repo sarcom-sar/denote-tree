@@ -12,6 +12,8 @@ package:
 #+begin_src emacs-lisp
   (add-to-list 'load-path "~/path/to/repo")
   (require 'denote-tree)
+  ;; optionally one can add denote-tree-link
+  ;; (require 'denote-tree-link)
 #+end_src
 
 If you have GNU Emacs>=29.1, then feel free to get it from here:
@@ -32,8 +34,17 @@ those cyclical nodes by default.  The initial cost of drawing a full tree is
 paid once, at initialization. If user is willing to do so, one can tweak the
 value of =denote-tree-max-traversal-depth=, so that the tree is drawn only
 partially.  That truncated tree can be then expanded via =denote-tree-redraw=.
-It handles both linking and unlinking nodes via =denote-tree-link-nodes= and
-=denote-tree-unlink-node=.
+
+The extension =denote-tree-link= is provided if the user wishes to additionally
+link, unlink and create new nodes.  They are not defined in
+=denote-tree-mode-map=, but they can be added like so,
+
+#+begin_src emacs-lisp
+  (dolist (el '(("i" . #'denote-tree-link-nodes)
+                ("u" . #'denote-tree-unlink-node)
+                ("s" . #'denote-tree-spawn-child-node)))
+    (keymap-set denote-tree-mode-map (car el) (cdr el)))
+#+end_src
 
 *** Keybindings for =*denote-tree*= buffer
 
@@ -45,9 +56,6 @@ It handles both linking and unlinking nodes via =denote-tree-link-nodes= and
 | b          | denote-tree-parent-node      |
 | g          | denote-tree-redraw           |
 | e          | denote-tree-edit-node        |
-| i          | denote-tree-link-nodes       |
-| u          | denote-tree-unlink-node      |
-| s          | denote-tree-spawn-child-node |
 | RET        | denote-tree-enter-node       |
 
 *** Visualization
@@ -67,7 +75,7 @@ It handles both linking and unlinking nodes via =denote-tree-link-nodes= and
     '-* Dui dui euismod elit, vitae placerat urna tortor vitae lacus.
 #+end_example
 
-*** In depth doc
+*** Documentation
 
 **** Customizable elements
 
@@ -93,6 +101,9 @@ It handles both linking and unlinking nodes via =denote-tree-link-nodes= and
 - =denote-tree-extend-filetype-with=, extend what kinds of regexps =denote-tree=
   is aware of in your front matter.  It also provides backwards compatibility
   with versions od =denote= older than commit 3517ba2.
+
+***** denote-tree-link
+
 - =denote-tree-link-insert-function=, return the region at which the link is to
   be inserted.  The function takes no arguments and returns a pair of intergers.
   The range determines a buffer region in which text will be replace with a
@@ -104,8 +115,7 @@ It handles both linking and unlinking nodes via =denote-tree-link-nodes= and
 - =denote-tree-link-after-link-insertion-hooks=, List of hooks to run after the
   link was inserted.  This variable is primarily used to modify the text around
   inserted link.  Before this hook is ran the buffer is narrowed to just the
-  link itself.  =point-min= points to the area behind the link, while the
-  =point-max= points to the area after the link.
+  link itself.
 
 **** Faces
 
@@ -145,6 +155,9 @@ It handles both linking and unlinking nodes via =denote-tree-link-nodes= and
   Edit current note via denote's =denote-rename-file=.
 - =denote-tree-enter-node= (&optional button)
   Enter node at point in other window.  BUTTON is pased as node's ID.
+
+***** denote-tree-link
+
 - =denote-tree-link-nodes= (from-mark to-point)
   Link node at FROM-MARK to TO-POINT.  If =denote-tree-link-insert-function= is
   set, then perform this based on function's return value.  Otherwise open a
@@ -157,7 +170,7 @@ It handles both linking and unlinking nodes via =denote-tree-link-nodes= and
   - =denote-tree-link-kill= ()
     Abort the linking, restore window configuration.  Do not actually kill the
     buffer itself, since the user might wish to examine it.
-- =denote-tree-unlink-node= (pos)
+- =denote-tree-link-unlink-node= (pos)
   Unlink the node at POS from it's parent.  Leave only the text that was there
   before the linking.  If the link contains only an ID, delete entire line sans
   the newline.
