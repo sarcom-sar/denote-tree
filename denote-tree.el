@@ -410,7 +410,7 @@ properties."
           (plist-put (alist-get node new-alist) :descp new-descp))
     (delete-region (line-beginning-position) (line-end-position))
     (setq pos
-          (denote-tree--draw-node-foo
+          (denote-tree--draw-node
            node
            (alist-get node new-alist)
            (denote-tree--nested-value
@@ -489,10 +489,10 @@ The full detail of all attributes:
 (defun denote-tree--draw-node-list-helper (node alist node-plist stack)
   "Set the current NODE in NODE-PLIST and advance the STACK.
 
-This function calls `denote-tree--draw-node-foo' to do an actual drawing.
+This function calls `denote-tree--draw-node' to do an actual drawing.
 Besides delegating the drawing part it also advances the stack
 and sets up everything for next iteration."
-  (let ((point (denote-tree--draw-node-foo
+  (let ((point (denote-tree--draw-node
                 node node-plist (denote-tree--nested-value
                                  alist node :parent :next-indent)))
         (copy-stack (copy-sequence stack)))
@@ -504,7 +504,7 @@ and sets up everything for next iteration."
             (alist-get (car copy-stack) alist)
             copy-stack))))
 
-(defun denote-tree--draw-node-foo (node plist next-indent)
+(defun denote-tree--draw-node (node plist next-indent)
   "Draw NODE with NEXT-INDENT according to PLIST."
   (let ((point 0))
     (insert

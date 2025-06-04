@@ -473,19 +473,19 @@ and it's value in plist is a string."
       '((a12 :true-name a :children (d e))
         (a :true-name a :children (d e)))))))
 
-(ert-deftest denote-tree-test--draw-node-foo ()
-  "Tests for `denote-tree--draw-node-foo'."
+(ert-deftest denote-tree-test--draw-node ()
+  "Tests for `denote-tree--draw-node'."
   (with-temp-buffer
-    (should (= (denote-tree--draw-node-foo
+    (should (= (denote-tree--draw-node
                 'a '(:true-name a :descp "a" :last nil :pos nil) "")
                3)))
   (with-temp-buffer
-    (denote-tree--draw-node-foo
+    (denote-tree--draw-node
      'a '(:true-name a :descp "a" :last nil :pos nil) "")
     (should (equal (buffer-substring-no-properties (point-min) (point-max))
                    "+-* a\n")))
   (with-temp-buffer
-    (denote-tree--draw-node-foo
+    (denote-tree--draw-node
      'a '(:true-name a :descp "a" :last nil :pos nil) "")
     (should
      (equal (get-text-property (point-min) 'denote-tree--identifier) 'a))
@@ -495,16 +495,16 @@ and it's value in plist is a string."
              'face)
             'denote-tree-node)))
   (with-temp-buffer
-    (should (= (denote-tree--draw-node-foo
+    (should (= (denote-tree--draw-node
                 'a '(:true-name b :descp "a" :last nil :pos nil) "|")
                4)))
   (with-temp-buffer
-    (denote-tree--draw-node-foo
+    (denote-tree--draw-node
      'a '(:true-name b :descp "a" :last nil :pos nil) "|")
     (should (equal (buffer-substring-no-properties (point-min) (point-max))
                    "|+-* a\n")))
   (with-temp-buffer
-    (denote-tree--draw-node-foo
+    (denote-tree--draw-node
      'a '(:true-name b :descp "a" :last nil :pos nil) "|")
     (should
      (equal (get-text-property (point-min) 'denote-tree--identifier) 'a))
