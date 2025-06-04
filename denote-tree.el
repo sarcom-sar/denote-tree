@@ -742,7 +742,9 @@ Return as a list sans BUFFER's own identifier."
         (push (intern (concat (match-string-no-properties 1)
                               (match-string-no-properties 2)))
               found-ids))
-      (delete (intern buffer-id) (nreverse found-ids)))))
+      (seq-uniq
+       (delete (intern buffer-id) (nreverse found-ids))
+       #'eq))))
 
 (defun denote-tree--collect-keywords-as-string (buffer keywords)
   "Return KEYWORDS as a joint string from BUFFER."
