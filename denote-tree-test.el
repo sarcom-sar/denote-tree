@@ -5,6 +5,10 @@
 
 ;;; Code:
 
+(defvar denote-tree-test-mock--extended-filetype
+  (denote-tree--build-extended-filetype
+   denote-file-types denote-tree-extend-filetype-with))
+
 (defvar denote-tree-test-mock--denote-file-types-1
   '((org
      :title-key-regexp "org-title:"
@@ -189,7 +193,7 @@ allows to classify the type of front matter denote is dealing with."
        "org-signature: foz\n"
        "org-date: fazboo")
       (should
-       (equal-including-properties
+       (seq-set-equal-p
         (denote-tree--collect-keywords
          (current-buffer) '(title identifier keywords signature date))
         `((title . ,(propertize "foo" 'denote-tree--type 'title))
@@ -204,7 +208,7 @@ allows to classify the type of front matter denote is dealing with."
        "org-signature: foz\n"
        "org-date: fazboo")
       (should
-       (equal-including-properties
+       (seq-set-equal-p
         (denote-tree--collect-keywords
          (current-buffer) '(title identifier keywords signature date))
         `((title . ,(propertize "foo" 'denote-tree--type 'title))
@@ -216,7 +220,7 @@ allows to classify the type of front matter denote is dealing with."
       (should-not (denote-tree--collect-keywords (current-buffer) '())))
     (with-temp-buffer
       (should
-       (equal
+       (seq-set-equal-p
         (denote-tree--collect-keywords
          (current-buffer) '(title identifier))
         '((title) (identifier)))))
@@ -230,7 +234,7 @@ allows to classify the type of front matter denote is dealing with."
       (with-temp-buffer
         (insert "org-kazoo: PRRT")
         (should
-         (equal-including-properties
+         (seq-set-equal-p
           (denote-tree--collect-keywords (current-buffer) '(kazoo))
           `((kazoo . ,(propertize "PRRT" 'denote-tree--type 'kazoo)))))))))
 
@@ -238,43 +242,47 @@ allows to classify the type of front matter denote is dealing with."
   "Tests for `denote-tree--build-extended-filetype'."
   (let ((base denote-tree-test-mock--denote-file-types-1)
         (add '()))
-    (should (equal
-             (assq 'org (denote-tree--build-extended-filetype base add))
-             '(org :title-key-regexp "org-title:"
-                   :identifier-key-regexp "org-identifier:"
-                   :keywords-key-regexp "org-keywords:"
-                   :signature-key-regexp "org-signature:"
-                   :date-key-regexp "org-date:"))))
+    (should
+     (seq-set-equal-p
+      (assq 'org (denote-tree--build-extended-filetype base add))
+      '(org :title-key-regexp "org-title:"
+            :identifier-key-regexp "org-identifier:"
+            :keywords-key-regexp "org-keywords:"
+            :signature-key-regexp "org-signature:"
+            :date-key-regexp "org-date:"))))
   (let ((base denote-tree-test-mock--denote-file-types-1)
         (add '((:foo-key-regexp org "org-foo:"))))
     (should
-     (equal (assq 'org (denote-tree--build-extended-filetype base add))
-            '(org :title-key-regexp "org-title:"
-                  :identifier-key-regexp "org-identifier:"
-                  :keywords-key-regexp "org-keywords:"
-                  :signature-key-regexp "org-signature:"
-                  :date-key-regexp "org-date:"
-                  :foo-key-regexp "org-foo:")))
+     (seq-set-equal-p
+      (assq 'org (denote-tree--build-extended-filetype base add))
+      '(org :title-key-regexp "org-title:"
+            :identifier-key-regexp "org-identifier:"
+            :keywords-key-regexp "org-keywords:"
+            :signature-key-regexp "org-signature:"
+            :date-key-regexp "org-date:"
+            :foo-key-regexp "org-foo:")))
     (should
-     (equal (assq 'text (denote-tree--build-extended-filetype base add))
-            '(text :title-key-regexp "text-title:"
-                   :identifier-key-regexp "text-identifier:"
-                   :keywords-key-regexp "text-keywords:"
-                   :signature-key-regexp "text-signature:"
-                   :date-key-regexp "text-date:"
-                   :foo-key-regexp nil))))
+     (seq-set-equal-p
+      (assq 'text (denote-tree--build-extended-filetype base add))
+      '(text :title-key-regexp "text-title:"
+             :identifier-key-regexp "text-identifier:"
+             :keywords-key-regexp "text-keywords:"
+             :signature-key-regexp "text-signature:"
+             :date-key-regexp "text-date:"
+             :foo-key-regexp nil))))
   (let ((base denote-tree-test-mock--denote-file-types-2)
         (add
          '((:keywords-key-regexp org "org-keywords:")
            (:signature-key-regexp org "org-signature:")
            (:date-key-regexp org "org-date:"))))
     (should
-     (equal (assq 'org (denote-tree--build-extended-filetype base add))
-            '(org :title-key-regexp "org-title:"
-                  :identifier-key-regexp "org-identifier:"
-                  :keywords-key-regexp "org-keywords:"
-                  :signature-key-regexp "org-signature:"
-                  :date-key-regexp "org-date:")))))
+     (seq-set-equal-p
+      (assq 'org (denote-tree--build-extended-filetype base add))
+      '(org :title-key-regexp "org-title:"
+            :identifier-key-regexp "org-identifier:"
+            :keywords-key-regexp "org-keywords:"
+            :signature-key-regexp "org-signature:"
+            :date-key-regexp "org-date:")))))
 
 
 (ert-deftest denote-tree-test--collect-links ()
@@ -309,6 +317,14 @@ allows to classify the type of front matter denote is dealing with."
       (with-temp-buffer
         (insert
          "#+title: FOO\n"
+         "20231226T163250 20231226T163250\n")
+        (goto-char (point-min))
+        (should
+         (equal (denote-tree--collect-links (buffer-name (current-buffer)))
+                '(20231226T163250))))
+      (with-temp-buffer
+        (insert
+         "#+title: FOO\n"
          "#+identifier: 20231226T163250\n"
          "20240119T164551 20240120T164558")
         (goto-char (point-min))
@@ -330,23 +346,25 @@ allows to classify the type of front matter denote is dealing with."
          (equal (denote-tree--collect-links (buffer-name (current-buffer)))
                 nil))))))
 
-(ert-deftest denote-tree-test--extract-and-compare-symbols ()
-  "Tests for `denote-tree--extract-and-compare-symbols'."
+(ert-deftest denote-tree-test--extract-and-compare-symbol ()
+  "Tests for `denote-tree--extract-and-compare-symbol'."
   (should
-   (eq (denote-tree--extract-and-compare-symbols :title-key-regexp 'title)
+   (eq (denote-tree--extract-and-compare-symbol :title-key-regexp 'title)
        :title-key-regexp))
   (should
-   (eq (denote-tree--extract-and-compare-symbols 'title-key-regexp 'title) nil))
+   (eq (denote-tree--extract-and-compare-symbol 'title-key-regexp 'title)
+       nil))
   (should
-   (eq (denote-tree--extract-and-compare-symbols :date-format 'date) nil))
+   (eq (denote-tree--extract-and-compare-symbol :date-format 'date)
+       nil))
   (should
-   (eq (denote-tree--extract-and-compare-symbols :foo-bar-baz-regexp 'foo)
+   (eq (denote-tree--extract-and-compare-symbol :foo-bar-baz-regexp 'foo)
        :foo-bar-baz-regexp))
   (should
-   (eq (denote-tree--extract-and-compare-symbols :foobar-regexp 'foobar)
+   (eq (denote-tree--extract-and-compare-symbol :foobar-regexp 'foobar)
        :foobar-regexp))
-  (should-not (denote-tree--extract-and-compare-symbols :foo-regexp nil))
-  (should-not (denote-tree--extract-and-compare-symbols nil 'bar)))
+  (should-not (denote-tree--extract-and-compare-symbol :foo-regexp nil))
+  (should-not (denote-tree--extract-and-compare-symbol nil 'bar)))
 
 (ert-deftest denote-tree-test--get-regexps ()
   "Tests for `denote-tree--get-regexps'.
@@ -432,34 +450,42 @@ and it's value in plist is a string."
   "Tests for `denote-tree--fix-children-in-alist'."
   (let ((alist '((a12 :true-name a :children nil)
                  (a :true-name a :children (b c)))))
-    (should (equal (denote-tree--fix-children-in-alist alist)
-                   '((a12 :true-name a :children (b c))
-                     (a :true-name a :children (b c))))))
+    (should
+     (seq-set-equal-p
+      (denote-tree--fix-children-in-alist alist)
+      '((a12 :true-name a :children (b c))
+        (a :true-name a :children (b c))))))
   (let ((alist '((a :true-name a :children nil))))
-    (should (equal (denote-tree--fix-children-in-alist alist)
-                   '((a :true-name a :children nil)))))
+    (should
+     (seq-set-equal-p
+      (denote-tree--fix-children-in-alist alist)
+      '((a :true-name a :children nil)))))
   (let ((alist '((a12 :true-name a :children nil))))
-    (should (equal (denote-tree--fix-children-in-alist alist)
-                   '((a12 :true-name a :children nil)))))
+    (should
+     (seq-set-equal-p
+      (denote-tree--fix-children-in-alist alist)
+      '((a12 :true-name a :children nil)))))
   (let ((alist '((a12 :true-name a :children (b c))
                  (a :true-name a :children (d e)))))
-    (should (equal (denote-tree--fix-children-in-alist alist)
-                   '((a12 :true-name a :children (d e))
-                     (a :true-name a :children (d e)))))))
+    (should
+     (seq-set-equal-p
+      (denote-tree--fix-children-in-alist alist)
+      '((a12 :true-name a :children (d e))
+        (a :true-name a :children (d e)))))))
 
-(ert-deftest denote-tree-test--draw-node-foo ()
-  "Tests for `denote-tree--draw-node-foo'."
+(ert-deftest denote-tree-test--draw-node ()
+  "Tests for `denote-tree--draw-node'."
   (with-temp-buffer
-    (should (= (denote-tree--draw-node-foo
+    (should (= (denote-tree--draw-node
                 'a '(:true-name a :descp "a" :last nil :pos nil) "")
                3)))
   (with-temp-buffer
-    (denote-tree--draw-node-foo
+    (denote-tree--draw-node
      'a '(:true-name a :descp "a" :last nil :pos nil) "")
     (should (equal (buffer-substring-no-properties (point-min) (point-max))
                    "+-* a\n")))
   (with-temp-buffer
-    (denote-tree--draw-node-foo
+    (denote-tree--draw-node
      'a '(:true-name a :descp "a" :last nil :pos nil) "")
     (should
      (equal (get-text-property (point-min) 'denote-tree--identifier) 'a))
@@ -469,16 +495,16 @@ and it's value in plist is a string."
              'face)
             'denote-tree-node)))
   (with-temp-buffer
-    (should (= (denote-tree--draw-node-foo
+    (should (= (denote-tree--draw-node
                 'a '(:true-name b :descp "a" :last nil :pos nil) "|")
                4)))
   (with-temp-buffer
-    (denote-tree--draw-node-foo
+    (denote-tree--draw-node
      'a '(:true-name b :descp "a" :last nil :pos nil) "|")
     (should (equal (buffer-substring-no-properties (point-min) (point-max))
                    "|+-* a\n")))
   (with-temp-buffer
-    (denote-tree--draw-node-foo
+    (denote-tree--draw-node
      'a '(:true-name b :descp "a" :last nil :pos nil) "|")
     (should
      (equal (get-text-property (point-min) 'denote-tree--identifier) 'a))
@@ -674,7 +700,7 @@ and it's value in plist is a string."
         (setq x (cdr x))))))
 
 (defmacro denote-tree-test-mock-draw-tree (lst-of-links)
-  "Execute `denote-tree--walk-links-iteratively' over LST-OF-LINKS."
+  "Execute `denote-tree--walk-links' over LST-OF-LINKS."
   `(let ((denote-tree-max-traversal-depth t)
          (tree-alist '())
          (next (denote-tree-test-mock-make-next-links ,lst-of-links)))
@@ -690,8 +716,10 @@ and it's value in plist is a string."
        (unwind-protect
            (setq tree-alist
                  (denote-tree--fix-children-in-alist
-                  (denote-tree--walk-links-iteratively
-                   (caar (funcall next)) "" t t)))
+                  (denote-tree--walk-links
+                   (caar (funcall next))
+                   :lastp t
+                   :depth t)))
            (denote-tree--clean-up)))
      tree-alist))
 
@@ -1139,7 +1167,14 @@ and it's value in plist is a string."
              (lambda (x y)
                x)))
     (let* ((alist (list (denote-tree--node-plist
-                         '(a . a) 'a 'a nil "" t t)))
+                         'a
+                         :true-name 'a
+                         :next 'a
+                         :prev 'a
+                         :parent nil
+                         :indent ""
+                         :lastp t
+                         :depth t)))
            (ret (denote-tree--grow-alist-and-stack 'a alist nil (list 'a)))
            (new-alist (cadr ret))
            (new-stack (cadddr ret))
@@ -1162,7 +1197,14 @@ and it's value in plist is a string."
              (lambda (x y)
                x)))
     (let* ((alist (list (denote-tree--node-plist
-                         '(a . a) 'a 'a nil "" t t)))
+                         'a
+                         :true-name 'a
+                         :next 'a
+                         :prev 'a
+                         :parent nil
+                         :indent ""
+                         :lastp t
+                         :depth t)))
            (ret (denote-tree--grow-alist-and-stack 'a alist nil (list 'a)))
            (new-alist (cadr ret))
            (new-stack (cadddr ret))
@@ -1210,6 +1252,16 @@ and it's value in plist is a string."
   (should
    (equal (denote-tree--find-orphans '(a) '((a baz) (a5 foo) (b bar)))
           '((a5 foo)))))
+
+(ert-deftest denote-tree-test--first-orphan ()
+  (should
+   (equal (denote-tree--first-orphan "a" '((a5 foo) (b bar)))
+          '(a5 foo)))
+  (should-not (denote-tree--first-orphan "a" '((b bar) (b5 bar))))
+  (should-not (denote-tree--first-orphan "a" '((a foo) (b bar))))
+  (should
+   (equal (denote-tree--first-orphan "a" '((a foo) (a1 car) (a2 dar)))
+          '(a1 car))))
 
 (provide 'denote-tree-test)
 ;;; denote-tree-test.el ends here

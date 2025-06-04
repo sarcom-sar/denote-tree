@@ -1,7 +1,7 @@
 EMACS              ?= emacs
 DEPS               ?= ert denote cl-lib
-PACKAGE-FILES      := denote-tree.el denote-tree-edit.el
-LOAD-PACKAGE-TEST  := -l denote-tree-test.el -l denote-tree-edit-test.el
+PACKAGE-FILES      := denote-tree.el denote-tree-link.el
+LOAD-PACKAGE-TEST  := -l denote-tree-test.el -l denote-tree-link-test.el
 RM                 := rm -f
 
 INIT-PACKAGES="(progn \
@@ -34,7 +34,7 @@ lisp: %.elc
 
 .PHONY: test
 test:
-	${EMACS} -Q -batch --eval ${INIT-PACKAGES} -L . ${LOAD-PACKAGE-TEST} -f ert-run-tests-batch-and-exit
+	${EMACS} -Q -batch --eval ${INIT-PACKAGES} -L . ${LOAD-PACKAGE-TEST} -f ert-run-tests-batch-and-exit 2>&1 | grep -v "^Building denote-tree buffer" | grep -v "^Warning"
 
 .PHONY: clean
 clean:

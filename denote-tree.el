@@ -2,7 +2,7 @@
 
 ;; Copyright 2024, Sararin
 ;; Created: 2024-09-15 Sun
-;; Version: 0.8.8
+;; Version: 0.9.0
 ;; Keywords: convenience
 ;; URL: http://github.com/sarcom-sar/denote-tree.el
 ;; Package-Requires: ((emacs "28.1") (denote "3.0.1"))
@@ -62,8 +62,6 @@
 (require 'seq)
 (require 'let-alist)
 (require 'cl-lib)
-
-(declare-function #'denote-tree-edit-mode "./denote-tree-edit.el")
 
 
 ;;;; Faces and Custom
@@ -129,11 +127,6 @@ Denote's default front matter elements:
 (defcustom denote-tree-preserve-teleports-p t
   "Teleport back when accessing cyclical node from it's child.
 When nil, always move to \"real\" parent of a node."
-  :type 'boolean)
-
-(defcustom denote-tree-fancy-edit nil
-  "If t, use fancy editing with widgets (experimental).
-If nil fall back to the thin `denote-rename-file' wrapper."
   :type 'boolean)
 
 (defcustom denote-tree-extend-filetype-with
@@ -207,30 +200,34 @@ open it.
   :interactive nil)
 
 ;;;###autoload
-(defun denote-tree (&optional buffer)
+(defun denote-tree (buffer)
   "Draw hierarchy between denote files as a tree.
 
-The function uses either the current buffer, if called interactively or
-a BUFFER provided by the user."
-  (interactive)
-  (let (buffer-name)
+The function allows the user to choose between all file-visiting
+buffers.  If called non-interactively, then the BUFFER has to be a valid
+denote-style identifier."
+  (interactive
+   (list
+    (buffer-file-name
+     (get-buffer
+      (read-buffer "Draw buffer: "
+                   (if (eq (selected-window) (next-window))
+		                   (window-buffer (next-window))
+		                 (other-buffer (current-buffer)))
+		               t
+                   (lambda (x) (buffer-file-name (cdr x))))))))
+  (let* ((id (denote-retrieve-filename-identifier-with-error buffer))
+         (buffer-name (concat "*" denote-tree-buffer-prefix " " id "*")))
     (unwind-protect
         (progn
           (setq denote-tree--extended-filetype
                 (denote-tree--build-extended-filetype
                  denote-file-types denote-tree-extend-filetype-with))
-          (setq buffer
-                (denote-retrieve-filename-identifier-with-error
-                 (or (and (bufferp buffer) (buffer-file-name buffer))
-                     buffer
-                     (buffer-file-name))))
-          (setq buffer-name
-                (concat "*" denote-tree-buffer-prefix " " buffer "*"))
           (let ((inhibit-read-only t))
             (with-current-buffer (get-buffer-create buffer-name)
               (erase-buffer)
               (denote-tree-mode)
-              (denote-tree--draw-tree buffer)
+              (denote-tree--draw-tree id)
               (setq denote-tree--buffer-name buffer-name)))
           (pop-to-buffer buffer-name)
           (goto-char (1+ (length denote-tree-lower-knee))))
@@ -240,11 +237,12 @@ a BUFFER provided by the user."
   "Enter node at point in other window.
 BUTTON is pased as node's ID."
   (interactive)
-  (when button
-    (find-file-other-window
-     ;; no need to file-check, since if it's drawn
-     ;; then it's good to show
-     (denote-get-path-by-id button))))
+  (if button
+      (find-file-other-window
+       ;; no need to file-check, since if it's drawn
+       ;; then it's good to show
+       (denote-get-path-by-id button))
+    (message "No valid node under the point")))
 
 (defun denote-tree-redraw (&optional arg)
   "Redraw ARG parts of a tree.
@@ -358,27 +356,39 @@ omitted, nil or zero, move once."
 (defun denote-tree-edit-node ()
   "Edit node's front matter.
 
-What is editable is dependent on `denote-prompts'.  If
-`denote-tree-edit-mode' is loaded and `denote-tree-fancy-edit' is set to
-t, use it's UI."
+What is editable is dependent on `denote-prompts'."
   (interactive)
-  (if denote-tree-fancy-edit
-      (progn
-        (require 'denote-tree-edit)
-        (denote-tree-edit-mode))
-    (let* ((identifier (denote-tree--get-prop 'button-data))
-           (buffer (denote-tree--edit-node (denote-get-path-by-id identifier))))
-      (save-excursion
-        (goto-char (point-min))
-        ;; edit all occurences of that buffer
-        (while (text-property-search-forward
-                'button-data identifier t)
-          (setq denote-tree--tree-alist
-                (denote-tree--redraw-node
-                 buffer denote-tree--tree-alist)))))))
+  (let* ((identifier (denote-tree--get-prop 'button-data))
+         (buffer (denote-tree--edit-node (denote-get-path-by-id identifier))))
+    (save-excursion
+      (goto-char (point-min))
+      ;; edit all occurences of that buffer
+      (while (text-property-search-forward
+              'button-data identifier t)
+        (setq denote-tree--tree-alist
+              (denote-tree--redraw-node
+               buffer denote-tree--tree-alist))))))
 
 
-;;;; Utilities for node editing
+;;;; Initialisation
+
+(defun denote-tree--build-extended-filetype (gen-from add-this)
+  "Add keys and values from ADD-THIS to GEN-FROM alist.
+
+This is purely backwards-compatible scheme to allow
+`denote-tree-extend-filetype-with' to extend `denote-file-types' in case user's
+denote version is too old."
+  (let ((ext-filetype (copy-tree gen-from)))
+    (dolist (type ext-filetype)
+      (let ((ret '()))
+        (dolist (key add-this)
+          (push (plist-get (cdr key) (car type)) ret)
+          (push (car key) ret))
+        (setf (cdr type) (seq-union (cdr type) ret))))
+    ext-filetype))
+
+
+;;;; Interactive function helpers
 
 (defun denote-tree--edit-node (buffer)
   "Call `denote-rename-file' interactively to edit BUFFER.
@@ -404,7 +414,7 @@ properties."
           (plist-put (alist-get node new-alist) :descp new-descp))
     (delete-region (line-beginning-position) (line-end-position))
     (setq pos
-          (denote-tree--draw-node-foo
+          (denote-tree--draw-node
            node
            (alist-get node new-alist)
            (denote-tree--nested-value
@@ -417,92 +427,76 @@ properties."
 
 ;;;; Tree traversal
 
+(defun denote-tree--traverse-structure (alist &rest args)
+  "Iterate on ALIST via ARGS.  Return a new alist.
+
+This function abstracts the traversal of structure defied in ALIST, both the
+`:call-fn' and `:other-fn' should return a list of elements ELEMENT, NEW-ALIST,
+INFO and STACK which specify the the next step of iteration.
+
+The full detail of all attributes:
+
+ `:call-fn' - user supplied functions with 4 arguments which are in
+              charge of maintaining the stack;
+`:other-fn' - user supplied function with 3 arguments which is ran if function
+              defined by `:call-fn' failed.  If this argument is empty, default
+              to `(lambda (x y z) (list (cadr z) x y (cdr z)))';
+ `:element' - current element under traversal;
+    `:info' - stores the information specific to the current `:call-fn' or
+              `:other-fn' implementation that can not be generalised;
+   `:stack' - maintains the elements to traverse further."
+  (let ((element (plist-get args :element))
+        (info (plist-get args :info))
+        (stack (plist-get args :stack))
+        (call-fn (plist-get args :call-fn))
+        (other-fn (or (plist-get args :other-fn)
+                      (lambda (x y z) (list (cadr z) x y (cdr z))))))
+    (when (car alist)
+      (let ((progress (make-progress-reporter "Building denote-tree buffer..."))
+            (new-alist (copy-sequence alist)))
+        (while element
+          (seq-setq (element new-alist info stack)
+                    (or (funcall call-fn element new-alist info stack)
+                        (funcall other-fn new-alist info stack)))
+          (progress-reporter-update progress))
+        (progress-reporter-done progress)
+        new-alist))))
+
 (defun denote-tree--draw-tree (buffer)
   "Draw and propertize a tree in current buffer starting with BUFFER."
-  (denote-tree--open-link-maybe buffer)
   (setq denote-tree--tree-alist
         (denote-tree--fix-children-in-alist
-         (denote-tree--walk-links-iteratively
-          buffer "" t denote-tree-max-traversal-depth)))
+         (denote-tree--walk-links
+          buffer
+          :lastp t
+          :depth denote-tree-max-traversal-depth)))
   (when denote-tree--tree-alist
     (denote-tree--draw-node-list denote-tree--tree-alist (intern buffer))))
 
-(defun denote-tree--traverse-structure
-    (element alist info stack call-fn &optional other-fn)
-  "Traverse the structure calling CALL-FN or OTHER-FN, return the ALIST.
-
-CALL-FN and OTHER-FN are user supplied functions with 4 arguments which
-are in charge of maintaining the stack.  ELEMENT is a current element under
-traversal.  ALIST stores the general information, INFO should store the
-specific information, while STACK maintains the elements to traverse further.
-
-If CALL-FN returns nil, OTHER-FN is called instead.  These functions should
-return a list of four elements each."
-  (when (car alist)
-    (let ((progress (make-progress-reporter "Building denote-tree buffer..."))
-          (new-alist (copy-sequence alist)))
-      (while element
-        (seq-setq (element new-alist info stack)
-                  (or (funcall call-fn element new-alist info stack)
-                      (funcall other-fn new-alist info stack)))
-        (progress-reporter-update progress))
-      (progress-reporter-done progress)
-      new-alist)))
-
-(defun denote-tree--walk-links-iteratively
-    (buffer indent lastp depth &optional parent next prev suppl-alist)
-  "Walk links from BUFFER with starting INDENT."
-  (let ((node (intern buffer)))
-    (setq next (or next node))
-    (setq prev (or prev node))
-    (denote-tree--traverse-structure
-     node
-     (append
-      (list
-       (denote-tree--node-plist
-        (cons node node) next prev parent indent lastp depth))
-      suppl-alist)
-     nil
-     (list node)
-     #'denote-tree--grow-alist-and-stack
-     (lambda (alist _ stack)
-       (list (cadr stack)
-             alist
-             nil
-             (cdr stack))))))
-
-(defun denote-tree--fix-children-in-alist (alist)
-  "Copy :children of true node to the same prop of duplicate node in ALIST."
-  (let (new-alist)
-    (seq-do
-     (lambda (x)
-       (push
-        (if-let* ((true-name (plist-get (cdr x) :true-name))
-                  ((not (eq (car x) true-name)))
-                  (children (denote-tree--nested-value alist true-name :children)))
-            (append (list (car x)) (plist-put (cdr x) :children children))
-          x)
-        new-alist))
-     alist)))
+
+;;;;; Draw a node
 
 (defun denote-tree--draw-node-list (alist initial-node)
   "Draw every node in ALIST starting from INITIAL-NODE."
   (denote-tree--traverse-structure
-   initial-node alist (alist-get initial-node alist) (list initial-node)
-   #'denote-tree--draw-node-list-helper
-   (lambda (alist _ stack)
-     (list (cadr stack)
-           alist
-           (alist-get (cadr stack) alist)
-           (cdr stack)))))
+   alist
+   :element initial-node
+   :info (alist-get initial-node alist)
+   :stack (list initial-node)
+   :call-fn #'denote-tree--draw-node-list-helper
+   :other-fn (lambda (alist _ stack)
+               (list (cadr stack)
+                     alist
+                     (alist-get (cadr stack) alist)
+                     (cdr stack)))))
 
 (defun denote-tree--draw-node-list-helper (node alist node-plist stack)
   "Set the current NODE in NODE-PLIST and advance the STACK.
 
-This function calls `denote-tree--draw-node-foo' to do an actual drawing.
+This function calls `denote-tree--draw-node' to do an actual drawing.
 Besides delegating the drawing part it also advances the stack
 and sets up everything for next iteration."
-  (let ((point (denote-tree--draw-node-foo
+  (let ((point (denote-tree--draw-node
                 node node-plist (denote-tree--nested-value
                                  alist node :parent :next-indent)))
         (copy-stack (copy-sequence stack)))
@@ -514,7 +508,7 @@ and sets up everything for next iteration."
             (alist-get (car copy-stack) alist)
             copy-stack))))
 
-(defun denote-tree--draw-node-foo (node plist next-indent)
+(defun denote-tree--draw-node (node plist next-indent)
   "Draw NODE with NEXT-INDENT according to PLIST."
   (let ((point 0))
     (insert
@@ -536,6 +530,70 @@ and sets up everything for next iteration."
                   (symbol-name (plist-get plist :true-name)))
     (insert "\n")
     point))
+
+(defun denote-tree--calculate-indent (indent lastp)
+  "Concat INDENT and either denote-tree-space or denote-tree-pipe."
+  (concat indent (if lastp denote-tree-space denote-tree-pipe)))
+
+(defun denote-tree--set-button (position buffer)
+  "Add button to visit BUFFER at POSITION."
+  (make-text-button position (+ position (length denote-tree-node))
+                    'action #'denote-tree-enter-node
+                    'button-data buffer))
+
+
+;;;;; Build alist
+
+(defun denote-tree--walk-links (buffer &rest args)
+  "Walk along the links from BUFFER with ARGS.
+
+This function returns a new alist that maps relations between nodes in
+form specified by `denote-tree--node-plist'.
+
+The following attributes are recognized:
+
+      `:indent' - initial indentation for the first node;
+       `:lastp' - is this node the last node?
+       `:depth' - maximum depth the traversal is going to have, if t, then it's
+                  unlimited;
+      `:parent' - parent of a current node, the root's parent is nil;
+        `:next' - next sibling of the parent node, if there is none, then it's
+                  the same node;
+        `:prev' - prev sibling of the parent node, if there is none, then it's
+                  the same node;
+`:suppl-alist:' - if this is not the first traversal, then this is the
+                  current alist, which will be used to build a nowe one."
+  (let* ((node (intern buffer))
+         (indent (plist-get args :indent))
+         (lastp (plist-get args :lastp))
+         (depth (plist-get args :depth))
+         (parent (plist-get args :parent))
+         (next (or (plist-get args :next)
+                   node))
+         (prev (or (plist-get args :prev)
+                   node))
+         (suppl-alist (plist-get args :suppl-alist)))
+    (denote-tree--traverse-structure
+     (append
+      (list
+       (denote-tree--node-plist
+        node
+        :true-name node
+        :next next
+        :prev prev
+        :parent parent
+        :indent indent
+        :lastp lastp
+        :depth depth))
+      suppl-alist)
+     :element node
+     :stack (list node)
+     :call-fn #'denote-tree--grow-alist-and-stack
+     :other-fn (lambda (alist _ stack)
+                 (list (cadr stack)
+                       alist
+                       nil
+                       (cdr stack))))))
 
 (defun denote-tree--grow-alist-and-stack (node alist info stack)
   "Add NODE to ALIST, fetch more nodes for STACK."
@@ -563,49 +621,50 @@ and sets up everything for next iteration."
             (append
              (mapcar (lambda (x)
                        (denote-tree--node-plist
-                        x
-                        (denote-tree--next-sibling (car x) children-list)
-                        (denote-tree--next-sibling (car x) (reverse children-list))
-                        node
-                        indent
-                        (eq (car x) last-children-node)
-                        new-depth))
+                        (car x)
+                        :true-name (cdr x)
+                        :next (denote-tree--next-sibling (car x) children-list)
+                        :prev (denote-tree--next-sibling (car x) (reverse children-list))
+                        :parent node
+                        :indent indent
+                        :lastp (eq (car x) last-children-node)
+                        :depth new-depth))
                      children)
              alist)))
       (setf (alist-get node new-alist)
             (plist-put (alist-get node new-alist) :children children-list))
       (list (car new-stack) new-alist info new-stack))))
 
-(defun denote-tree--unique-nodes (node existsp)
-  "Return a pair new id of NODE and NODE symbol itself.
+(defun denote-tree--node-plist (x &rest args)
+  "Build full plist for node X.
 
-If EXISTSP, return an unique identifier."
-  (cons (if existsp (gensym node) node)
-        node))
+The following attributes are recognised:
 
-(defun denote-tree--node-plist (x &optional next prev parent indent lastp depth)
-  "Build full plist for X.
-
-  Argument NEXT - next sibling
-  Argument PREV - previous sibling
-Argument PARENT - parent node
-Argument INDENT - next indent
- Argument LASTP - is the node last node."
-  (let* ((node (car x))
-         (true-node (cdr x))
-         (indent (denote-tree--calculate-indent indent lastp)))
+`:true-name' - denote id of the note;
+     `:next' - next sibling;
+     `:prev' - previous sibling;
+   `:parent' - parent node;
+   `:indent' - next indent;
+    `:lastp' - is the node last node;
+    `:depth' - depth of the current node."
+  (let* ((node x)
+         (true-node (plist-get args :true-name))
+         (indent (denote-tree--calculate-indent
+                  (or (plist-get args :indent) "")
+                  (plist-get args :lastp))))
+    (denote-tree--open-link-maybe (symbol-name true-node))
     (list
      node
      :next-indent indent
      :true-name true-node
-     :next next
-     :prev prev
+     :next (plist-get args :next)
+     :prev (plist-get args :prev)
      :descp (denote-tree--collect-keywords-as-string
              (symbol-name true-node) denote-tree-node-description)
      :children nil
-     :parent parent
-     :last lastp
-     :depth depth)))
+     :parent (plist-get args :parent)
+     :last (plist-get args :lastp)
+     :depth (plist-get args :depth))))
 
 (defun denote-tree--next-sibling (x siblings)
   "Return the :next SIBLING of X."
@@ -614,34 +673,171 @@ Argument INDENT - next indent
     (setcdr (last next) next)
     (cadr (memq x next))))
 
-(defun denote-tree--nested-value (alist initial-key &rest nested-value)
-  "Iteratively return NESTED-VALUE of INITIAL-KEY in ALIST."
-  (let* ((prop (car nested-value))
-         (value (plist-get (alist-get initial-key alist) prop)))
-    (dolist (trio (cdr nested-value) value)
-      (seq-find
-       (lambda (x) (setq value (plist-get (alist-get x alist) trio)))
-       (if (listp value) value (list value))))))
+(defun denote-tree--fix-children-in-alist (alist)
+  "Copy :children of true node to the same prop of duplicate node in ALIST."
+  (let (new-alist)
+    ;; the order matters, make it not so
+    (dolist (x alist (nreverse new-alist))
+      (if-let* ((true-name (plist-get (cdr x) :true-name))
+                ((not (eq (car x) true-name)))
+                (children (denote-tree--nested-value alist true-name :children)))
+          (push (append (list (car x)) (plist-put (cdr x) :children children))
+                new-alist)
+        (push x new-alist)))))
 
-(defun denote-tree--calculate-indent (indent lastp)
-  "Concat INDENT and either denote-tree-space or denote-tree-pipe."
-  (concat indent (if lastp denote-tree-space denote-tree-pipe)))
+(defun denote-tree--unique-nodes (node existsp)
+  "Return a pair new id of NODE and NODE symbol itself.
 
-(defun denote-tree--set-button (position buffer)
-  "Add button to visit BUFFER at POSITION."
-  (make-text-button position (+ position (length denote-tree-node))
-                    'action #'denote-tree-enter-node
-                    'button-data buffer))
+If EXISTSP, return an unique identifier."
+  (cons (if existsp (gensym node) node)
+        node))
 
-(defun denote-tree--walk-region (func)
-  "Step through every line of region and apply FUNC to it.
+
+;;;;;; Individual node interaction
 
-Return a payload."
-  (let ((payload '()))
-    (while (< (point) (point-max))
-      (setq payload (append (list (funcall func)) payload))
-      (forward-line))
-    payload))
+(defun denote-tree--open-link-maybe (element)
+  "Return ELEMENT buffer, create if necessary.
+Add ELEMENT to `denote-tree--visited-buffers' to delete it after
+`denote-tree' initialization."
+  (unless (get-buffer element)
+    (if-let* ((file-path (denote-get-path-by-id element)))
+        (progn
+          (with-current-buffer (get-buffer-create element)
+            (insert-file-contents file-path))
+          (unless (member element denote-tree--visited-buffers)
+            (push element denote-tree--visited-buffers)))
+      (warn "%s was not found" element)
+      (setq element "nil")))
+  (intern element))
+
+(defun denote-tree--find-filetype (buffer)
+  "Guess the filetype in BUFFER and return it as a symbol.
+
+`denote-tree--find-filetype' works refering only to a buffer by finding
+any regex from `denote-tree--extended-filetype' that matches in the
+front matter.  This can be potentially expensive (worst case scenario is
+not finding a match), but guaranteed to work as long the user set the
+front-matter."
+  (with-current-buffer buffer
+    (goto-char (point-min))
+    (let ((filetype))
+      (setq filetype
+	          (catch 'file-type
+	            (dolist (type-plist denote-tree--extended-filetype)
+		            (dolist (el (denote-tree--get-regexps (cdr type-plist)))
+		              (let ((symbol-in-buff
+			                   (save-excursion
+			                     (re-search-forward (cadr el) nil t))))
+		                (when symbol-in-buff
+		                  (throw 'file-type type-plist)))))))
+      (unless filetype
+	      (warn "%s not a denote-style buffer" buffer))
+      filetype)))
+
+(defun denote-tree--collect-links (buffer)
+  "Collect all denote style identifiers in BUFFER.
+Return as a list sans BUFFER's own identifier."
+  (let ((buffer-id
+         (or (denote-retrieve-filename-identifier buffer)
+             (denote-tree--collect-keywords-as-string buffer '(identifier))))
+        found-ids)
+    (with-current-buffer buffer
+      (goto-char (point-min))
+      (while (search-forward-regexp denote-id-regexp nil t)
+        (push (intern (concat (match-string-no-properties 1)
+                              (match-string-no-properties 2)))
+              found-ids))
+      (seq-uniq
+       (delete (intern buffer-id) (nreverse found-ids))
+       #'eq))))
+
+(defun denote-tree--collect-keywords-as-string (buffer keywords)
+  "Return KEYWORDS as a joint string from BUFFER."
+  (let ((result '()))
+    (dolist (el (denote-tree--collect-keywords buffer keywords))
+      (when (cdr el)
+        (push (cdr el) result)))
+    (string-join (nreverse result) " ")))
+
+(defun denote-tree--collect-keywords (buffer keywords)
+  "Return denote propertized KEYWORDS from BUFFER."
+  (when-let* ((regexps
+               (thread-first
+                 (denote-tree--find-filetype buffer)
+                 (cdr)
+                 (denote-tree--get-regexps))))
+    (with-current-buffer buffer
+      (let ((result '()))
+        (dolist (el keywords result)
+          (push (denote-tree--collect-keywords-helper el regexps)
+                result))))))
+
+(defun denote-tree--collect-keywords-helper (el regexps)
+  "Turn EL into cons according to REGEXPS."
+  (goto-char (point-min))
+  (or (and (stringp el)
+           (cons 'str el))
+      (and (re-search-forward
+            (denote-tree--extract-and-compare-symbols el regexps) nil t)
+           (cons el (funcall denote-tree-node-colorize-function
+                             (denote-trim-whitespace
+                              (buffer-substring-no-properties
+                               (point) (line-end-position)))
+                             el)))
+      (and (symbolp el)
+           (cons el nil))))
+
+(defun denote-tree--get-regexps (plist)
+  "Return alist of all keys ending in -regexp with values in PLIST."
+  (let (lst el)
+    (while plist
+      (setq el (car plist))
+      (and (symbolp el)
+	         (string-suffix-p
+	          "-regexp" (symbol-name el))
+	         (stringp (cadr plist))
+	         (push (cadr plist) lst)
+	         (push el lst))
+      (setq plist (cddr plist)))
+    (seq-partition lst 2)))
+
+(defun denote-tree--extract-and-compare-symbols
+    (el regexps &optional extractor-regexp)
+  "Return symbol in REGEXPS, that matches EL.
+
+Optional argument EXTRACTOR-REGEXP is passed along to
+`denote-tree--extract-and-compare-symbol' and returns the matching
+symbol."
+  (catch 'break
+    (let ((regexps (if (listp regexps) regexps (list regexps))))
+      (dolist (reg regexps)
+        (let ((symbol (denote-tree--extract-and-compare-symbol
+                       (car reg) el extractor-regexp)))
+          (when symbol
+            (throw 'break (car (alist-get symbol regexps)))))))))
+
+(defun denote-tree--extract-and-compare-symbol
+    (symbol element &optional extractor-regexp)
+  "Apply EXTRACTOR-REGEXP to SYMBOL and compare with ELEMENT.
+
+EXTRACTOR-REGEXP should capture one group, which will be transformed
+into shortened form.  If EXTRACTOR-REGEXP is nil, then the default value
+mangles the SYMBOL like so,
+
+:key-value-regexp      -> key
+:foo-bar-regexp        -> foo
+:identifier-val-regexp -> identifier
+
+If the mangled form is `eq' to SYMBOL, return the SYMBOL."
+  (or extractor-regexp (setq extractor-regexp ":\\(.+?\\)-\\(?:.*?\\)regexp"))
+  (and (eq (intern
+            (replace-regexp-in-string
+             extractor-regexp "\\1" (symbol-name symbol)))
+           element)
+       symbol))
+
+
+;;;; Redraw
 
 (defun denote-tree--deepen-traversal (alist)
   "Retraverse current node under point with ALIST.
@@ -666,13 +862,24 @@ low value."
                       (save-excursion
                         (denote-tree--alist-in-region alist)))
                      (alist-sans-region
-                      (list (seq-difference alist alist-in-region)))
-                     (args-for-walking
-                      (denote-tree--args-for-walking curr-node alist)))
+                      (seq-difference alist alist-in-region)))
                 (setq new-alist (denote-tree--fix-children-in-alist
-                                 (apply #'denote-tree--walk-links-iteratively
-                                        (append args-for-walking
-                                                alist-sans-region))))
+                                 (denote-tree--walk-links
+                                  (symbol-name curr-node)
+                                  :indent (buffer-substring-no-properties
+                                           (line-beginning-position)
+                                           (- (denote-tree--get-node-pos)
+                                              (length denote-tree-node)))
+                                  :lastp (denote-tree--nested-value
+                                          alist curr-node :last)
+                                  :depth denote-tree-max-traversal-depth
+                                  :parent (denote-tree--nested-value
+                                           alist curr-node :parent)
+                                  :next (denote-tree--nested-value
+                                         alist curr-node :next)
+                                  :prev (denote-tree--nested-value
+                                         alist curr-node :prev)
+                                  :suppl-alist alist-sans-region)))
                 (setq orphans
                       (seq-difference (mapcar #'car alist-in-region)
                                       (mapcar #'car new-alist)))
@@ -701,60 +908,6 @@ low value."
                     (setq new-alist alist))))))
         (denote-tree--clean-up)))
     (list curr-pos new-alist)))
-
-(defun denote-tree--find-orphans (orphaned alist)
-  "Find ORPHANED nodes in an ALIST.
-
-If a node is deleted during rescan of a tree, then there is
-a possibility, that that node had cyclical buffers associated
-with it.  Children of that node become effectively lost."
-  (seq-reduce
-   (lambda (acc orp-el)
-     (push (seq-find
-            (lambda (alist-el)
-              (let ((el-name (symbol-name orp-el))
-                    (alist-key (symbol-name (car alist-el))))
-                (and (not (string= el-name alist-key))
-                     (string-prefix-p el-name alist-key))))
-            alist)
-           acc))
-   orphaned
-   '()))
-
-(defun denote-tree--alist-in-region (alist)
-  "Return ALIST of nodes from the current region."
-  (let* ((nodes-in-region
-          (denote-tree--walk-region
-           (lambda ()
-             (get-text-property
-              (point) 'denote-tree--identifier)))))
-    (seq-reduce
-     (lambda (payload el)
-       (setq payload (append (list (assq el alist)) payload)))
-     nodes-in-region
-     '())))
-
-(defun denote-tree--args-for-walking (node alist)
-  "Return NODE information from ALIST.
-
-To be more specific, the function returns a list of:
-
-- name;
-- indent;
-- last;
-- traversal-depth;
-- parent;
-- next-node;
-- prev-node."
-  (list (symbol-name node)
-        (buffer-substring-no-properties
-         (line-beginning-position)
-         (- (denote-tree--get-node-pos) (length denote-tree-node)))
-        (denote-tree--nested-value alist node :last)
-        denote-tree-max-traversal-depth
-        (denote-tree--nested-value alist node :parent)
-        (denote-tree--nested-value alist node :next)
-        (denote-tree--nested-value alist node :prev)))
 
 (defun denote-tree--determine-node-bounds (node alist)
   "Return bounds of current NODE with ALIST as a cons.
@@ -801,160 +954,58 @@ signal an error."
              (line-end-position)))))
       (t (error "Denote tree buffer %s is malformed" (buffer-name)))))))
 
-
-;;;; Helpers for Links and Buffers
+(defun denote-tree--alist-in-region (alist)
+  "Return ALIST of nodes from the current region."
+  (let* ((nodes-in-region
+          (denote-tree--walk-region
+           (lambda ()
+             (get-text-property
+              (point) 'denote-tree--identifier))))
+         (result '()))
+    (dolist (el nodes-in-region result)
+      (push (assq el alist) result))))
 
-(defun denote-tree--collect-links (buffer)
-  "Collect all denote style identifiers in BUFFER.
-Return as a list sans BUFFER's own identifier."
-  (let ((buffer-id
-         (or (denote-retrieve-filename-identifier buffer)
-             (denote-tree--collect-keywords-as-string buffer '(identifier))))
-        found-ids)
-    (with-current-buffer buffer
-      (goto-char (point-min))
-      (while (search-forward-regexp denote-id-regexp nil t)
-        (push (intern (concat (match-string-no-properties 1)
-                              (match-string-no-properties 2)))
-              found-ids))
-      (delete (intern buffer-id) (nreverse found-ids)))))
+(defun denote-tree--walk-region (func)
+  "Step through every line of region and apply FUNC to it.
 
-(defun denote-tree--build-extended-filetype (gen-from add-this)
-  "Add keys and values from ADD-THIS to GEN-FROM alist."
-  (let ((ext-filetype (copy-tree gen-from)))
-    (dolist (type ext-filetype)
-      (mapc
-       (lambda (key)
-         (unless (plist-member (cdr type) (car key))
-           (setf (cdr type)
-                 (plist-put
-                  (cdr type) (car key) (plist-get (cdr key) (car type))))))
-       add-this))
-    ext-filetype))
+Return a payload."
+  (let ((payload '()))
+    (while (< (point) (point-max))
+      (setq payload (append (list (funcall func)) payload))
+      (forward-line))
+    payload))
 
-(defun denote-tree--collect-keywords (buffer keywords)
-  "Return denote propertized KEYWORDS from BUFFER."
-  (when-let* ((regexps
-               (thread-first
-                 (denote-tree--find-filetype buffer)
-                 (cdr)
-                 (denote-tree--get-regexps))))
-    (with-current-buffer buffer
-      (mapcar (lambda (el)
-                (denote-tree--collect-keywords-helper el regexps))
-              keywords))))
+(defun denote-tree--find-orphans (orphaned alist)
+  "Find ORPHANED nodes in an ALIST.
 
-(defun denote-tree--collect-keywords-helper (el regexps)
-  "Turn EL into cons according to REGEXPS."
-  (goto-char (point-min))
-  (cond
-   ;; if it's a string, just push it
-   ((stringp el)
-    (cons 'str el))
-   ;; if it's in regexps, covert to str and push
-   ((re-search-forward
-     (cadr (seq-find
-            (lambda (reg)
-              (denote-tree--extract-and-compare-symbols (car reg) el))
-            regexps))
-     nil t)
-    (cons el
-          (funcall denote-tree-node-colorize-function
-                   (denote-trim-whitespace
-                    (buffer-substring-no-properties (point) (line-end-position)))
-                   el)))
-   ;; symbol with no associated str
-   ((symbolp el)
-    (list el))))
+If a node is deleted during rescan of a tree, then there is
+a possibility, that that node had cyclical buffers associated
+with it.  Children of that node become effectively lost."
+  (let ((result '()))
+    (dolist (orp-el orphaned result)
+      (let ((orphan (denote-tree--first-orphan (symbol-name orp-el) alist)))
+        (push orphan result)))))
 
-(defun denote-tree--get-regexps (plist)
-  "Return alist of all keys ending in -regexp with values in PLIST."
-  (let (lst el)
-    (while plist
-      (setq el (car plist))
-      (and (symbolp el)
-	   (string-suffix-p
-	    "-regexp" (symbol-name el))
-	   (stringp (cadr plist))
-	   (push (cadr plist) lst)
-	   (push el lst))
-      (setq plist (cddr plist)))
-    (seq-partition lst 2)))
-
-(defun denote-tree--extract-and-compare-symbols
-    (symbol element &optional extractor-regexp)
-  "Apply EXTRACTOR-REGEXP to SYMBOL and compare with ELEMENT.
-
-EXTRACTOR-REGEXP should capture one group, which will be transformed
-into shortened form.  If EXTRACTOR-REGEXP is nil, then the default value
-mangles the SYMBOL like so,
-
-:key-value-regexp      -> key
-:foo-bar-regexp        -> foo
-:identifier-val-regexp -> identifier"
-  (setq extractor-regexp (or extractor-regexp ":\\(.+?\\)-\\(?:.*?\\)regexp"))
-  (and (eq (intern
-            (replace-regexp-in-string
-             extractor-regexp "\\1" (symbol-name symbol)))
-           element)
-       symbol))
-
-(defun denote-tree--collect-keywords-as-string (buffer keywords)
-  "Return KEYWORDS as a joint string from BUFFER."
-  (string-join (seq-filter
-                #'identity
-                (mapcar #'cdr (denote-tree--collect-keywords buffer keywords)))
-               " "))
-
-(defun denote-tree--find-filetype (buffer)
-  "Guess the filetype in BUFFER and return it as a symbol.
-
-`denote-tree--find-filetype' works refering only to a buffer by finding
-any regex from `denote-tree--extended-filetype' that matches in the
-front matter.  This can be potentially expensive (worst case scenario is
-not finding a match), but guaranteed to work as long the user set the
-front-matter."
-  (with-current-buffer buffer
-    (goto-char (point-min))
-    (let ((filetype))
-      (setq filetype
-	          (catch 'file-type
-	            (dolist (type-plist denote-tree--extended-filetype)
-		            (dolist (el (denote-tree--get-regexps (cdr type-plist)))
-		              (let ((symbol-in-buff
-			                   (save-excursion
-			                     (re-search-forward (cadr el) nil t))))
-		                (when symbol-in-buff
-		                  (throw 'file-type type-plist)))))))
-      (unless filetype
-	      (warn "%s not a denote-style buffer" buffer))
-      filetype)))
-
-(defun denote-tree--open-link-maybe (element)
-  "Return ELEMENT buffer, create if necessary.
-Add ELEMENT to `denote-tree--visited-buffers' to delete it after
-`denote-tree' initialization."
-  (unless (get-buffer element)
-    (if-let* ((file-path (denote-get-path-by-id element)))
-        (progn
-          (with-current-buffer (get-buffer-create element)
-            (insert-file-contents file-path))
-          (unless (member element denote-tree--visited-buffers)
-            (push element denote-tree--visited-buffers)))
-      (warn "%s was not found" element)
-      (setq element "nil")))
-  (intern element))
+(defun denote-tree--first-orphan (el-name alist)
+  "Return first element of ALIST equal to EL-NAME or nil."
+  (catch 'break
+    (dolist (alist-el alist)
+      (let ((alist-key (symbol-name (car alist-el))))
+        (when (and (not (string= el-name alist-key))
+                   (string-prefix-p el-name alist-key))
+          (throw 'break alist-el))))))
 
 
-;;;; Helper functions
+;;;; General purpose helpers
 
-(defun denote-tree--clean-up ()
-  "Clean up buffers created during the tree walk."
-  (dolist (el denote-tree--visited-buffers)
-    ;; silence all kill-buffer errors
-    (condition-case nil
-        (kill-buffer el)
-      (error nil))))
+(defun denote-tree--nested-value (alist initial-key &rest nested-value)
+  "Iteratively return NESTED-VALUE of INITIAL-KEY in ALIST."
+  (let* ((prop (car nested-value))
+         (value (plist-get (alist-get initial-key alist) prop)))
+    (dolist (trio (cdr nested-value) value)
+      (seq-find
+       (lambda (x) (setq value (plist-get (alist-get x alist) trio)))
+       (if (listp value) value (list value))))))
 
 (defun denote-tree--default-props (str type)
   "Default function returning STR of TYPE with properties.
@@ -978,6 +1029,17 @@ This function will move the point, if AT-POS is a position."
         (line-beginning-position) prop nil (line-end-position))
        prop)
     (error nil)))
+
+
+;;;; Finalization
+
+(defun denote-tree--clean-up ()
+  "Clean up buffers created during the tree walk."
+  (dolist (el denote-tree--visited-buffers)
+    ;; silence all kill-buffer errors
+    (condition-case nil
+        (kill-buffer el)
+      (error nil))))
 
 (provide 'denote-tree)
 ;;; denote-tree.el ends here
