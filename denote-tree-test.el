@@ -317,6 +317,14 @@ allows to classify the type of front matter denote is dealing with."
       (with-temp-buffer
         (insert
          "#+title: FOO\n"
+         "20231226T163250 20231226T163250\n")
+        (goto-char (point-min))
+        (should
+         (equal (denote-tree--collect-links (buffer-name (current-buffer)))
+                '(20231226T163250))))
+      (with-temp-buffer
+        (insert
+         "#+title: FOO\n"
          "#+identifier: 20231226T163250\n"
          "20240119T164551 20240120T164558")
         (goto-char (point-min))
