@@ -28,7 +28,6 @@
 (require 'denote-tree)
 
 (declare-function denote-get-link-description "denote")
-(declare-function denote-tree-redraw "denote-tree")
 
 
 ;;;; Customization and vars
