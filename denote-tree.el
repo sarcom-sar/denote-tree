@@ -373,7 +373,11 @@ What is editable is dependent on `denote-prompts'."
 ;;;; Initialisation
 
 (defun denote-tree--build-extended-filetype (gen-from add-this)
-  "Add keys and values from ADD-THIS to GEN-FROM alist."
+  "Add keys and values from ADD-THIS to GEN-FROM alist.
+
+This is purely backwards-compatible scheme to allow
+`denote-tree-extend-filetype-with' to extend `denote-file-types' in case user's
+denote version is too old."
   (let ((ext-filetype (copy-tree gen-from)))
     (dolist (type ext-filetype)
       (let ((ret '()))
