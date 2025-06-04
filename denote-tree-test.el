@@ -700,7 +700,7 @@ and it's value in plist is a string."
         (setq x (cdr x))))))
 
 (defmacro denote-tree-test-mock-draw-tree (lst-of-links)
-  "Execute `denote-tree--walk-links-iteratively' over LST-OF-LINKS."
+  "Execute `denote-tree--walk-links' over LST-OF-LINKS."
   `(let ((denote-tree-max-traversal-depth t)
          (tree-alist '())
          (next (denote-tree-test-mock-make-next-links ,lst-of-links)))
@@ -716,7 +716,7 @@ and it's value in plist is a string."
        (unwind-protect
            (setq tree-alist
                  (denote-tree--fix-children-in-alist
-                  (denote-tree--walk-links-iteratively
+                  (denote-tree--walk-links
                    (caar (funcall next))
                    :lastp t
                    :depth t)))

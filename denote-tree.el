@@ -462,7 +462,7 @@ The full detail of all attributes:
   "Draw and propertize a tree in current buffer starting with BUFFER."
   (setq denote-tree--tree-alist
         (denote-tree--fix-children-in-alist
-         (denote-tree--walk-links-iteratively
+         (denote-tree--walk-links
           buffer
           :lastp t
           :depth denote-tree-max-traversal-depth)))
@@ -540,7 +540,7 @@ and sets up everything for next iteration."
 
 ;;;;; Build alist
 
-(defun denote-tree--walk-links-iteratively (buffer &rest args)
+(defun denote-tree--walk-links (buffer &rest args)
   "Walk along the links from BUFFER with ARGS.
 
 This function returns a new alist that maps relations between nodes in
@@ -860,7 +860,7 @@ low value."
                      (alist-sans-region
                       (seq-difference alist alist-in-region)))
                 (setq new-alist (denote-tree--fix-children-in-alist
-                                 (denote-tree--walk-links-iteratively
+                                 (denote-tree--walk-links
                                   (symbol-name curr-node)
                                   :indent (buffer-substring-no-properties
                                            (line-beginning-position)
