@@ -237,11 +237,12 @@ denote-style identifier."
   "Enter node at point in other window.
 BUTTON is pased as node's ID."
   (interactive)
-  (when button
-    (find-file-other-window
-     ;; no need to file-check, since if it's drawn
-     ;; then it's good to show
-     (denote-get-path-by-id button))))
+  (if button
+      (find-file-other-window
+       ;; no need to file-check, since if it's drawn
+       ;; then it's good to show
+       (denote-get-path-by-id button))
+    (message "No valid node under the point")))
 
 (defun denote-tree-redraw (&optional arg)
   "Redraw ARG parts of a tree.
