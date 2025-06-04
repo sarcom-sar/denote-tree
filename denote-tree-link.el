@@ -236,11 +236,11 @@ is narrowed to region between POS and MARK."
                    (denote-tree-link--range node ".*?")))
                 (link-string
                  (buffer-substring-no-properties
-                  (car link-range) (cadr link-range))))
+                  (car link-range) (cdr link-range))))
       (save-match-data
         (string-match link-in-context link-string)
         (goto-char (car link-range))
-        (delete-region (car link-range) (cadr link-range))
+        (delete-region (car link-range) (cdr link-range))
         (when (match-beginning 2)
           (insert (substring link-string (match-beginning 2) (match-end 2))))))
     (write-file (buffer-file-name) nil))
@@ -263,7 +263,7 @@ If none present, return nil."
                (format regex-to-search node description) nil t)
               (re-search-forward
                (format id-only-regex node) nil t))
-          (list (match-beginning 0) (match-end 0))
+          (cons (match-beginning 0) (match-end 0))
         (error "No valid target for unlinking in node %s" node)))))
 
 
