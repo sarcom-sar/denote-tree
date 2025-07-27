@@ -110,7 +110,7 @@ user decide where in TO-POINT node the link to FROM-MARK should be set."
       (message "The line under the point doesn't contain a node"))
      ((equal node-from node-to)
       (user-error "Trying to link a file to itself"))
-     (t (denote-tree-link--helper node-from node-to)))))
+     (t (denote-tree-link--link node-from node-to)))))
 
 (defun denote-tree-link-unlink-node (pos)
   "Unlink the node at POS from it's parent.
@@ -145,7 +145,7 @@ contains only an ID, delete entire line sans the newline."
       (let ((buff (current-buffer))
             (child (call-interactively #'denote)))
         (with-current-buffer buff
-          (denote-tree-link--helper child node)))))))
+          (denote-tree-link--link child node)))))))
 
 (defun denote-tree-link-finalize (&optional stay-with-capture)
   "Insert a link between point and mark in the note buffer.
@@ -182,7 +182,7 @@ examine it."
 
 ;;;; Module entry point
 
-(defun denote-tree-link--helper (link-this to-this)
+(defun denote-tree-link--link (link-this to-this)
   "Link note LINK-THIS to note TO-THIS.
 
 If `denote-tree-link-insert-function' is set, do it

@@ -110,8 +110,8 @@
       (goto-char (point-min))
       (should (search-forward id nil t)))))
 
-(ert-deftest denote-tree-link-test--helper ()
-  "Tests for `denote-tree-link--helper'."
+(ert-deftest denote-tree-link-test--link ()
+  "Tests for `denote-tree-link--link'."
   (cl-letf (((symbol-function 'write-file)
              (lambda (_ _)
                nil)))
@@ -138,7 +138,7 @@
           (cl-letf (((symbol-function 'find-file-noselect)
                      (lambda (x)
                        (get-buffer to-node-buffer))))
-            (denote-tree-link--helper from-node-file to-node-file))
+            (denote-tree-link--link from-node-file to-node-file))
           (with-current-buffer to-node-buffer
             (should denote-tree-link-mode)
             (should denote-tree-link--plist)
