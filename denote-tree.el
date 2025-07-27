@@ -602,12 +602,7 @@ The following attributes are recognized:
   "Add NODE to ALIST, fetch more nodes for STACK."
   (when-let* (((eq node (denote-tree--nested-value alist node :true-name)))
               (depth (denote-tree--nested-value alist node :depth)))
-    (let* ((new-depth (cond
-                       ((symbolp depth) depth)
-                       ((and (numberp depth) (< 0 (1- depth))) (1- depth))
-                       ((and (numberp depth) (= 0 (1- depth))) nil)
-                       (t t)))
-           (uniq-links-in-node
+    (let* ((uniq-links-in-node
             (mapcar (lambda (x)
                       (denote-tree--unique-nodes x (alist-get x alist)))
                     (save-excursion
@@ -631,11 +626,24 @@ The following attributes are recognized:
                         :indent (denote-tree--nested-value alist node :next-indent)
                         :lastp (eq (car x) last-children-node)
                         :depth new-depth))
+                        :depth (denote-tree--new-depth depth)))
                      children)
              alist)))
       (setf (alist-get node new-alist)
             (plist-put (alist-get node new-alist) :children children-list))
       (list (car new-stack) new-alist info new-stack))))
+
+(defun denote-tree--new-depth (old-depth)
+  "Return new depth based on OLD-DEPTH.
+
+If OLD-DEPTH is t or nil, keep it.  Either all further nodes are
+supposed to be produced or none.  If OLD-DEPTH is a number, then the
+user still wants more nodes drawn, repeat until OLD-DEPTH is zero."
+  (cond
+   ((symbolp old-depth) old-depth)
+   ((and (numberp old-depth) (< 0 (1- old-depth))) (1- old-depth))
+   ((and (numberp old-depth) (= 0 (1- old-depth))) nil)
+   (t t)))
 
 (defun denote-tree--node-plist (x &rest args)
   "Build full plist for node X.
