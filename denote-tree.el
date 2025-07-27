@@ -602,11 +602,7 @@ The following attributes are recognized:
   "Add NODE to ALIST, fetch more nodes for STACK."
   (when-let* (((eq node (denote-tree--nested-value alist node :true-name)))
               (depth (denote-tree--nested-value alist node :depth)))
-    (let* ((children
-            (seq-filter (lambda (x)
-                          (denote-tree--open-link-maybe (symbol-name (cdr x))))
-                        (denote-tree--unique-links-in-node
-                         (symbol-name node) alist)))
+    (let* ((children (denote-tree--children (symbol-name node) alist))
            (children-list (mapcar #'car children))
            (new-stack (append children-list (cdr stack)))
            (new-alist
@@ -648,6 +644,13 @@ be the same symbol."
             (denote-tree--unique-nodes x (alist-get x alist)))
           (save-excursion
             (denote-tree--collect-links node))))
+
+(defun denote-tree--children (node alist)
+  "List child nodes from NODE registered in ALIST that are openable."
+  (seq-filter (lambda (x)
+                (denote-tree--open-link-maybe (symbol-name (cdr x))))
+              (denote-tree--unique-links-in-node
+               node alist)))
 
 (defun denote-tree--node-plist (x &rest args)
   "Build full plist for node X.
