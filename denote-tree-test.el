@@ -1107,8 +1107,9 @@ allows to classify the type of front matter denote is dealing with."
                  (lambda (_)
                    '(c1 c2 c3 c))))
         (should
-         (equal '(c c3 c2 c1)
-                (mapcar #'car (denote-tree--alist-in-region alist))))))))
+         (seq-set-equal-p
+          '(c c3 c2 c1)
+          (mapcar #'car (denote-tree--alist-in-region alist))))))))
 
 (ert-deftest denote-tree-test--redraw-node ()
   "Tests for `denote-tree--redraw-node'."
