@@ -283,7 +283,7 @@ node position for future backtracking."
     (if (< arg 0)
         (denote-tree-parent-node (- arg))
       (dotimes (_ arg next-point)
-        (let ((node-id (get-text-property (point) 'denote-tree--identifier)))
+        (let ((node-id (get-text-property (point) :denote-tree--identifier)))
           (setq next-point (denote-tree--nested-value
                             alist node-id :children :pos))
           (setq curr-point (denote-tree--get-node-pos))
@@ -308,13 +308,13 @@ ommited, nil or zero, move once."
     (let ((alist denote-tree--tree-alist)
           next-point canon-point)
       (dotimes (_ arg next-point)
-        (let ((node-id (get-text-property (point) 'denote-tree--identifier)))
+        (let ((node-id (get-text-property (point) :denote-tree--identifier)))
           (setq next-point (denote-tree--nested-value
                             alist node-id :parent :pos))
           (setq canon-point
                 (denote-tree--nested-value
                  alist
-                 (get-text-property next-point 'denote-tree--identifier)
+                 (get-text-property next-point :denote-tree--identifier)
                  :children :pos))
           (when-let* ((current-teleport (car denote-tree--teleport-stack))
                       ((equal canon-point (cadr current-teleport))))
@@ -334,7 +334,7 @@ omitted, nil or zero, move once."
         (arg (abs arg))
         next-point)
     (dotimes (_ arg next-point)
-      (let ((node-id (get-text-property (point) 'denote-tree--identifier)))
+      (let ((node-id (get-text-property (point) :denote-tree--identifier)))
         (setq next-point
               (denote-tree--nested-value
                denote-tree--tree-alist node-id direction :pos))
@@ -408,7 +408,7 @@ Return current buffer object."
 Include only elements from `denote-tree-node-description'.  Preserve
 properties."
   (let ((inhibit-read-only t)
-        (node (get-text-property (point) 'denote-tree--identifier))
+        (node (get-text-property (point) :denote-tree--identifier))
         (new-alist alist)
         (new-descp (denote-tree--collect-keywords-as-string
                     buffer denote-tree-node-description))
@@ -528,7 +528,7 @@ and sets up everything for next iteration."
      (plist-get plist :descp))
     (put-text-property
      (line-beginning-position) (line-end-position)
-     'denote-tree--identifier node)
+     :denote-tree--identifier node)
     (denote-tree--set-button point
                   (symbol-name (plist-get plist :true-name)))
     (insert "\n")
@@ -849,7 +849,7 @@ Especially useful, if `denote-tree-max-traversal-depth' is set to very
 low value."
   (let* ((inhibit-read-only t)
          (curr-pos (point))
-         (curr-node (get-text-property (point) 'denote-tree--identifier))
+         (curr-node (get-text-property (point) :denote-tree--identifier))
          (new-alist alist)
          (orphans '())
          (move-orphans-to '()))
@@ -941,7 +941,7 @@ signal an error."
        (save-excursion
          (goto-char (denote-tree--nested-value alist node :parent :pos))
          (let (prev-next next id)
-           (setq id (get-text-property (point) 'denote-tree--identifier))
+           (setq id (get-text-property (point) :denote-tree--identifier))
            (while (and (setq next (denote-tree--nested-value
                                    alist id :next :pos))
                        (not (equal prev-next next))
@@ -949,7 +949,7 @@ signal an error."
              (setq prev-next next)
              (goto-char (or (denote-tree--nested-value alist id :parent :pos)
                             1))
-             (setq id (get-text-property (point) 'denote-tree--identifier)))
+             (setq id (get-text-property (point) :denote-tree--identifier)))
            (if (> now-pos (or next 1))
                (1- (point-max))
              (goto-char (denote-tree--nested-value alist id :next :pos))
@@ -963,7 +963,7 @@ signal an error."
           (denote-tree--walk-region
            (lambda ()
              (get-text-property
-              (point) 'denote-tree--identifier))))
+              (point) :denote-tree--identifier))))
          (result '()))
     (dolist (el nodes-in-region result)
       (push (assq el alist) result))))

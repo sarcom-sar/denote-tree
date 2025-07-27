@@ -488,7 +488,7 @@ and it's value in plist is a string."
     (denote-tree--draw-node
      'a '(:true-name a :descp "a" :last nil :pos nil) "")
     (should
-     (equal (get-text-property (point-min) 'denote-tree--identifier) 'a))
+     (equal (get-text-property (point-min) :denote-tree--identifier) 'a))
     (should
      (equal (get-text-property
              (next-single-property-change (point-min) 'face)
@@ -507,7 +507,7 @@ and it's value in plist is a string."
     (denote-tree--draw-node
      'a '(:true-name b :descp "a" :last nil :pos nil) "|")
     (should
-     (equal (get-text-property (point-min) 'denote-tree--identifier) 'a))
+     (equal (get-text-property (point-min) :denote-tree--identifier) 'a))
     (should
      (equal (get-text-property
              (next-single-property-change (point-min) 'face)
@@ -539,19 +539,19 @@ and it's value in plist is a string."
       (forward-line)
       (denote-tree-next-node)
       (should
-       (equal (get-text-property (point) 'denote-tree--identifier) 'c))
+       (equal (get-text-property (point) :denote-tree--identifier) 'c))
       (denote-tree-next-node)
       (should
-       (equal (get-text-property (point) 'denote-tree--identifier) 'd))
+       (equal (get-text-property (point) :denote-tree--identifier) 'd))
       (denote-tree-next-node)
       (should
-       (equal (get-text-property (point) 'denote-tree--identifier) 'b))
+       (equal (get-text-property (point) :denote-tree--identifier) 'b))
       (denote-tree-next-node -1)
       (should
-       (equal (get-text-property (point) 'denote-tree--identifier) 'd))
+       (equal (get-text-property (point) :denote-tree--identifier) 'd))
       (denote-tree-next-node 2)
       (should
-       (equal (get-text-property (point) 'denote-tree--identifier) 'c)))))
+       (equal (get-text-property (point) :denote-tree--identifier) 'c)))))
 
 (ert-deftest denote-tree-test--child-node ()
   "Tests for `denote-tree-next-node'."
@@ -577,19 +577,19 @@ and it's value in plist is a string."
       (goto-char (point-min))
       (denote-tree-child-node)
       (should
-       (equal (get-text-property (point) 'denote-tree--identifier) 'b))
+       (equal (get-text-property (point) :denote-tree--identifier) 'b))
       (denote-tree-child-node)
       (should
-       (equal (get-text-property (point) 'denote-tree--identifier) 'c))
+       (equal (get-text-property (point) :denote-tree--identifier) 'c))
       (denote-tree-child-node)
       (should
-       (equal (get-text-property (point) 'denote-tree--identifier) 'd))
+       (equal (get-text-property (point) :denote-tree--identifier) 'd))
       (denote-tree-child-node -1)
       (should
-       (equal (get-text-property (point) 'denote-tree--identifier) 'c))
+       (equal (get-text-property (point) :denote-tree--identifier) 'c))
       (denote-tree-child-node -2)
       (should
-       (equal (get-text-property (point) 'denote-tree--identifier) 'a))))
+       (equal (get-text-property (point) :denote-tree--identifier) 'a))))
   (with-temp-buffer
     (let ((alist '((a :next-indent "|" :children (b c)
                       :last t :depth t
@@ -617,10 +617,10 @@ and it's value in plist is a string."
       (forward-line 4)
       (denote-tree-child-node)
       (should
-       (equal (get-text-property (point) 'denote-tree--identifier) 'd))
+       (equal (get-text-property (point) :denote-tree--identifier) 'd))
       (denote-tree-child-node -1)
       (should
-       (equal (get-text-property (point) 'denote-tree--identifier) 'b123)))))
+       (equal (get-text-property (point) :denote-tree--identifier) 'b123)))))
 
 (ert-deftest denote-tree-test--parent-node ()
   "Tests for `denote-tree-next-node'."
@@ -647,19 +647,19 @@ and it's value in plist is a string."
       (forward-line -1)
       (denote-tree-parent-node)
       (should
-       (equal (get-text-property (point) 'denote-tree--identifier) 'c))
+       (equal (get-text-property (point) :denote-tree--identifier) 'c))
       (denote-tree-parent-node)
       (should
-       (equal (get-text-property (point) 'denote-tree--identifier) 'b))
+       (equal (get-text-property (point) :denote-tree--identifier) 'b))
       (denote-tree-parent-node)
       (should
-       (equal (get-text-property (point) 'denote-tree--identifier) 'a))
+       (equal (get-text-property (point) :denote-tree--identifier) 'a))
       (denote-tree-parent-node -1)
       (should
-       (equal (get-text-property (point) 'denote-tree--identifier) 'b))
+       (equal (get-text-property (point) :denote-tree--identifier) 'b))
       (denote-tree-parent-node -2)
       (should
-       (equal (get-text-property (point) 'denote-tree--identifier) 'd))))
+       (equal (get-text-property (point) :denote-tree--identifier) 'd))))
   (with-temp-buffer
     (let ((alist '((a :next-indent "|" :children (b c)
                       :last t :depth t
@@ -687,10 +687,10 @@ and it's value in plist is a string."
       (forward-line -1)
       (denote-tree-parent-node -1)
       (should
-       (equal (get-text-property (point) 'denote-tree--identifier) 'd))
+       (equal (get-text-property (point) :denote-tree--identifier) 'd))
       (denote-tree-parent-node)
       (should
-       (equal (get-text-property (point) 'denote-tree--identifier) 'b123)))))
+       (equal (get-text-property (point) :denote-tree--identifier) 'b123)))))
 
 (defun denote-tree-test-mock-make-next-links (lst-of-links)
   "Closure returning next element from LST-OF-LINKS."
@@ -735,27 +735,27 @@ and it's value in plist is a string."
       (should
        (equal '(15 25)
               (denote-tree--determine-node-bounds
-               (get-text-property (point) 'denote-tree--identifier) alist)))
+               (get-text-property (point) :denote-tree--identifier) alist)))
       (goto-char (point-min))
       ;; at b2
       (forward-line 3)
       (should
        (equal '(26 36)
               (denote-tree--determine-node-bounds
-               (get-text-property (point) 'denote-tree--identifier) alist)))
+               (get-text-property (point) :denote-tree--identifier) alist)))
       (goto-char (point-min))
       ;; at b
       (forward-line 1)
       (should
        (equal '(7 36)
               (denote-tree--determine-node-bounds
-               (get-text-property (point) 'denote-tree--identifier) alist)))
+               (get-text-property (point) :denote-tree--identifier) alist)))
       (goto-char (point-min))
       ;; at a
       (should
        (equal '(1 96)
               (denote-tree--determine-node-bounds
-               (get-text-property (point) 'denote-tree--identifier) alist)))))
+               (get-text-property (point) :denote-tree--identifier) alist)))))
   (with-temp-buffer
     (let ((alist (denote-tree-test-mock-draw-tree
                   '(("a") (b c d) (b1) (b2) (b3) nil (c1 c2) nil nil (d1 d2)))))
@@ -766,7 +766,7 @@ and it's value in plist is a string."
       (should
        (equal '(39 53)
               (denote-tree--determine-node-bounds
-               (get-text-property (point) 'denote-tree--identifier) alist)))))
+               (get-text-property (point) :denote-tree--identifier) alist)))))
   (with-temp-buffer
     (let ((alist (denote-tree-test-mock-draw-tree
                   '(("a") (b c d) (b1) nil (c1) nil (d1 d2 d3)))))
@@ -777,7 +777,7 @@ and it's value in plist is a string."
       (should
        (equal '(75 85)
               (denote-tree--determine-node-bounds
-               (get-text-property (point) 'denote-tree--identifier) alist))))))
+               (get-text-property (point) :denote-tree--identifier) alist))))))
 
 (ert-deftest denote-tree-test--deepen-traversal-trivial-redraw ()
   "Tests for `denote-tree--deepen-traversal'."
@@ -1065,7 +1065,7 @@ and it's value in plist is a string."
         (should-not
          (seq-difference
             (denote-tree--walk-region
-             (lambda () (get-text-property (point) 'denote-tree--identifier)))
+             (lambda () (get-text-property (point) :denote-tree--identifier)))
             '(b2 b3 b1 b))))))
   (let ((alist
          (denote-tree-test-mock-draw-tree
@@ -1081,7 +1081,7 @@ and it's value in plist is a string."
             (length
              (seq-difference
               (denote-tree--walk-region
-               (lambda () (get-text-property (point) 'denote-tree--identifier)))
+               (lambda () (get-text-property (point) :denote-tree--identifier)))
               '(b2 b1 b))))))))
   (let ((alist
          (denote-tree-test-mock-draw-tree
@@ -1094,7 +1094,7 @@ and it's value in plist is a string."
         (should-not
          (seq-difference
           (denote-tree--walk-region
-           (lambda () (get-text-property (point) 'denote-tree--identifier)))
+           (lambda () (get-text-property (point) :denote-tree--identifier)))
           '(c)))))))
 
 (ert-deftest denote-tree-test--alist-in-region ()

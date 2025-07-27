@@ -121,7 +121,7 @@ contains only an ID, delete entire line sans the newline."
   (let* (;; node id linked with the file
          (real-node (denote-tree--get-prop 'button-data pos))
          ;; the gensyme'd id to make it unique
-         (node (get-text-property pos 'denote-tree--identifier))
+         (node (get-text-property pos :denote-tree--identifier))
          (parent-pos (denote-tree--nested-value
                       denote-tree--tree-alist node :parent :pos))
          (parent-buff (find-file-noselect
