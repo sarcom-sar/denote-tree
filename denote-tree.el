@@ -300,10 +300,7 @@ node position for future backtracking."
   "Move the point to the parent of a node ARG times.
 
 If ARG is negative move to the child of a node ARG times.  If ARG is
-ommited, nil or zero, move once.
-
-If `denote-tree-preserve-teleports-p' is set to t, teleport to the
-parent the point came from."
+ommited, nil or zero, move once."
   (interactive "p")
   (or arg (setq arg 1))
   (if (< arg 0)
