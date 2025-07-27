@@ -112,7 +112,7 @@ link, unlink and create new nodes.  They are not defined in
   - =denote-tree-insert-at-eof=, return a pair of locations at the end of the
     file.
   - =denote-tree-insert-after-front-matter=, return a pair of locations after
-    the front-matter, if it fails default to =denote-tree-insert-at-eof=;
+    the front-matter, if it fails default to =denote-tree-insert-at-eof=.
 - =denote-tree-link-after-link-insertion-hooks=, List of hooks to run after the
   link was inserted.  This variable is primarily used to modify the text around
   inserted link.  Before this hook is ran the buffer is narrowed to just the
