@@ -60,8 +60,6 @@
 
 (require 'denote)
 (require 'seq)
-(require 'let-alist)
-(require 'cl-lib)
 
 
 ;;;; Faces and Custom
