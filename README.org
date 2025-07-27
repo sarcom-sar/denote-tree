@@ -48,15 +48,16 @@ link, unlink and create new nodes.  They are not defined in
 
 *** Keybindings for =*denote-tree*= buffer
 
-| Keybinding | Function                     |
-|------------+------------------------------|
-| n          | denote-tree-next-node        |
-| p          | denote-tree-prev-node        |
-| f          | denote-tree-child-node       |
-| b          | denote-tree-parent-node      |
-| g          | denote-tree-redraw           |
-| e          | denote-tree-edit-node        |
-| RET        | denote-tree-enter-node       |
+| Keybinding | Function                 |
+|------------+--------------------------|
+| n          | denote-tree-next-node    |
+| p          | denote-tree-prev-node    |
+| f          | denote-tree-child-node   |
+| b          | denote-tree-parent-node  |
+| g          | denote-tree-redraw       |
+| e          | denote-tree-edit-node    |
+| w          | denote-tree-copy-node-id |
+| RET        | denote-tree-enter-node   |
 
 *** Visualization
 
@@ -153,6 +154,8 @@ link, unlink and create new nodes.  They are not defined in
   entire tree."
 - =denote-tree-edit-node= ()
   Edit current note via denote's =denote-rename-file=.
+- =denote-rename-copy-node-id= ()
+  Save canonical denote id to the kill ring.
 - =denote-tree-enter-node= (&optional button)
   Enter node at point in other window.  BUTTON is pased as node's ID.
 

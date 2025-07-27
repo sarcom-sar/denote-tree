@@ -189,6 +189,7 @@ position of cyclical parent node.")
     (keymap-set map "b" #'denote-tree-parent-node)
     (keymap-set map "g" #'denote-tree-redraw)
     (keymap-set map "e" #'denote-tree-edit-node)
+    (keymap-set map "w" #'denote-tree-copy-node-id)
     map)
   "Keymap for `denote-tree-mode'.")
 
@@ -368,6 +369,13 @@ What is editable is dependent on `denote-prompts'."
         (setq denote-tree--tree-alist
               (denote-tree--redraw-node
                buffer denote-tree--tree-alist))))))
+
+(defun denote-tree-copy-node-id ()
+  "Save canonical denote id to the kill ring."
+  (interactive)
+  (let ((id (denote-tree--get-prop 'button-data)))
+    (message "%s" id)
+    (kill-new id)))
 
 
 ;;;; Initialisation
