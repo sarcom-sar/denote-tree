@@ -1000,10 +1000,9 @@ Return a payload."
 If a node is deleted during rescan of a tree, then there is
 a possibility, that that node had cyclical buffers associated
 with it.  Children of that node become effectively lost."
-  (let ((result '()))
-    (dolist (orp-el orphaned result)
-      (let ((orphan (denote-tree--first-orphan (symbol-name orp-el) alist)))
-        (push orphan result)))))
+  (mapcar (lambda (orp-el)
+            (denote-tree--first-orphan (symbol-name orp-el) alist))
+          (reverse orphaned)))
 
 (defun denote-tree--first-orphan (el-name alist)
   "Return first element of ALIST equal to EL-NAME or nil."
