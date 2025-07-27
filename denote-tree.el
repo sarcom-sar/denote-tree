@@ -783,10 +783,11 @@ Return as a list sans BUFFER's own identifier."
                  (cdr)
                  (denote-tree--get-regexps))))
     (with-current-buffer buffer
-      (let ((result '()))
-        (dolist (el keywords result)
-          (push (denote-tree--collect-keywords-helper el regexps)
-                result))))))
+      (reverse
+       (seq-reduce (lambda (lst el)
+                     (cons (denote-tree--collect-keywords-helper el regexps) lst))
+                   keywords
+                   '())))))
 
 (defun denote-tree--collect-keywords-helper (el regexps)
   "Turn EL into a pair of type and some string according to REGEXPS.
