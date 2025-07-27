@@ -785,11 +785,11 @@ Return as a list sans BUFFER's own identifier."
     (with-current-buffer buffer
       (reverse
        (seq-reduce (lambda (lst el)
-                     (cons (denote-tree--collect-keywords-helper el regexps) lst))
+                     (cons (denote-tree--type-pair el regexps) lst))
                    keywords
                    '())))))
 
-(defun denote-tree--collect-keywords-helper (el regexps)
+(defun denote-tree--type-pair (el regexps)
   "Turn EL into a pair of type and some string according to REGEXPS.
 
 If EL is a string, return '(str . EL).
