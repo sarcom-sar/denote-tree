@@ -602,15 +602,11 @@ The following attributes are recognized:
   "Add NODE to ALIST, fetch more nodes for STACK."
   (when-let* (((eq node (denote-tree--nested-value alist node :true-name)))
               (depth (denote-tree--nested-value alist node :depth)))
-    (let* ((uniq-links-in-node
-            (mapcar (lambda (x)
-                      (denote-tree--unique-nodes x (alist-get x alist)))
-                    (save-excursion
-                      (denote-tree--collect-links (symbol-name node)))))
-           (children
+    (let* ((children
             (seq-filter (lambda (x)
                           (denote-tree--open-link-maybe (symbol-name (cdr x))))
-                        uniq-links-in-node))
+                        (denote-tree--unique-links-in-node
+                         (symbol-name node) alist)))
            (children-list (mapcar #'car children))
            (last-children-node (car (last children-list)))
            (new-stack (append children-list (cdr stack)))
@@ -644,6 +640,16 @@ user still wants more nodes drawn, repeat until OLD-DEPTH is zero."
    ((and (numberp old-depth) (< 0 (1- old-depth))) (1- old-depth))
    ((and (numberp old-depth) (= 0 (1- old-depth))) nil)
    (t t)))
+
+(defun denote-tree--unique-links-in-node (node alist)
+  "List all unique links in NODE and extract real id from ALIST.
+
+Return a list of pairs in format (node-id . node).  node-id and node can
+be the same symbol."
+  (mapcar (lambda (x)
+            (denote-tree--unique-nodes x (alist-get x alist)))
+          (save-excursion
+            (denote-tree--collect-links node))))
 
 (defun denote-tree--node-plist (x &rest args)
   "Build full plist for node X.
