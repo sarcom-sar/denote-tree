@@ -602,8 +602,7 @@ The following attributes are recognized:
   "Add NODE to ALIST, fetch more nodes for STACK."
   (when-let* (((eq node (denote-tree--nested-value alist node :true-name)))
               (depth (denote-tree--nested-value alist node :depth)))
-    (let* ((indent (denote-tree--nested-value alist node :next-indent))
-           (new-depth (cond
+    (let* ((new-depth (cond
                        ((symbolp depth) depth)
                        ((and (numberp depth) (< 0 (1- depth))) (1- depth))
                        ((and (numberp depth) (= 0 (1- depth))) nil)
@@ -629,7 +628,7 @@ The following attributes are recognized:
                         :next (denote-tree--next-sibling (car x) children-list)
                         :prev (denote-tree--next-sibling (car x) (reverse children-list))
                         :parent node
-                        :indent indent
+                        :indent (denote-tree--nested-value alist node :next-indent)
                         :lastp (eq (car x) last-children-node)
                         :depth new-depth))
                      children)
