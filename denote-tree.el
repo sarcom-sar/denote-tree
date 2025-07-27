@@ -981,8 +981,8 @@ signal an error."
              (get-text-property
               (point) :denote-tree--identifier))))
          (result '()))
-    (dolist (el nodes-in-region result)
-      (push (assq el alist) result))))
+    (mapcar (lambda (el) (assq el alist))
+            (reverse nodes-in-region))))
 
 (defun denote-tree--walk-region (func)
   "Step through every line of region and apply FUNC to it.
