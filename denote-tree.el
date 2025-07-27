@@ -683,12 +683,12 @@ The following attributes are recognised:
      :last (plist-get args :lastp)
      :depth (plist-get args :depth))))
 
-(defun denote-tree--next-sibling (x siblings)
-  "Return the :next SIBLING of X."
-  (when-let* (((seq-contains-p siblings x))
+(defun denote-tree--next-sibling (node siblings)
+  "Return the :next SIBLING of NODE."
+  (when-let* (((seq-contains-p siblings node))
               (next (copy-tree siblings)))
     (setcdr (last next) next)
-    (cadr (memq x next))))
+    (cadr (memq node next))))
 
 (defun denote-tree--fix-children-in-alist (alist)
   "Copy :children of true node to the same prop of duplicate node in ALIST."
