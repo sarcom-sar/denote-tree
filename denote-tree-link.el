@@ -140,12 +140,12 @@ contains only an ID, delete entire line sans the newline."
                (denote-tree--get-prop 'button-data pos))))
     (cond
      ((not node)
-      (message "No valid node under the point")))
-    (t
-     (let ((buff (current-buffer))
-           (child (call-interactively #'denote)))
-       (with-current-buffer buff
-         (denote-tree-link--helper child node))))))
+      (message "No valid node under the point"))
+     (t
+      (let ((buff (current-buffer))
+            (child (call-interactively #'denote)))
+        (with-current-buffer buff
+          (denote-tree-link--helper child node)))))))
 
 (defun denote-tree-link-finalize (&optional stay-with-capture)
   "Insert a link between point and mark in the note buffer.
