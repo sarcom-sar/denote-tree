@@ -1012,8 +1012,8 @@ with it.  Children of that node become effectively lost."
 
 (defun denote-tree--default-props (str type)
   "Default function returning STR of TYPE with properties.
-One props returned has to be denote-tree--type."
-  (propertize str 'denote-tree--type type))
+One props returned has to be :denote-tree--type."
+  (propertize str :denote-tree--type type))
 
 (defun denote-tree--get-node-pos (&optional object limit)
   "Get node position in line."

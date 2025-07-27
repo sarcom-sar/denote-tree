@@ -53,19 +53,19 @@
   "Tests for `denote-tree--default-props'.
 
 `denote-tree--default-props' should return a string FOO with prop
-'denote-tree--type BAR."
+:denote-tree--type BAR."
   (should (equal-including-properties
            (denote-tree--default-props "a" 'b)
-           (propertize "a" 'denote-tree--type 'b)))
+           (propertize "a" :denote-tree--type 'b)))
   (should (equal-including-properties
            (denote-tree--default-props "" 'b)
-           (propertize "" 'denote-tree--type 'b)))
+           (propertize "" :denote-tree--type 'b)))
   (should (equal-including-properties
            (denote-tree--default-props "a" 'b)
-           (propertize "a" 'denote-tree--type 'b)))
+           (propertize "a" :denote-tree--type 'b)))
   (should (equal-including-properties
            (denote-tree--default-props "a" '(b c))
-           (propertize "a" 'denote-tree--type '(b c)))))
+           (propertize "a" :denote-tree--type '(b c)))))
 
 (defmacro denote-tree-test--prepare-buffer-space (start-bufs after-bufs visited)
   "Prepare an environment for testing `denote-tree--clean-up'.
@@ -196,11 +196,11 @@ allows to classify the type of front matter denote is dealing with."
        (seq-set-equal-p
         (denote-tree--collect-keywords
          (current-buffer) '(title identifier keywords signature date))
-        `((title . ,(propertize "foo" 'denote-tree--type 'title))
-          (identifier . ,(propertize "bar" 'denote-tree--type 'identifier))
-          (keywords . ,(propertize "baz" 'denote-tree--type 'keywords))
-          (signature . ,(propertize "foz" 'denote-tree--type 'signature))
-          (date . ,(propertize "fazboo" 'denote-tree--type 'date))))))
+        `((title . ,(propertize "foo" :denote-tree--type 'title))
+          (identifier . ,(propertize "bar" :denote-tree--type 'identifier))
+          (keywords . ,(propertize "baz" :denote-tree--type 'keywords))
+          (signature . ,(propertize "foz" :denote-tree--type 'signature))
+          (date . ,(propertize "fazboo" :denote-tree--type 'date))))))
     (with-temp-buffer
       (insert
        "org-title: foo\n"
@@ -211,11 +211,11 @@ allows to classify the type of front matter denote is dealing with."
        (seq-set-equal-p
         (denote-tree--collect-keywords
          (current-buffer) '(title identifier keywords signature date))
-        `((title . ,(propertize "foo" 'denote-tree--type 'title))
-          (identifier . ,(propertize "bar" 'denote-tree--type 'identifier))
+        `((title . ,(propertize "foo" :denote-tree--type 'title))
+          (identifier . ,(propertize "bar" :denote-tree--type 'identifier))
           (keywords)
-          (signature . ,(propertize "foz" 'denote-tree--type 'signature))
-          (date . ,(propertize "fazboo" 'denote-tree--type 'date))))))
+          (signature . ,(propertize "foz" :denote-tree--type 'signature))
+          (date . ,(propertize "fazboo" :denote-tree--type 'date))))))
     (with-temp-buffer
       (should-not (denote-tree--collect-keywords (current-buffer) '())))
     (with-temp-buffer
@@ -236,7 +236,7 @@ allows to classify the type of front matter denote is dealing with."
         (should
          (seq-set-equal-p
           (denote-tree--collect-keywords (current-buffer) '(kazoo))
-          `((kazoo . ,(propertize "PRRT" 'denote-tree--type 'kazoo)))))))))
+          `((kazoo . ,(propertize "PRRT" :denote-tree--type 'kazoo)))))))))
 
 (ert-deftest denote-tree-test--build-extended-filetype ()
   "Tests for `denote-tree--build-extended-filetype'."
@@ -712,7 +712,7 @@ and it's value in plist is a string."
                   (intern x)))
                ((symbol-function 'denote-tree--collect-keywords-as-string)
                 (lambda (x _)
-                  (propertize x 'denote-tree--type 'title))))
+                  (propertize x :denote-tree--type 'title))))
        (unwind-protect
            (setq tree-alist
                  (denote-tree--fix-children-in-alist
@@ -800,7 +800,7 @@ and it's value in plist is a string."
                      (intern x)))
                   ((symbol-function 'denote-tree--collect-keywords-as-string)
                    (lambda (x _)
-                     (propertize x 'denote-tree--type 'title))))
+                     (propertize x :denote-tree--type 'title))))
           (unwind-protect
               (denote-tree--deepen-traversal alist)
             (denote-tree--clean-up)))
@@ -829,7 +829,7 @@ and it's value in plist is a string."
                      (intern x)))
                   ((symbol-function 'denote-tree--collect-keywords-as-string)
                    (lambda (x _)
-                     (propertize x 'denote-tree--type 'title))))
+                     (propertize x :denote-tree--type 'title))))
           (unwind-protect
               (setq tree-alist (cadr (denote-tree--deepen-traversal alist)))
             (denote-tree--clean-up)))
@@ -861,7 +861,7 @@ and it's value in plist is a string."
                      (intern x)))
                   ((symbol-function 'denote-tree--collect-keywords-as-string)
                    (lambda (x _)
-                     (propertize x 'denote-tree--type 'title))))
+                     (propertize x :denote-tree--type 'title))))
           (unwind-protect
               (setq tree-alist (cadr (denote-tree--deepen-traversal alist)))
             (denote-tree--clean-up)))
@@ -891,7 +891,7 @@ and it's value in plist is a string."
                      (intern x)))
                   ((symbol-function 'denote-tree--collect-keywords-as-string)
                    (lambda (x _)
-                     (propertize x 'denote-tree--type 'title))))
+                     (propertize x :denote-tree--type 'title))))
           (unwind-protect
               (setq tree-alist (cadr (denote-tree--deepen-traversal alist)))
             (denote-tree--clean-up)))
@@ -919,7 +919,7 @@ and it's value in plist is a string."
                      (intern x)))
                   ((symbol-function 'denote-tree--collect-keywords-as-string)
                    (lambda (x _)
-                     (propertize x 'denote-tree--type 'title))))
+                     (propertize x :denote-tree--type 'title))))
           (unwind-protect
               (setq tree-alist (cadr (denote-tree--deepen-traversal alist)))
             (denote-tree--clean-up)))
@@ -969,7 +969,7 @@ and it's value in plist is a string."
                      (intern x)))
                   ((symbol-function 'denote-tree--collect-keywords-as-string)
                    (lambda (x _)
-                     (propertize x 'denote-tree--type 'title))))
+                     (propertize x :denote-tree--type 'title))))
           (unwind-protect
               (setq tree-alist (cadr (denote-tree--deepen-traversal alist)))
             (denote-tree--clean-up)))
@@ -1004,7 +1004,7 @@ and it's value in plist is a string."
                      (intern x)))
                   ((symbol-function 'denote-tree--collect-keywords-as-string)
                    (lambda (x _)
-                     (propertize x 'denote-tree--type 'title))))
+                     (propertize x :denote-tree--type 'title))))
           (unwind-protect
               (setq tree-alist (cadr (denote-tree--deepen-traversal alist)))
             (denote-tree--clean-up)))
