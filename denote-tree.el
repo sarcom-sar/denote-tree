@@ -740,7 +740,7 @@ front-matter."
     (let ((filetype
            (catch 'file-type
 	           (dolist (type-plist denote-tree--extended-filetype)
-		           (dolist (el (denote-tree--get-regexps (cdr type-plist)))
+		           (dolist (el (denote-tree--symbols-regexp-suffix (cdr type-plist)))
 		             (let ((symbol-in-buff
 			                  (save-excursion
 			                    (re-search-forward (cadr el) nil t))))
@@ -781,7 +781,7 @@ Return as a list sans BUFFER's own identifier."
                (thread-first
                  (denote-tree--find-filetype buffer)
                  (cdr)
-                 (denote-tree--get-regexps))))
+                 (denote-tree--symbols-regexp-suffix))))
     (with-current-buffer buffer
       (reverse
        (seq-reduce (lambda (lst el)
@@ -808,7 +808,7 @@ Else EL is unknown symbol, do not print it."
    ((symbolp el)
     (cons el nil))))
 
-(defun denote-tree--get-regexps (plist)
+(defun denote-tree--symbols-regexp-suffix (plist)
   "Return alist of all keys ending in -regexp with values in PLIST."
   (seq-reduce (lambda (lst el)
                 (if (and (symbolp (car el))

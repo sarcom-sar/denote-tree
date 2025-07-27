@@ -366,23 +366,23 @@ allows to classify the type of front matter denote is dealing with."
   (should-not (denote-tree--extract-and-compare-symbol :foo-regexp nil))
   (should-not (denote-tree--extract-and-compare-symbol nil 'bar)))
 
-(ert-deftest denote-tree-test--get-regexps ()
-  "Tests for `denote-tree--get-regexps'.
+(ert-deftest denote-tree-test--symbols-regexp-suffix ()
+  "Tests for `denote-tree--symbols-regexp-suffix'.
 
-`denote-tree--get-regexps' returns a symbol if and only if it ends with -regexp
-and it's value in plist is a string."
-  (should-not (denote-tree--get-regexps '()))
-  (should-not (denote-tree--get-regexps '("foor" "baz")))
-  (should-not (denote-tree--get-regexps '(:regexp "foor")))
+`denote-tree--symbols-regexp-suffix' returns a symbol if and only if it ends with
+-regexp and it's value in plist is a string."
+  (should-not (denote-tree--symbols-regexp-suffix '()))
+  (should-not (denote-tree--symbols-regexp-suffix '("foor" "baz")))
+  (should-not (denote-tree--symbols-regexp-suffix '(:regexp "foor")))
   (should
-   (equal (denote-tree--get-regexps '(:foo-regexp "foor" :bar-regexp bar))
+   (equal (denote-tree--symbols-regexp-suffix '(:foo-regexp "foor" :bar-regexp bar))
           '((:foo-regexp "foor"))))
   (should
    (equal
-    (denote-tree--get-regexps '(:foo-regexp "foor" :bar "bar"))
+    (denote-tree--symbols-regexp-suffix '(:foo-regexp "foor" :bar "bar"))
     '((:foo-regexp "foor"))))
   (should
-   (equal (denote-tree--get-regexps '(:foo-regexp "foor" :bar-regexp "baar"))
+   (equal (denote-tree--symbols-regexp-suffix '(:foo-regexp "foor" :bar-regexp "baar"))
           '((:bar-regexp "baar") (:foo-regexp "foor")))))
 
 (ert-deftest denote-tree-test--open-link-maybe ()
