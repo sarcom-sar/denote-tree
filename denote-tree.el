@@ -608,7 +608,6 @@ The following attributes are recognized:
                         (denote-tree--unique-links-in-node
                          (symbol-name node) alist)))
            (children-list (mapcar #'car children))
-           (last-children-node (car (last children-list)))
            (new-stack (append children-list (cdr stack)))
            (new-alist
             (append
@@ -620,8 +619,7 @@ The following attributes are recognized:
                         :prev (denote-tree--next-sibling (car x) (reverse children-list))
                         :parent node
                         :indent (denote-tree--nested-value alist node :next-indent)
-                        :lastp (eq (car x) last-children-node)
-                        :depth new-depth))
+                        :lastp (eq (car x) (car (last children-list)))
                         :depth (denote-tree--new-depth depth)))
                      children)
              alist)))
