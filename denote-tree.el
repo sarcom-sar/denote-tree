@@ -810,17 +810,15 @@ Else EL is unknown symbol, do not print it."
 
 (defun denote-tree--get-regexps (plist)
   "Return alist of all keys ending in -regexp with values in PLIST."
-  (let (lst el)
-    (while plist
-      (setq el (car plist))
-      (and (symbolp el)
-	         (string-suffix-p
-	          "-regexp" (symbol-name el))
-	         (stringp (cadr plist))
-	         (push (cadr plist) lst)
-	         (push el lst))
-      (setq plist (cddr plist)))
-    (seq-partition lst 2)))
+  (seq-reduce (lambda (lst el)
+                (if (and (symbolp (car el))
+                         (string-suffix-p
+                          "-regexp" (symbol-name (car el)))
+                         (stringp (cadr el)))
+                    (cons el lst)
+                  lst))
+              (seq-partition plist 2)
+              '()))
 
 (defun denote-tree--extract-and-compare-symbols
     (el regexps &optional extractor-regexp)
