@@ -279,7 +279,7 @@ node position for future backtracking."
       (setq preserve-teleport-p (not preserve-teleport-p))
       (setq arg 1))
      ((eq arg '-)
-      (setq arg -1)))
+      (setq arg (- arg))))
     (if (< arg 0)
         (denote-tree-parent-node (- arg))
       (dotimes (_ arg next-point)
