@@ -737,16 +737,15 @@ not finding a match), but guaranteed to work as long the user set the
 front-matter."
   (with-current-buffer buffer
     (goto-char (point-min))
-    (let ((filetype))
-      (setq filetype
-	          (catch 'file-type
-	            (dolist (type-plist denote-tree--extended-filetype)
-		            (dolist (el (denote-tree--get-regexps (cdr type-plist)))
-		              (let ((symbol-in-buff
-			                   (save-excursion
-			                     (re-search-forward (cadr el) nil t))))
-		                (when symbol-in-buff
-		                  (throw 'file-type type-plist)))))))
+    (let ((filetype
+           (catch 'file-type
+	           (dolist (type-plist denote-tree--extended-filetype)
+		           (dolist (el (denote-tree--get-regexps (cdr type-plist)))
+		             (let ((symbol-in-buff
+			                  (save-excursion
+			                    (re-search-forward (cadr el) nil t))))
+		               (when symbol-in-buff
+		                 (throw 'file-type type-plist))))))))
       (unless filetype
 	      (warn "%s not a denote-style buffer" buffer))
       filetype)))
