@@ -756,10 +756,13 @@ Return as a list sans BUFFER's own identifier."
   (let ((buffer-id
          (or (denote-retrieve-filename-identifier buffer)
              (denote-tree--collect-keywords-as-string buffer '(identifier))))
+        (id-regexp (if (boundp 'denote-id-regexp)
+                       denote-id-regexp
+                     denote-date-identifier-regexp))
         found-ids)
     (with-current-buffer buffer
       (goto-char (point-min))
-      (while (search-forward-regexp denote-id-regexp nil t)
+      (while (search-forward-regexp id-regexp nil t)
         (push (intern (concat (match-string-no-properties 1)
                               (match-string-no-properties 2)))
               found-ids))
