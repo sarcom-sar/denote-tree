@@ -210,11 +210,10 @@ denote-style identifier."
     (buffer-file-name
      (get-buffer
       (read-buffer "Draw buffer: "
-                   (if (eq (selected-window) (next-window))
-		                   (window-buffer (next-window))
-		                 (other-buffer (current-buffer)))
-		               t
-                   (lambda (x) (buffer-file-name (cdr x))))))))
+		           (when (buffer-file-name (current-buffer))
+		             (current-buffer))
+		           t
+		           (lambda (x) (buffer-file-name (cdr x))))))))
   (let* ((id (denote-retrieve-filename-identifier-with-error buffer))
          (buffer-name (concat "*" denote-tree-buffer-prefix " " id "*")))
     (unwind-protect
